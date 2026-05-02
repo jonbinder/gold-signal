@@ -1,0 +1,159 @@
+@import "tailwindcss";
+
+/* ── GoldSignal Design Tokens ─────────────────────────────── */
+:root {
+  /* Gold palette */
+  --gold-100: #fdf6e3;
+  --gold-200: #f9e8b0;
+  --gold-300: #f0cc6a;
+  --gold-400: #c9a84c;
+  --gold-500: #a8872d;
+  --gold-600: #7d6320;
+
+  /* Silver palette */
+  --silver-100: #f4f4f6;
+  --silver-200: #d8d9e0;
+  --silver-300: #b0b3be;
+  --silver-400: #8a8d9a;
+  --silver-500: #636678;
+  --silver-600: #3e4055;
+
+  /* Dark background system */
+  --bg-void:    #080808;
+  --bg-obsidian:#0f0f11;
+  --bg-surface: #161618;
+  --bg-raised:  #1e1e22;
+  --bg-overlay: #26262c;
+
+  /* Borders */
+  --border-dim:    rgba(201,168,76,0.12);
+  --border-mid:    rgba(201,168,76,0.25);
+  --border-bright: rgba(201,168,76,0.50);
+
+  /* Typography */
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-mono:    'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+  --font-body:    'DM Sans', system-ui, sans-serif;
+
+  /* Semantic */
+  --text-primary:   #e8e0cc;
+  --text-secondary: #9a9480;
+  --text-muted:     #5a5648;
+  --text-gold:      #c9a84c;
+  --text-silver:    #b0b3be;
+
+  --green:  #4caf6e;
+  --red:    #e05555;
+  --green-dim: rgba(76,175,110,0.15);
+  --red-dim:   rgba(224,85,85,0.15);
+}
+
+/* ── Base reset ───────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  background: var(--bg-void);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100dvh;
+  background: var(--bg-obsidian);
+  background-image:
+    radial-gradient(ellipse 80% 40% at 50% -10%, rgba(201,168,76,0.06) 0%, transparent 60%),
+    repeating-linear-gradient(
+      90deg,
+      rgba(201,168,76,0.02) 0px,
+      rgba(201,168,76,0.02) 1px,
+      transparent 1px,
+      transparent 60px
+    );
+}
+
+/* ── Typography ───────────────────────────────────────────── */
+h1, h2, h3 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+
+.mono { font-family: var(--font-mono); }
+.gold { color: var(--text-gold); }
+.silver { color: var(--text-silver); }
+
+/* ── Gold rule divider ────────────────────────────────────── */
+.rule-gold {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold-400), transparent);
+  border: none;
+  margin: 0;
+}
+
+/* ── Badge variants ───────────────────────────────────────── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.badge-gold   { background: rgba(201,168,76,0.15); color: var(--gold-300); border: 1px solid rgba(201,168,76,0.25); }
+.badge-silver { background: rgba(176,179,190,0.12); color: var(--silver-200); border: 1px solid rgba(176,179,190,0.2); }
+.badge-new    { background: rgba(76,175,110,0.15);  color: #6fcf8e; border: 1px solid rgba(76,175,110,0.25); }
+.badge-sell   { background: rgba(224,85,85,0.15);   color: #f08080; border: 1px solid rgba(224,85,85,0.25); }
+
+/* ── Table base ───────────────────────────────────────────── */
+.gs-table { width: 100%; border-collapse: collapse; }
+.gs-table th {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding: 10px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--border-dim);
+  white-space: nowrap;
+}
+.gs-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-dim);
+  vertical-align: middle;
+}
+.gs-table tbody tr:hover { background: rgba(201,168,76,0.03); }
+.gs-table tbody tr:last-child td { border-bottom: none; }
+
+/* ── Scrollbar ────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-surface); }
+::-webkit-scrollbar-thumb { background: var(--border-mid); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border-bright); }
+
+/* ── Animations ───────────────────────────────────────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-fadeUp { animation: fadeUp 0.5s ease both; }
+
+.skeleton {
+  background: linear-gradient(90deg, var(--bg-raised) 25%, var(--bg-overlay) 50%, var(--bg-raised) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
+}

@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getInvestors } from "@/lib/data";
+import { loadWithFallback } from "@/lib/safe-data";
 import { SEED_INVESTORS } from "@/lib/seed-data";
 import type { Investor } from "@/types";
+
+export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: "Investors",
@@ -27,13 +30,8 @@ function getInitials(name: string): string {
 }
 
 export default async function InvestorsPage() {
-  let investors: Investor[] = SEED_INVESTORS;
-  try {
-    const live = await getInvestors();
-    if (live.length > 0) investors = live;
-  } catch {
-    // Use seed data
-  }
+  const live = await loadWithFallback(() => getInvestors(), [] as Investor[]);
+  const investors: Investor[] = live.length > 0 ? live : SEED_INVESTORS;
 
   return (
     <div style={{ maxWidth: 1200, margin: "0 auto", padding: "48px 24px" }}>

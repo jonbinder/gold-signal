@@ -1,5 +1,8 @@
 import Link from "next/link";
 import { getInvestors, getLeaderboard } from "@/lib/data";
+import { loadWithFallback } from "@/lib/safe-data";
+
+export const revalidate = 300;
 
 // Fallback data for when DB is empty (initial dev)
 const MOCK_STATS = {
@@ -17,29 +20,20 @@ const FEATURED_TICKERS = [
 ];
 
 export default async function HomePage() {
-  // Attempt to load live data; fall back gracefully
-  let investorCount = MOCK_STATS.managers;
-  try {
-    const investors = await getInvestors();
-    if (investors.length > 0) investorCount = investors.length;
-  } catch {
-    // DB not connected yet
-  }
+  const investors = await loadWithFallback(() => getInvestors(), []);
+  const investorCount =
+    investors.length > 0 ? investors.length : MOCK_STATS.managers;
 
-  let leaderboard = FEATURED_TICKERS;
-  try {
-    const live = await getLeaderboard(undefined, 5);
-    if (live.length > 0) {
-      leaderboard = live.map((e) => ({
-        ticker: e.security.ticker,
-        name: e.security.name,
-        sector: e.security.sector ?? "—",
-        owners: e.stats.owner_count,
-      }));
-    }
-  } catch {
-    // Use mock data
-  }
+  const liveLeaderboard = await loadWithFallback(() => getLeaderboard(undefined, 5), []);
+  const leaderboard =
+    liveLeaderboard.length > 0
+      ? liveLeaderboard.map((e) => ({
+          ticker: e.security.ticker,
+          name: e.security.name,
+          sector: e.security.sector ?? "—",
+          owners: e.stats.owner_count,
+        }))
+      : FEATURED_TICKERS;
 
   return (
     <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px" }}>

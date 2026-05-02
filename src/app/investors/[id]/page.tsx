@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
   getInvestorBySlug,
@@ -11,6 +12,9 @@ import {
   getSeedInvestorBySlug,
 } from "@/lib/seed-data";
 import type { HoldingWithSecurity, Investor } from "@/types";
+import { loadWithFallback } from "@/lib/safe-data";
+
+export const revalidate = 300;
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -42,13 +46,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
     .join(" ");
 
-  let title = getSeedInvestorBySlug(slug)?.name ?? fallbackTitle;
-  try {
-    const live = await getInvestorBySlug(slug);
-    if (live?.name) title = live.name;
-  } catch {
-    // keep seed / fallback title
-  }
+  const seedName = getSeedInvestorBySlug(slug)?.name;
+  const live = await loadWithFallback(() => getInvestorBySlug(slug), null);
+  const title = live?.name ?? seedName ?? fallbackTitle;
 
   return { title };
 }
@@ -59,14 +59,10 @@ export default async function InvestorPage({ params }: Props) {
   let investor: Investor | null = getSeedInvestorBySlug(slug);
   let holdings: HoldingWithSecurity[] = getSeedHoldingsForSlug(slug);
 
-  try {
-    const live = await getInvestorBySlug(slug);
-    if (live) {
-      investor = live;
-      holdings = await getHoldingsForInvestor(live.id);
-    }
-  } catch {
-    // seed already applied
+  const live = await loadWithFallback(() => getInvestorBySlug(slug), null);
+  if (live) {
+    investor = live;
+    holdings = await loadWithFallback(() => getHoldingsForInvestor(live.id), holdings);
   }
 
   if (!investor) notFound();
@@ -78,7 +74,10 @@ export default async function InvestorPage({ params }: Props) {
       {/* Investor header */}
       <div style={{ marginBottom: 40 }}>
         <div style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 10, fontFamily: "var(--font-mono)" }}>
-          ← <a href="/investors" style={{ color: "var(--text-muted)", textDecoration: "none" }}>Investors</a>
+          ←{" "}
+          <Link href="/investors" style={{ color: "var(--text-muted)", textDecoration: "none" }}>
+            Investors
+          </Link>
         </div>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 20 }}>
           <div>

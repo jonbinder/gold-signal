@@ -7,9 +7,7 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "logo.clearbit.com" },
     ],
   },
-  experimental: {
-    typedRoutes: true,
-  },
+  typedRoutes: true,
 };
 
 export default nextConfig;

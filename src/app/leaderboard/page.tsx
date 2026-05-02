@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getLeaderboard, formatUSD } from "@/lib/data";
+import { loadWithFallback } from "@/lib/safe-data";
 import type { LeaderboardEntry } from "@/types";
 
 export const metadata: Metadata = {
@@ -31,13 +32,8 @@ function sectorColor(sector: string | null): string {
 }
 
 export default async function LeaderboardPage() {
-  let entries = SEED_LEADERBOARD;
-  try {
-    const live = await getLeaderboard(undefined, 25);
-    if (live.length > 0) entries = live;
-  } catch {
-    // Use seed
-  }
+  const live = await loadWithFallback(() => getLeaderboard(undefined, 25), []);
+  const entries = live.length > 0 ? live : SEED_LEADERBOARD;
 
   // Group by sector for summary
   const sectors: Record<string, number> = {};

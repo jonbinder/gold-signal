@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { createClient } from "./supabase/server";
 import type {
   Investor,
@@ -8,7 +9,7 @@ import type {
 
 // ─── Investors ────────────────────────────────────────────────────────────────
 
-export async function getInvestors(): Promise<Investor[]> {
+export const getInvestors = cache(async (): Promise<Investor[]> => {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("investors")
@@ -18,9 +19,9 @@ export async function getInvestors(): Promise<Investor[]> {
 
   if (error) throw new Error(`getInvestors: ${error.message}`);
   return data ?? [];
-}
+});
 
-export async function getInvestorBySlug(slug: string): Promise<Investor | null> {
+export const getInvestorBySlug = cache(async (slug: string): Promise<Investor | null> => {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("investors")
@@ -30,45 +31,43 @@ export async function getInvestorBySlug(slug: string): Promise<Investor | null> 
 
   if (error) return null;
   return data;
-}
+});
 
 // ─── Holdings ─────────────────────────────────────────────────────────────────
 
-export async function getHoldingsForInvestor(
-  investorId: string,
-  periodId?: string
-): Promise<HoldingWithSecurity[]> {
-  const supabase = await createClient();
+export const getHoldingsForInvestor = cache(
+  async (investorId: string, periodId?: string): Promise<HoldingWithSecurity[]> => {
+    const supabase = await createClient();
 
-  let query = supabase
-    .from("holdings")
-    .select(
-      `
+    let query = supabase
+      .from("holdings")
+      .select(
+        `
       *,
       security:securities(*)
     `
-    )
-    .eq("investor_id", investorId)
-    .order("value_usd", { ascending: false });
+      )
+      .eq("investor_id", investorId)
+      .order("value_usd", { ascending: false });
 
-  if (periodId) {
-    query = query.eq("period_id", periodId);
-  } else {
-    // Join to get only the latest period
-    const latestPeriod = await getLatestPeriod();
-    if (latestPeriod) {
-      query = query.eq("period_id", latestPeriod.id);
+    if (periodId) {
+      query = query.eq("period_id", periodId);
+    } else {
+      const latestPeriod = await getLatestPeriod();
+      if (latestPeriod) {
+        query = query.eq("period_id", latestPeriod.id);
+      }
     }
-  }
 
-  const { data, error } = await query;
-  if (error) throw new Error(`getHoldingsForInvestor: ${error.message}`);
-  return (data as HoldingWithSecurity[]) ?? [];
-}
+    const { data, error } = await query;
+    if (error) throw new Error(`getHoldingsForInvestor: ${error.message}`);
+    return (data as HoldingWithSecurity[]) ?? [];
+  }
+);
 
 // ─── Periods ──────────────────────────────────────────────────────────────────
 
-export async function getLatestPeriod(): Promise<ReportingPeriod | null> {
+export const getLatestPeriod = cache(async (): Promise<ReportingPeriod | null> => {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("reporting_periods")
@@ -78,9 +77,9 @@ export async function getLatestPeriod(): Promise<ReportingPeriod | null> {
 
   if (error) return null;
   return data;
-}
+});
 
-export async function getAllPeriods(): Promise<ReportingPeriod[]> {
+export const getAllPeriods = cache(async (): Promise<ReportingPeriod[]> => {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("reporting_periods")
@@ -89,48 +88,47 @@ export async function getAllPeriods(): Promise<ReportingPeriod[]> {
 
   if (error) throw new Error(`getAllPeriods: ${error.message}`);
   return data ?? [];
-}
+});
 
 // ─── Leaderboard ──────────────────────────────────────────────────────────────
 
-export async function getLeaderboard(
-  periodId?: string,
-  limit = 20
-): Promise<LeaderboardEntry[]> {
-  const supabase = await createClient();
+export const getLeaderboard = cache(
+  async (periodId?: string, limit = 20): Promise<LeaderboardEntry[]> => {
+    const supabase = await createClient();
 
-  const activePeriodId = periodId ?? (await getLatestPeriod())?.id;
-  if (!activePeriodId) return [];
+    const activePeriodId = periodId ?? (await getLatestPeriod())?.id;
+    if (!activePeriodId) return [];
 
-  const { data, error } = await supabase
-    .from("security_ownership_stats")
-    .select(
-      `
+    const { data, error } = await supabase
+      .from("security_ownership_stats")
+      .select(
+        `
       *,
       security:securities(*)
     `
-    )
-    .eq("period_id", activePeriodId)
-    .order("owner_count", { ascending: false })
-    .limit(limit);
+      )
+      .eq("period_id", activePeriodId)
+      .order("owner_count", { ascending: false })
+      .limit(limit);
 
-  if (error) throw new Error(`getLeaderboard: ${error.message}`);
+    if (error) throw new Error(`getLeaderboard: ${error.message}`);
 
-  return (data ?? []).map((row) => ({
-    security: row.security,
-    stats: {
-      id: row.id,
-      security_id: row.security_id,
-      period_id: row.period_id,
-      owner_count: row.owner_count,
-      total_shares: row.total_shares,
-      total_value_usd: row.total_value_usd,
-      new_buyers: row.new_buyers,
-      sellers: row.sellers,
-      updated_at: row.updated_at,
-    },
-  }));
-}
+    return (data ?? []).map((row) => ({
+      security: row.security,
+      stats: {
+        id: row.id,
+        security_id: row.security_id,
+        period_id: row.period_id,
+        owner_count: row.owner_count,
+        total_shares: row.total_shares,
+        total_value_usd: row.total_value_usd,
+        new_buyers: row.new_buyers,
+        sellers: row.sellers,
+        updated_at: row.updated_at,
+      },
+    }));
+  }
+);
 
 // ─── Utils ────────────────────────────────────────────────────────────────────
 

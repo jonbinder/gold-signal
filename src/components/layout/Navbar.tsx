@@ -1,16 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 
 const NAV_LINKS = [
   { href: "/investors", label: "Investors" },
   { href: "/leaderboard", label: "Leaderboard" },
-];
+] as const;
 
 export function Navbar() {
-  const pathname = usePathname();
-
   return (
     <header
       style={{
@@ -68,27 +65,15 @@ export function Navbar() {
 
         {/* Nav links */}
         <nav style={{ display: "flex", alignItems: "center", gap: 4 }}>
-          {NAV_LINKS.map((link) => {
-            const isActive = pathname.startsWith(link.href);
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
-                style={{
-                  padding: "6px 14px",
-                  borderRadius: 6,
-                  textDecoration: "none",
-                  fontSize: 14,
-                  fontWeight: 500,
-                  color: isActive ? "var(--text-gold)" : "var(--text-secondary)",
-                  background: isActive ? "rgba(201,168,76,0.08)" : "transparent",
-                  transition: "all 0.15s",
-                }}
-              >
-                {link.label}
-              </Link>
-            );
-          })}
+          {NAV_LINKS.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="text-white hover:text-gold transition-colors px-4 py-2 rounded-md"
+            >
+              {link.label}
+            </Link>
+          ))}
 
           {/* Auth placeholder */}
           <Link

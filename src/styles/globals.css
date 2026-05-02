@@ -48,6 +48,10 @@
   --red-dim:   rgba(224,85,85,0.15);
 }
 
+@theme {
+  --color-gold: var(--text-gold);
+}
+
 /* ── Base reset ───────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; }
 

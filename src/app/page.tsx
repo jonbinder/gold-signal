@@ -1,10 +1,13 @@
+import Image from "next/image";
 import Link from "next/link";
+import { ArrowRight, Building2, LineChart, PieChart, Shield } from "lucide-react";
 import { getInvestors, getLeaderboard } from "@/lib/data";
 import { loadWithFallback } from "@/lib/safe-data";
+import { Button } from "@/components/ui/button";
+import { NewsletterStrip } from "@/components/home/NewsletterStrip";
 
 export const revalidate = 300;
 
-// Fallback data for when DB is empty (initial dev)
 const MOCK_STATS = {
   managers: 5,
   holdings: 0,
@@ -19,10 +22,12 @@ const FEATURED_TICKERS = [
   { ticker: "GDX", name: "VanEck Gold Miners ETF", sector: "ETF", owners: 2 },
 ];
 
+const HERO_IMAGE =
+  "https://images.unsplash.com/photo-1580828343064-58d38262bd85?auto=format&fit=crop&w=2400&q=82";
+
 export default async function HomePage() {
   const investors = await loadWithFallback(() => getInvestors(), []);
-  const investorCount =
-    investors.length > 0 ? investors.length : MOCK_STATS.managers;
+  const investorCount = investors.length > 0 ? investors.length : MOCK_STATS.managers;
 
   const liveLeaderboard = await loadWithFallback(() => getLeaderboard(undefined, 5), []);
   const leaderboard =
@@ -36,367 +41,210 @@ export default async function HomePage() {
       : FEATURED_TICKERS;
 
   return (
-    <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px" }}>
-      {/* ── Hero ──────────────────────────────────────────── */}
-      <section
-        style={{
-          paddingTop: 80,
-          paddingBottom: 64,
-          display: "grid",
-          gridTemplateColumns: "1fr",
-          gap: 32,
-          textAlign: "center",
-        }}
-      >
-        {/* Kicker */}
-        <div style={{ display: "flex", justifyContent: "center" }}>
-          <span
-            className="badge badge-gold"
-            style={{ fontSize: 10, letterSpacing: "0.15em" }}
-          >
-            ◆ Smart Money Intelligence
-          </span>
-        </div>
-
-        {/* Headline */}
-        <h1
-          style={{
-            fontSize: "clamp(36px, 6vw, 68px)",
-            lineHeight: 1.05,
-            fontFamily: "var(--font-display)",
-            fontWeight: 700,
-            color: "var(--text-primary)",
-            maxWidth: 800,
-            margin: "0 auto",
-          }}
-        >
-          Track What Top Managers
-          <br />
-          <span
-            style={{
-              color: "var(--text-gold)",
-              textShadow: "0 0 40px rgba(201,168,76,0.3)",
-            }}
-          >
-            Own in Gold & Silver
-          </span>
-        </h1>
-
-        {/* Sub */}
-        <p
-          style={{
-            fontSize: 18,
-            color: "var(--text-secondary)",
-            maxWidth: 560,
-            margin: "0 auto",
-            lineHeight: 1.65,
-          }}
-        >
-          GoldSignal aggregates 13F filings from precious metals fund managers —
-          giving you full transparency into institutional positions across miners,
-          royalty companies, and ETFs.
-        </p>
-
-        {/* CTAs */}
-        <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
-          <Link
-            href="/investors"
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 8,
-              padding: "13px 28px",
-              background: "linear-gradient(135deg, var(--gold-400), var(--gold-300))",
-              color: "#0a0a0a",
-              borderRadius: 8,
-              fontWeight: 700,
-              fontSize: 14,
-              textDecoration: "none",
-              letterSpacing: "0.01em",
-            }}
-          >
-            View Investors →
-          </Link>
-          <Link
-            href="/leaderboard"
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 8,
-              padding: "13px 28px",
-              background: "var(--bg-raised)",
-              color: "var(--text-primary)",
-              border: "1px solid var(--border-mid)",
-              borderRadius: 8,
-              fontWeight: 600,
-              fontSize: 14,
-              textDecoration: "none",
-            }}
-          >
-            Leaderboard
-          </Link>
-        </div>
-      </section>
-
-      {/* ── Stat bar ──────────────────────────────────────── */}
-      <div className="rule-gold" />
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
-          gap: 0,
-          borderBottom: "1px solid var(--border-dim)",
-        }}
-      >
-        {[
-          { label: "Fund Managers", value: investorCount.toString() },
-          { label: "Filing Quarter", value: MOCK_STATS.quarter },
-          { label: "Universe", value: "22 Tickers" },
-          { label: "Data Source", value: "SEC 13F" },
-        ].map((stat, i) => (
-          <div
-            key={i}
-            style={{
-              padding: "20px 24px",
-              borderRight: i < 3 ? "1px solid var(--border-dim)" : "none",
-              textAlign: "center",
-            }}
-          >
-            <div
-              style={{
-                fontFamily: "var(--font-mono)",
-                fontSize: 22,
-                fontWeight: 600,
-                color: "var(--text-gold)",
-              }}
-            >
-              {stat.value}
-            </div>
-            <div
-              style={{
-                fontSize: 11,
-                color: "var(--text-muted)",
-                letterSpacing: "0.08em",
-                textTransform: "uppercase",
-                marginTop: 4,
-                fontFamily: "var(--font-mono)",
-              }}
-            >
-              {stat.label}
-            </div>
-          </div>
-        ))}
-      </div>
-      <div className="rule-gold" />
-
-      {/* ── Most Owned Preview ────────────────────────────── */}
-      <section style={{ paddingTop: 64, paddingBottom: 64 }}>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "baseline",
-            justifyContent: "space-between",
-            marginBottom: 32,
-          }}
-        >
-          <div>
-            <h2
-              style={{
-                fontSize: 28,
-                fontFamily: "var(--font-display)",
-                fontWeight: 700,
-                margin: 0,
-              }}
-            >
-              Most Owned Miners
-            </h2>
-            <p style={{ color: "var(--text-secondary)", marginTop: 6, fontSize: 14 }}>
-              Top holdings by number of tracked managers
+    <>
+      {/* Hero */}
+      <section className="relative min-h-[320px] w-full overflow-hidden sm:min-h-[420px] lg:min-h-[480px]">
+        <Image
+          src={HERO_IMAGE}
+          alt="Open-pit mining landscape"
+          fill
+          priority
+          className="object-cover object-center"
+          sizes="100vw"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-navy-950/90 via-navy-950/45 to-navy-950/30" />
+        <div className="absolute inset-0 flex items-center justify-center px-4 py-16 sm:py-24">
+          <div className="w-full max-w-4xl border-y border-gold-500/40 bg-gold-500/20 px-4 py-8 text-center shadow-sm backdrop-blur-[2px] sm:px-10 sm:py-10">
+            <p className="mb-3 font-mono text-[10px] font-semibold uppercase tracking-[0.25em] text-gold-200 sm:text-xs">
+              Precious metals · 13F holdings
             </p>
-          </div>
-          <Link
-            href="/leaderboard"
-            style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: 12,
-              color: "var(--text-gold)",
-              textDecoration: "none",
-              letterSpacing: "0.05em",
-            }}
-          >
-            VIEW ALL →
-          </Link>
-        </div>
-
-        <div
-          style={{
-            background: "var(--bg-surface)",
-            border: "1px solid var(--border-dim)",
-            borderRadius: 12,
-            overflow: "hidden",
-          }}
-        >
-          <table className="gs-table">
-            <thead>
-              <tr>
-                <th style={{ width: 36 }}>#</th>
-                <th>Ticker</th>
-                <th>Company</th>
-                <th>Sector</th>
-                <th style={{ textAlign: "right" }}>Managers</th>
-              </tr>
-            </thead>
-            <tbody>
-              {leaderboard.map((row, i) => (
-                <tr key={row.ticker}>
-                  <td>
-                    <span
-                      style={{
-                        fontFamily: "var(--font-mono)",
-                        fontSize: 12,
-                        color: "var(--text-muted)",
-                      }}
-                    >
-                      {i + 1}
-                    </span>
-                  </td>
-                  <td>
-                    <span
-                      className="mono"
-                      style={{
-                        fontWeight: 700,
-                        fontSize: 14,
-                        color: "var(--text-gold)",
-                        letterSpacing: "0.04em",
-                      }}
-                    >
-                      {row.ticker}
-                    </span>
-                  </td>
-                  <td style={{ color: "var(--text-primary)", fontWeight: 500 }}>
-                    {row.name}
-                  </td>
-                  <td>
-                    <span
-                      className={`badge ${
-                        row.sector?.includes("Stream") || row.sector?.includes("Royal")
-                          ? "badge-gold"
-                          : "badge-silver"
-                      }`}
-                    >
-                      {row.sector}
-                    </span>
-                  </td>
-                  <td style={{ textAlign: "right" }}>
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "flex-end",
-                        gap: 8,
-                      }}
-                    >
-                      <div
-                        style={{
-                          width: Math.max(4, (row.owners / 5) * 60),
-                          height: 4,
-                          background: "var(--gold-400)",
-                          borderRadius: 2,
-                          opacity: 0.6,
-                        }}
-                      />
-                      <span
-                        className="mono"
-                        style={{ fontSize: 13, color: "var(--text-primary)" }}
-                      >
-                        {row.owners}
-                      </span>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      {/* ── How it works ──────────────────────────────────── */}
-      <section style={{ paddingBottom: 80 }}>
-        <h2
-          style={{
-            fontSize: 28,
-            fontFamily: "var(--font-display)",
-            marginBottom: 32,
-            textAlign: "center",
-          }}
-        >
-          How GoldSignal Works
-        </h2>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-            gap: 16,
-          }}
-        >
-          {[
-            {
-              icon: "01",
-              title: "13F Filings",
-              desc: "We parse SEC 13F filings from gold & silver fund managers every quarter.",
-            },
-            {
-              icon: "02",
-              title: "Holdings Analysis",
-              desc: "Track new positions, additions, reductions, and full exits in real time.",
-            },
-            {
-              icon: "03",
-              title: "Leaderboard",
-              desc: "See which miners command the most institutional conviction across managers.",
-            },
-            {
-              icon: "04",
-              title: "Investor Profiles",
-              desc: "Deep-dive into each fund's full portfolio with % allocations and history.",
-            },
-          ].map((card) => (
-            <div
-              key={card.icon}
-              style={{
-                background: "var(--bg-surface)",
-                border: "1px solid var(--border-dim)",
-                borderRadius: 10,
-                padding: "24px 20px",
-              }}
-            >
-              <div
-                style={{
-                  fontFamily: "var(--font-mono)",
-                  fontSize: 10,
-                  color: "var(--text-gold)",
-                  letterSpacing: "0.1em",
-                  marginBottom: 12,
-                }}
+            <h1 className="text-balance text-3xl font-bold leading-tight tracking-tight text-white sm:text-4xl md:text-5xl lg:text-[2.75rem]">
+              Tracking the Smart Money in Gold &amp; Silver
+            </h1>
+            <p className="mx-auto mt-4 max-w-2xl text-pretty text-sm leading-relaxed text-navy-100 sm:text-base">
+              GoldSignal aggregates quarterly SEC 13F filings from specialist fund managers — so you can see
+              conviction across miners, royalties, streamers, and sector ETFs.
+            </p>
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+              <Button variant="gold" size="lg" asChild>
+                <Link href="/investors">
+                  View investors
+                  <ArrowRight className="size-4" />
+                </Link>
+              </Button>
+              <Button
+                variant="outline"
+                size="lg"
+                className="border-white/40 bg-navy-950/30 text-white hover:bg-white/10"
+                asChild
               >
-                {card.icon}
-              </div>
-              <h3
-                style={{
-                  fontSize: 16,
-                  fontFamily: "var(--font-display)",
-                  marginBottom: 8,
-                }}
-              >
-                {card.title}
-              </h3>
-              <p style={{ fontSize: 14, color: "var(--text-secondary)", lineHeight: 1.6 }}>
-                {card.desc}
-              </p>
+                <Link href="/leaderboard">Leaderboard</Link>
+              </Button>
             </div>
-          ))}
+          </div>
+        </div>
+        <p className="absolute bottom-3 left-4 font-mono text-[10px] uppercase tracking-wider text-white/70 sm:bottom-4 sm:left-6 sm:text-xs">
+          Representative mining operations · Photo reference
+        </p>
+      </section>
+
+      <section className="border-b border-navy-200/80 bg-white py-14 sm:py-20">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <div className="mx-auto max-w-3xl text-center">
+            <h2 className="text-3xl font-bold tracking-tight text-navy-900 sm:text-4xl">
+              Welcome to <span className="text-gold-600">GoldSignal</span>
+            </h2>
+            <p className="mt-6 text-base font-semibold text-navy-800 sm:text-lg">
+              A professional view of where sophisticated institutions are positioned in the gold and silver
+              complex.
+            </p>
+            <p className="mt-4 text-pretty text-sm leading-relaxed text-slate-600 sm:text-base">
+              Whether you follow senior producers, royalty names, or silver leverage, our dashboards surface
+              ownership breadth, portfolio weights, and quarter-over-quarter activity — in one place.
+            </p>
+            <Button variant="default" className="mt-8" asChild>
+              <Link href="/investors">Read more about our coverage</Link>
+            </Button>
+          </div>
         </div>
       </section>
-    </div>
+
+      <section className="border-b border-navy-200 bg-navy-50">
+        <div className="mx-auto max-w-6xl">
+          <div className="grid grid-cols-2 divide-x divide-navy-200/80 md:grid-cols-4">
+            {[
+              { label: "Fund managers", value: investorCount.toString() },
+              { label: "Filing quarter", value: MOCK_STATS.quarter },
+              { label: "Universe", value: "22 tickers" },
+              { label: "Data source", value: "SEC 13F" },
+            ].map((stat) => (
+              <div key={stat.label} className="px-4 py-6 text-center sm:py-8">
+                <div className="font-mono text-xl font-semibold text-gold-600 sm:text-2xl">{stat.value}</div>
+                <div className="mt-1 font-mono text-[10px] font-medium uppercase tracking-wider text-slate-500 sm:text-[11px]">
+                  {stat.label}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-[var(--bg-void)] py-14 sm:py-20">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h2 className="text-2xl font-bold tracking-tight text-navy-900 sm:text-3xl">Most owned miners</h2>
+              <p className="mt-1 text-sm text-slate-600 sm:text-base">Top names by number of tracked managers</p>
+            </div>
+            <Link
+              href="/leaderboard"
+              className="inline-flex items-center gap-1 font-mono text-xs font-semibold uppercase tracking-wide text-gold-600 hover:text-gold-700"
+            >
+              View all
+              <ArrowRight className="size-3.5" />
+            </Link>
+          </div>
+
+          <div className="overflow-hidden rounded-sm border border-navy-200 bg-white shadow-sm">
+            <table className="gs-table">
+              <thead>
+                <tr>
+                  <th className="w-10 sm:w-12">#</th>
+                  <th>Ticker</th>
+                  <th className="min-w-[140px]">Company</th>
+                  <th className="hidden sm:table-cell">Sector</th>
+                  <th className="text-right">Managers</th>
+                </tr>
+              </thead>
+              <tbody>
+                {leaderboard.map((row, i) => (
+                  <tr key={row.ticker}>
+                    <td>
+                      <span className="font-mono text-xs text-slate-400">{i + 1}</span>
+                    </td>
+                    <td>
+                      <span className="font-mono text-sm font-bold tracking-wide text-gold-600">{row.ticker}</span>
+                    </td>
+                    <td className="font-medium text-navy-900">{row.name}</td>
+                    <td className="hidden sm:table-cell">
+                      <span
+                        className={`badge ${
+                          row.sector?.includes("Stream") || row.sector?.includes("Royal")
+                            ? "badge-gold"
+                            : "badge-silver"
+                        }`}
+                      >
+                        {row.sector}
+                      </span>
+                    </td>
+                    <td className="text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <div
+                          className="hidden h-1.5 max-w-[60px] rounded-sm bg-gold-400/80 sm:block"
+                          style={{ width: `${Math.max(8, (row.owners / 5) * 56)}px` }}
+                        />
+                        <span className="font-mono text-sm text-navy-900">{row.owners}</span>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section className="border-t border-navy-200 bg-white py-14 sm:py-20">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <h2 className="mb-10 text-center text-2xl font-bold tracking-tight text-navy-900 sm:mb-12 sm:text-3xl">
+            How GoldSignal works
+          </h2>
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              {
+                icon: Shield,
+                step: "01",
+                title: "13F filings",
+                desc: "We ingest and normalize SEC 13F disclosures from precious-metals-focused managers each quarter.",
+              },
+              {
+                icon: LineChart,
+                step: "02",
+                title: "Holdings analysis",
+                desc: "Surface new buys, adds, trims, and exits with portfolio context and historical comparison.",
+              },
+              {
+                icon: PieChart,
+                step: "03",
+                title: "Leaderboard",
+                desc: "Rank securities by manager count and aggregate reported value to spot consensus.",
+              },
+              {
+                icon: Building2,
+                step: "04",
+                title: "Investor profiles",
+                desc: "Drill into each fund’s full book with weights, sectors, and filing-period metadata.",
+              },
+            ].map((card) => (
+              <div
+                key={card.step}
+                className="rounded-sm border border-navy-200 bg-navy-50/50 p-6 transition-shadow hover:shadow-md"
+              >
+                <div className="mb-4 flex items-center justify-between">
+                  <card.icon className="size-8 text-navy-800" strokeWidth={1.25} />
+                  <span className="font-mono text-[10px] font-semibold uppercase tracking-widest text-gold-600">
+                    {card.step}
+                  </span>
+                </div>
+                <h3 className="text-base font-bold text-navy-900">{card.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-slate-600">{card.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <NewsletterStrip />
+    </>
   );
 }

@@ -8,9 +8,8 @@ export const metadata: Metadata = {
   description: "Most widely owned gold and silver stocks by tracked fund managers.",
 };
 
-export const revalidate = 3600; // revalidate every hour
+export const revalidate = 3600;
 
-// Seed data for UI dev
 const SEED_LEADERBOARD: LeaderboardEntry[] = [
   { security: { id:"s1",ticker:"WPM",exchange:"NYSE",name:"Wheaton Precious Metals",sector:"Royalty/Streaming",sub_sector:"Streaming",country:"Canada",market_cap:24e9,logo_url:null,is_active:true,created_at:""}, stats:{id:"st1",security_id:"s1",period_id:"p1",owner_count:4,total_shares:12_000_000,total_value_usd:528_000_000,new_buyers:1,sellers:0,updated_at:""} },
   { security: { id:"s2",ticker:"AEM",exchange:"NYSE",name:"Agnico Eagle Mines",sector:"Gold Miner",sub_sector:"Senior Producer",country:"Canada",market_cap:44e9,logo_url:null,is_active:true,created_at:""}, stats:{id:"st2",security_id:"s2",period_id:"p1",owner_count:3,total_shares:9_600_000,total_value_usd:555_000_000,new_buyers:0,sellers:0,updated_at:""} },
@@ -35,7 +34,6 @@ export default async function LeaderboardPage() {
   const live = await loadWithFallback(() => getLeaderboard(undefined, 25), []);
   const entries = live.length > 0 ? live : SEED_LEADERBOARD;
 
-  // Group by sector for summary
   const sectors: Record<string, number> = {};
   entries.forEach((e) => {
     const s = e.security.sector ?? "Other";
@@ -43,169 +41,108 @@ export default async function LeaderboardPage() {
   });
 
   return (
-    <div style={{ maxWidth: 1200, margin: "0 auto", padding: "48px 24px" }}>
-      {/* Header */}
-      <div style={{ marginBottom: 36 }}>
-        <h1 style={{ fontSize: "clamp(28px, 4vw, 42px)", fontFamily: "var(--font-display)", marginBottom: 8 }}>
-          Leaderboard
-        </h1>
-        <p style={{ color: "var(--text-secondary)", fontSize: 16 }}>
-          Most widely held gold & silver stocks by tracked fund managers · Q1 2025
-        </p>
-      </div>
-
-      {/* Sector summary pills */}
-      <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 32 }}>
-        {Object.entries(sectors).map(([sector, count]) => (
-          <div
-            key={sector}
-            style={{
-              background: "var(--bg-surface)",
-              border: "1px solid var(--border-dim)",
-              borderRadius: 20,
-              padding: "6px 14px",
-              fontSize: 13,
-              color: "var(--text-secondary)",
-            }}
-          >
-            <span style={{ fontFamily: "var(--font-mono)", color: "var(--text-gold)", marginRight: 5 }}>
-              {count}
-            </span>
-            {sector}
+    <div className="bg-[var(--bg-void)]">
+      <div className="border-b border-navy-200 bg-white">
+        <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
+          <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-gold-600">
+            Consensus
+          </p>
+          <h1 className="mt-2 text-3xl font-bold tracking-tight text-navy-900 sm:text-4xl">Leaderboard</h1>
+          <p className="mt-2 max-w-2xl text-sm text-slate-600 sm:text-base">
+            Most widely held gold and silver securities across tracked managers · Q1 2025
+          </p>
+          <div className="mt-6 flex flex-wrap gap-2">
+            {Object.entries(sectors).map(([sector, count]) => (
+              <span
+                key={sector}
+                className="inline-flex items-center gap-2 rounded-full border border-navy-200 bg-navy-50 px-3 py-1 text-xs text-slate-700"
+              >
+                <span className="font-mono font-semibold text-gold-600">{count}</span>
+                {sector}
+              </span>
+            ))}
           </div>
-        ))}
-      </div>
-
-      {/* Main table */}
-      <div
-        style={{
-          background: "var(--bg-surface)",
-          border: "1px solid var(--border-dim)",
-          borderRadius: 12,
-          overflow: "hidden",
-        }}
-      >
-        <div style={{ overflowX: "auto" }}>
-          <table className="gs-table">
-            <thead>
-              <tr>
-                <th style={{ width: 40 }}>#</th>
-                <th>Ticker</th>
-                <th>Company</th>
-                <th>Sector</th>
-                <th style={{ textAlign: "center" }}>Managers</th>
-                <th style={{ textAlign: "right" }}>Total Shares</th>
-                <th style={{ textAlign: "right" }}>Total Value</th>
-                <th style={{ textAlign: "center" }}>New Buyers</th>
-                <th style={{ textAlign: "center" }}>Sellers</th>
-              </tr>
-            </thead>
-            <tbody>
-              {entries.map((entry, i) => {
-                const { security: sec, stats } = entry;
-                const barW = (stats.owner_count / MAX_OWNERS) * 100;
-
-                return (
-                  <tr key={sec.id}>
-                    <td>
-                      <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "var(--text-muted)" }}>
-                        {i + 1}
-                      </span>
-                    </td>
-                    <td>
-                      <span
-                        className="mono"
-                        style={{
-                          fontWeight: 700,
-                          fontSize: 14,
-                          color: "var(--text-gold)",
-                          letterSpacing: "0.04em",
-                        }}
-                      >
-                        {sec.ticker}
-                      </span>
-                    </td>
-                    <td>
-                      <div style={{ fontWeight: 500, fontSize: 14 }}>{sec.name}</div>
-                      {sec.country && (
-                        <div style={{ fontSize: 11, color: "var(--text-muted)" }}>{sec.country}</div>
-                      )}
-                    </td>
-                    <td>
-                      <span className={`badge ${sectorColor(sec.sector)}`}>
-                        {sec.sub_sector ?? sec.sector}
-                      </span>
-                    </td>
-                    <td>
-                      {/* Owner bar */}
-                      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
-                        <div
-                          style={{
-                            width: 80,
-                            height: 6,
-                            background: "var(--bg-raised)",
-                            borderRadius: 3,
-                            overflow: "hidden",
-                          }}
-                        >
-                          <div
-                            style={{
-                              width: `${barW}%`,
-                              height: "100%",
-                              background: "linear-gradient(90deg, var(--gold-500), var(--gold-300))",
-                              borderRadius: 3,
-                            }}
-                          />
-                        </div>
-                        <span style={{ fontFamily: "var(--font-mono)", fontSize: 12 }}>
-                          {stats.owner_count}
-                        </span>
-                      </div>
-                    </td>
-                    <td
-                      style={{
-                        textAlign: "right",
-                        fontFamily: "var(--font-mono)",
-                        fontSize: 13,
-                        color: "var(--text-secondary)",
-                      }}
-                    >
-                      {(stats.total_shares / 1_000_000).toFixed(2)}M
-                    </td>
-                    <td
-                      style={{
-                        textAlign: "right",
-                        fontFamily: "var(--font-mono)",
-                        fontSize: 13,
-                      }}
-                    >
-                      {formatUSD(stats.total_value_usd)}
-                    </td>
-                    <td style={{ textAlign: "center" }}>
-                      {stats.new_buyers > 0 ? (
-                        <span className="badge badge-new">+{stats.new_buyers}</span>
-                      ) : (
-                        <span style={{ color: "var(--text-muted)", fontSize: 13 }}>—</span>
-                      )}
-                    </td>
-                    <td style={{ textAlign: "center" }}>
-                      {stats.sellers > 0 ? (
-                        <span className="badge badge-sell">−{stats.sellers}</span>
-                      ) : (
-                        <span style={{ color: "var(--text-muted)", fontSize: 13 }}>—</span>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
         </div>
       </div>
 
-      <p style={{ marginTop: 16, fontSize: 12, color: "var(--text-muted)", fontFamily: "var(--font-mono)" }}>
-        Data sourced from SEC 13F filings. Covers {entries.length} securities across {Object.keys(sectors).length} sectors.
-      </p>
+      <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-12">
+        <div className="overflow-hidden rounded-sm border border-navy-200 bg-white shadow-sm">
+          <div className="overflow-x-auto">
+            <table className="gs-table min-w-[880px]">
+              <thead>
+                <tr>
+                  <th className="w-10">#</th>
+                  <th>Ticker</th>
+                  <th>Company</th>
+                  <th>Sector</th>
+                  <th className="text-center">Managers</th>
+                  <th className="text-right">Total shares</th>
+                  <th className="text-right">Total value</th>
+                  <th className="text-center">New buyers</th>
+                  <th className="text-center">Sellers</th>
+                </tr>
+              </thead>
+              <tbody>
+                {entries.map((entry, i) => {
+                  const { security: sec, stats } = entry;
+                  const barW = (stats.owner_count / MAX_OWNERS) * 100;
+                  return (
+                    <tr key={sec.id}>
+                      <td>
+                        <span className="font-mono text-xs text-slate-400">{i + 1}</span>
+                      </td>
+                      <td>
+                        <span className="font-mono text-sm font-bold tracking-wide text-gold-600">{sec.ticker}</span>
+                      </td>
+                      <td>
+                        <div className="font-medium text-navy-900">{sec.name}</div>
+                        {sec.country && <div className="text-xs text-slate-500">{sec.country}</div>}
+                      </td>
+                      <td>
+                        <span className={`badge ${sectorColor(sec.sector)}`}>{sec.sub_sector ?? sec.sector}</span>
+                      </td>
+                      <td>
+                        <div className="flex flex-col items-center gap-1">
+                          <div className="h-1.5 w-20 overflow-hidden rounded-sm bg-navy-100">
+                            <div
+                              className="h-full rounded-sm bg-gradient-to-r from-gold-600 to-gold-400"
+                              style={{ width: `${barW}%` }}
+                            />
+                          </div>
+                          <span className="font-mono text-xs text-navy-900">{stats.owner_count}</span>
+                        </div>
+                      </td>
+                      <td className="text-right font-mono text-sm text-slate-600">
+                        {(stats.total_shares / 1_000_000).toFixed(2)}M
+                      </td>
+                      <td className="text-right font-mono text-sm font-medium text-navy-900">
+                        {formatUSD(stats.total_value_usd)}
+                      </td>
+                      <td className="text-center">
+                        {stats.new_buyers > 0 ? (
+                          <span className="badge badge-new">+{stats.new_buyers}</span>
+                        ) : (
+                          <span className="text-slate-400">—</span>
+                        )}
+                      </td>
+                      <td className="text-center">
+                        {stats.sellers > 0 ? (
+                          <span className="badge badge-sell">−{stats.sellers}</span>
+                        ) : (
+                          <span className="text-slate-400">—</span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <p className="mt-4 font-mono text-xs text-slate-500">
+          Data from SEC 13F filings. {entries.length} securities · {Object.keys(sectors).length} sectors.
+        </p>
+      </div>
     </div>
   );
 }

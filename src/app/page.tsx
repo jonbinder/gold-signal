@@ -1,9 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Building2, LineChart, PieChart, Shield } from "lucide-react";
-import { getLeaderboard } from "@/lib/data";
 import { FEATURED_INVESTORS } from "@/lib/featured-investors";
-import { loadWithFallback } from "@/lib/safe-data";
 import { Button } from "@/components/ui/button";
 import { NewsletterStrip } from "@/components/home/NewsletterStrip";
 
@@ -26,17 +24,7 @@ const HERO_IMAGE =
 
 export default async function HomePage() {
   const investorCount = FEATURED_INVESTORS.length;
-
-  const liveLeaderboard = await loadWithFallback(() => getLeaderboard(undefined, 5), []);
-  const leaderboard =
-    liveLeaderboard.length > 0
-      ? liveLeaderboard.map((e) => ({
-          ticker: e.security.ticker,
-          name: e.security.name,
-          sector: e.security.sector ?? "—",
-          owners: e.stats.owner_count,
-        }))
-      : FEATURED_TICKERS;
+  const leaderboard = FEATURED_TICKERS;
 
   return (
     <>
@@ -76,7 +64,7 @@ export default async function HomePage() {
                 className="border-white/40 bg-navy-950/30 text-white hover:bg-white/10"
                 asChild
               >
-                <Link href="/leaderboard">Leaderboard</Link>
+                <Link href="/gold-silver-stocks">Stocks</Link>
               </Button>
             </div>
           </div>
@@ -113,7 +101,7 @@ export default async function HomePage() {
             {[
               { label: "Fund managers", value: investorCount.toString() },
               { label: "Filing quarter", value: MOCK_STATS.quarter },
-              { label: "Universe", value: "22 tickers" },
+              { label: "Stock universe", value: "150+ tickers" },
               { label: "Data source", value: "SEC 13F" },
             ].map((stat) => (
               <div key={stat.label} className="px-4 py-6 text-center sm:py-8">
@@ -131,14 +119,14 @@ export default async function HomePage() {
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <h2 className="text-2xl font-bold tracking-tight text-navy-900 sm:text-3xl">Most owned miners</h2>
-              <p className="mt-1 text-sm text-slate-600 sm:text-base">Top names by number of tracked managers</p>
+              <h2 className="text-2xl font-bold tracking-tight text-navy-900 sm:text-3xl">Featured precious metals names</h2>
+              <p className="mt-1 text-sm text-slate-600 sm:text-base">Sample tickers from our gold &amp; silver stock directory</p>
             </div>
             <Link
-              href="/leaderboard"
+              href="/gold-silver-stocks"
               className="inline-flex items-center gap-1 font-mono text-xs font-semibold uppercase tracking-wide text-gold-600 hover:text-gold-700"
             >
-              View all
+              View stocks
               <ArrowRight className="size-3.5" />
             </Link>
           </div>
@@ -151,7 +139,7 @@ export default async function HomePage() {
                   <th>Ticker</th>
                   <th className="min-w-[140px]">Company</th>
                   <th className="hidden sm:table-cell">Sector</th>
-                  <th className="text-right">Managers</th>
+                  <th className="text-right">Score</th>
                 </tr>
               </thead>
               <tbody>
@@ -214,8 +202,8 @@ export default async function HomePage() {
               {
                 icon: PieChart,
                 step: "03",
-                title: "Leaderboard",
-                desc: "Rank securities by manager count and aggregate reported value to spot consensus.",
+                title: "Stock screener",
+                desc: "Browse a curated gold and silver universe with live-style quotes, categories, and market-cap filters.",
               },
               {
                 icon: Building2,

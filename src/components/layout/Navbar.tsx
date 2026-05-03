@@ -1,11 +1,11 @@
 import Link from "next/link";
-import { BarChart3, Landmark, Search, Users } from "lucide-react";
+import { Layers, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
 const NAV_LINKS = [
   { href: "/investors", label: "Investors", icon: Users },
-  { href: "/leaderboard", label: "Leaderboard", icon: BarChart3 },
+  { href: "/gold-silver-stocks", label: "Stocks", icon: Layers },
 ] as const;
 
 export function Navbar() {
@@ -51,27 +51,8 @@ export function Navbar() {
               </Link>
             );
           })}
-          <Link
-            href="/"
-            className="ml-1 hidden items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-navy-200 no-underline hover:text-white md:inline-flex"
-          >
-            <Landmark className="size-4" strokeWidth={1.5} aria-hidden />
-            Overview
-          </Link>
-          <span
-            className="ml-2 hidden h-6 w-px bg-white/10 lg:block"
-            aria-hidden
-          />
-          <button
-            type="button"
-            className="hidden items-center gap-1.5 rounded-sm px-2 py-2 text-[11px] font-semibold uppercase tracking-wide text-navy-200 hover:bg-white/5 hover:text-white lg:inline-flex"
-            aria-label="Search (coming soon)"
-          >
-            <Search className="size-4" strokeWidth={1.5} />
-            Search
-          </button>
-          <Button variant="gold" size="sm" className="ml-1 shrink-0" asChild>
-            <Link href="/auth">Sign in</Link>
+          <Button variant="gold" size="sm" className="ml-2 shrink-0" asChild>
+            <Link href="/auth">Login</Link>
           </Button>
         </nav>
       </div>

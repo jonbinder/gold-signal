@@ -6,13 +6,13 @@ const COLS = [
     links: [
       { href: "/", label: "Home" },
       { href: "/investors", label: "Investors" },
-      { href: "/leaderboard", label: "Leaderboard" },
+      { href: "/gold-silver-stocks", label: "Gold & silver stocks" },
     ],
   },
   {
     title: "Data",
     links: [
-      { href: "/leaderboard", label: "Most owned" },
+      { href: "/gold-silver-stocks", label: "Stock screener" },
       { href: "/investors", label: "Fund managers" },
       { href: "/", label: "Methodology" },
     ],

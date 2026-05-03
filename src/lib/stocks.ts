@@ -240,3 +240,169 @@ export async function getStockQuotes(tickers: string[]): Promise<Map<string, Sto
   );
   return out;
 }
+
+// ─── Intraday-style snapshot (price, % change, volume) — Polygon snapshot → Yahoo chart ───
+
+export type StockMarketSnapshot = {
+  ticker: string;
+  price: number | null;
+  /** Percent change for the session (e.g. 1.25 = +1.25%) */
+  changePct: number | null;
+  volume: number | null;
+  currency: string;
+  source: StockQuoteSource;
+  asOf: string;
+};
+
+type SnapMem = { snap: StockMarketSnapshot; at: number };
+const snapshotMemory = new Map<string, SnapMem>();
+
+function readSnapMem(sym: string): StockMarketSnapshot | null {
+  const hit = snapshotMemory.get(sym);
+  if (!hit) return null;
+  if (Date.now() - hit.at > CACHE_TTL_MS) {
+    snapshotMemory.delete(sym);
+    return null;
+  }
+  return { ...hit.snap, source: "cache" };
+}
+
+function writeSnapMem(snap: StockMarketSnapshot): void {
+  snapshotMemory.set(snap.ticker.toUpperCase(), { snap: { ...snap, source: snap.source }, at: Date.now() });
+}
+
+async function fetchPolygonSnapshot(
+  symbol: string,
+  apiKey: string,
+): Promise<{ price: number | null; changePct: number | null; volume: number | null } | null> {
+  const url = new URL(`/v2/snapshot/locale/us/markets/stocks/tickers/${encodeURIComponent(symbol)}`, polygonBaseUrl());
+  url.searchParams.set("apiKey", apiKey);
+  const res = await fetch(url.toString(), {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  if (!res.ok) return null;
+  const json: unknown = await res.json();
+  const t = json && typeof json === "object" ? (json as { ticker?: Record<string, unknown> }).ticker : null;
+  if (!t || typeof t !== "object") return null;
+  const day = t.day as { c?: number; v?: number } | undefined;
+  const lastTrade = t.lastTrade as { p?: number } | undefined;
+  const price =
+    typeof lastTrade?.p === "number" && lastTrade.p > 0
+      ? lastTrade.p
+      : typeof day?.c === "number" && day.c > 0
+        ? day.c
+        : null;
+  const volume = typeof day?.v === "number" && day.v >= 0 ? day.v : null;
+  const rawChange = t.todaysChangePerc;
+  const changePct =
+    typeof rawChange === "number" && Number.isFinite(rawChange)
+      ? rawChange
+      : null;
+  if (price == null) return null;
+  return { price, changePct, volume };
+}
+
+async function fetchYahooMarketSnapshot(
+  symbol: string,
+): Promise<{ price: number | null; changePct: number | null; volume: number | null } | null> {
+  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=5d`;
+  const res = await fetch(url, {
+    method: "GET",
+    headers: {
+      Accept: "application/json",
+      "User-Agent": "GoldSignal/1.0 (https://github.com/jonbinder/gold-signal)",
+    },
+    cache: "no-store",
+  });
+  if (!res.ok) return null;
+  const json: unknown = await res.json();
+  const chart = json && typeof json === "object" ? (json as { chart?: { result?: unknown[] } }).chart : null;
+  const result = chart?.result?.[0] as
+    | {
+        meta?: {
+          regularMarketPrice?: number;
+          previousClose?: number;
+          regularMarketChangePercent?: number;
+          regularMarketVolume?: number;
+        };
+      }
+    | undefined;
+  const meta = result?.meta;
+  if (!meta) return null;
+  const price =
+    typeof meta.regularMarketPrice === "number" && meta.regularMarketPrice > 0
+      ? meta.regularMarketPrice
+      : typeof meta.previousClose === "number" && meta.previousClose > 0
+        ? meta.previousClose
+        : null;
+  let changePct =
+    typeof meta.regularMarketChangePercent === "number" && Number.isFinite(meta.regularMarketChangePercent)
+      ? meta.regularMarketChangePercent
+      : null;
+  if (changePct != null && Math.abs(changePct) < 1.0000001 && Math.abs(changePct) > 1e-12) {
+    changePct = changePct * 100;
+  }
+  const volume =
+    typeof meta.regularMarketVolume === "number" && meta.regularMarketVolume >= 0 ? meta.regularMarketVolume : null;
+  if (price == null) return null;
+  return { price, changePct, volume };
+}
+
+/**
+ * Price + session % change + volume. Polygon snapshot first, Yahoo chart fallback.
+ * Cached in-memory for CACHE_TTL_MS (same process).
+ */
+export async function getStockMarketSnapshot(ticker: string): Promise<StockMarketSnapshot | null> {
+  const sym = normalizeTicker(ticker);
+  if (!sym) return null;
+
+  const cached = readSnapMem(sym);
+  if (cached) return cached;
+
+  const apiKey = process.env.POLYGON_API_KEY?.trim();
+  let source: "polygon" | "yahoo" = "polygon";
+  let pack: { price: number | null; changePct: number | null; volume: number | null } | null = null;
+
+  if (apiKey) {
+    pack = await fetchPolygonSnapshot(sym, apiKey);
+  }
+  if (!pack || pack.price == null) {
+    pack = await fetchYahooMarketSnapshot(sym);
+    source = "yahoo";
+  }
+  if (!pack || pack.price == null) return null;
+
+  const asOf = new Date().toISOString();
+  const snap: StockMarketSnapshot = {
+    ticker: sym,
+    price: pack.price,
+    changePct: pack.changePct,
+    volume: pack.volume,
+    currency: "USD",
+    source,
+    asOf,
+  };
+  writeSnapMem(snap);
+  return snap;
+}
+
+/** Batch market snapshots with bounded concurrency (server-side). */
+export async function getStockMarketSnapshots(
+  tickers: string[],
+  concurrency = 12,
+): Promise<Map<string, StockMarketSnapshot | null>> {
+  const unique = [...new Set(tickers.map(normalizeTicker).filter(Boolean))];
+  const out = new Map<string, StockMarketSnapshot | null>();
+  for (let i = 0; i < unique.length; i += concurrency) {
+    const slice = unique.slice(i, i + concurrency);
+    await Promise.all(
+      slice.map(async (sym) => {
+        const s = await getStockMarketSnapshot(sym);
+        out.set(sym, s);
+      }),
+    );
+  }
+  return out;
+}

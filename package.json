@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "test:stocks": "npx tsx scripts/test-stock-quotes.ts",
+    "db:generate-stocks-seed": "npx tsx scripts/generate-stocks-seed-sql.ts",
     "db:generate": "supabase gen types typescript --project-id $SUPABASE_PROJECT_ID > src/types/supabase.ts"
   },
   "dependencies": {

@@ -6,6 +6,8 @@ import type {
   LeaderboardEntry,
   ReportingPeriod,
 } from "@/types";
+import type { CuratedStock } from "@/types/stocks-curated";
+import { GOLD_SILVER_STOCK_SEED } from "@/lib/gold-silver-stocks-seed-data";
 
 // ─── Investors ────────────────────────────────────────────────────────────────
 
@@ -146,4 +148,40 @@ export function formatShares(shares: number): string {
 }
 
 // ─── Live quotes (Polygon → Yahoo, Supabase cache) ───────────────────────────
-export { getStockQuote, getStockQuotes, type StockQuote, type StockQuoteSource } from "./stocks";
+export {
+  getStockQuote,
+  getStockQuotes,
+  getStockMarketSnapshot,
+  getStockMarketSnapshots,
+  type StockQuote,
+  type StockQuoteSource,
+  type StockMarketSnapshot,
+} from "./stocks";
+
+// ─── Curated gold / silver stocks (Supabase `stocks` or static seed) ─────────
+export const getGoldSilverStocksForPage = cache(async (): Promise<CuratedStock[]> => {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("stocks")
+    .select("id,ticker,name,category,exchange,market_cap_usd,is_active,created_at")
+    .eq("is_active", true)
+    .order("ticker");
+
+  if (!error && data && data.length > 0) {
+    return data.map((row) => ({
+      id: row.id as string,
+      ticker: row.ticker as string,
+      name: row.name as string,
+      category: row.category as CuratedStock["category"],
+      exchange: row.exchange as string,
+      market_cap_usd: row.market_cap_usd as number | null,
+      is_active: row.is_active as boolean,
+      created_at: row.created_at as string | undefined,
+    }));
+  }
+
+  return GOLD_SILVER_STOCK_SEED.map((r, i) => ({
+    ...r,
+    id: `static-${r.ticker}-${i}`,
+  }));
+});

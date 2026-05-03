@@ -1,15 +1,29 @@
 import type { HoldingWithSecurity, Investor } from "@/types";
 
-/** Fallback investors — mirrors migration seed names/slugs */
+/** Fallback investors — curated public figures for UI / offline demo */
 export const SEED_INVESTORS: Investor[] = [
   {
-    id: "seed-sprott",
-    slug: "sprott-asset-management",
-    name: "Sprott Asset Management",
+    id: "seed-don-durrett",
+    slug: "don-durrett",
+    name: "Don Durrett",
+    firm: "Independent",
+    bio: "Analyst and author on the gold cycle; known for data-driven commentary on miners, silver, and macro precious-metals themes.",
+    aum_usd: null,
+    focus: ["gold", "silver", "miners", "macro"],
+    is_active: true,
+    logo_url: null,
+    website_url: null,
+    created_at: "",
+    updated_at: "",
+  },
+  {
+    id: "seed-eric-sprott",
+    slug: "eric-sprott",
+    name: "Eric Sprott",
     firm: "Sprott Inc.",
-    bio: "World's largest dedicated precious metals manager.",
-    aum_usd: 25_000_000_000,
-    focus: ["gold", "silver", "royalties"],
+    bio: "Canadian investor and founder of Sprott Inc.; long-time advocate of physical gold and silver and financing for quality mining names.",
+    aum_usd: null,
+    focus: ["gold", "silver", "royalties", "finance"],
     is_active: true,
     logo_url: null,
     website_url: "https://sprott.com",
@@ -17,13 +31,13 @@ export const SEED_INVESTORS: Investor[] = [
     updated_at: "",
   },
   {
-    id: "seed-first-eagle",
-    slug: "first-eagle-investments",
-    name: "First Eagle Investment Management",
-    firm: "First Eagle",
-    bio: "Value-oriented manager with significant gold holdings.",
-    aum_usd: 105_000_000_000,
-    focus: ["gold", "value"],
+    id: "seed-peter-schiff",
+    slug: "peter-schiff",
+    name: "Peter Schiff",
+    firm: "Euro Pacific",
+    bio: "Economist and CEO of Euro Pacific; prominent gold-focused wealth manager skeptical of fiat debasement and equity bubbles.",
+    aum_usd: null,
+    focus: ["gold", "wealth preservation", "macro"],
     is_active: true,
     logo_url: null,
     website_url: null,
@@ -31,13 +45,13 @@ export const SEED_INVESTORS: Investor[] = [
     updated_at: "",
   },
   {
-    id: "seed-vaneck",
-    slug: "van-eck-associates",
-    name: "VanEck Associates",
-    firm: "VanEck",
-    bio: "Pioneer in gold mining equity ETFs.",
-    aum_usd: 80_000_000_000,
-    focus: ["gold", "silver", "etf"],
+    id: "seed-rick-rule",
+    slug: "rick-rule",
+    name: "Rick Rule",
+    firm: "Sprott / Rule Investment Media",
+    bio: "Natural-resources speculator and capital-markets veteran; known for contrarian resource investing and Sprott leadership.",
+    aum_usd: null,
+    focus: ["resources", "gold", "speculation"],
     is_active: true,
     logo_url: null,
     website_url: null,
@@ -45,27 +59,13 @@ export const SEED_INVESTORS: Investor[] = [
     updated_at: "",
   },
   {
-    id: "seed-tocqueville",
-    slug: "tocqueville-asset-management",
-    name: "Tocqueville Asset Management",
-    firm: "Tocqueville",
-    bio: "Home of the long-running Tocqueville Gold Fund.",
-    aum_usd: 8_000_000_000,
-    focus: ["gold", "silver"],
-    is_active: true,
-    logo_url: null,
-    website_url: null,
-    created_at: "",
-    updated_at: "",
-  },
-  {
-    id: "seed-baker",
-    slug: "baker-steel-capital",
-    name: "Baker Steel Capital Managers",
-    firm: "Baker Steel",
-    bio: "London-based specialist in precious metals equities.",
-    aum_usd: 2_000_000_000,
-    focus: ["gold", "silver", "platinum"],
+    id: "seed-ross-beaty",
+    slug: "ross-beaty",
+    name: "Ross Beaty",
+    firm: "Equity / Lumina group",
+    bio: "Geologist and mining entrepreneur; built major companies across base and precious metals with a focus on disciplined operations.",
+    aum_usd: null,
+    focus: ["mining", "copper", "gold", "ESG"],
     is_active: true,
     logo_url: null,
     website_url: null,
@@ -141,10 +141,10 @@ const S = {
   SIL: mkSecurity("s-sil", "SIL", "NYSEARCA", "Global X Silver Miners ETF", "ETF", "Silver ETF", "USA", null),
 };
 
-/** Offline holdings per slug — UI preview before Supabase */
+/** Offline holdings per slug — illustrative demo data (not live 13F) */
 export const SEED_HOLDINGS_BY_SLUG: Record<string, HoldingWithSecurity[]> = {
-  "sprott-asset-management": [
-    mkHolding("seed-sprott", "h-s1", S.WPM, {
+  "eric-sprott": [
+    mkHolding("seed-eric-sprott", "h-es1", S.WPM, {
       shares: 5_000_000,
       value_usd: 220_000_000,
       portfolio_pct: 18.5,
@@ -153,7 +153,7 @@ export const SEED_HOLDINGS_BY_SLUG: Record<string, HoldingWithSecurity[]> = {
       change_type: "add",
       change_pct: 11.1,
     }),
-    mkHolding("seed-sprott", "h-s2", S.AEM, {
+    mkHolding("seed-eric-sprott", "h-es2", S.AEM, {
       shares: 3_200_000,
       value_usd: 185_000_000,
       portfolio_pct: 15.6,
@@ -162,7 +162,7 @@ export const SEED_HOLDINGS_BY_SLUG: Record<string, HoldingWithSecurity[]> = {
       change_type: "unchanged",
       change_pct: 0,
     }),
-    mkHolding("seed-sprott", "h-s3", S.GDX, {
+    mkHolding("seed-eric-sprott", "h-es3", S.GDX, {
       shares: 8_100_000,
       value_usd: 140_000_000,
       portfolio_pct: 11.8,
@@ -171,7 +171,7 @@ export const SEED_HOLDINGS_BY_SLUG: Record<string, HoldingWithSecurity[]> = {
       change_type: "new",
       change_pct: null,
     }),
-    mkHolding("seed-sprott", "h-s4", S.FNV, {
+    mkHolding("seed-eric-sprott", "h-es4", S.FNV, {
       shares: 2_400_000,
       value_usd: 108_000_000,
       portfolio_pct: 9.1,
@@ -181,15 +181,15 @@ export const SEED_HOLDINGS_BY_SLUG: Record<string, HoldingWithSecurity[]> = {
       change_pct: -20,
     }),
   ],
-  "first-eagle-investments": [
-    mkHolding("seed-first-eagle", "h-fe1", S.NEM, {
+  "peter-schiff": [
+    mkHolding("seed-peter-schiff", "h-ps1", S.NEM, {
       shares: 6_400_000,
       value_usd: 268_800_000,
       portfolio_pct: 14.2,
       change_type: "unchanged",
       change_pct: 0,
     }),
-    mkHolding("seed-first-eagle", "h-fe2", S.GOLD, {
+    mkHolding("seed-peter-schiff", "h-ps2", S.GOLD, {
       shares: 12_000_000,
       value_usd: 216_000_000,
       portfolio_pct: 11.4,
@@ -198,7 +198,7 @@ export const SEED_HOLDINGS_BY_SLUG: Record<string, HoldingWithSecurity[]> = {
       change_type: "add",
       change_pct: 20,
     }),
-    mkHolding("seed-first-eagle", "h-fe3", S.FNV, {
+    mkHolding("seed-peter-schiff", "h-ps3", S.FNV, {
       shares: 1_800_000,
       value_usd: 162_000_000,
       portfolio_pct: 8.6,
@@ -207,7 +207,7 @@ export const SEED_HOLDINGS_BY_SLUG: Record<string, HoldingWithSecurity[]> = {
       change_type: "reduce",
       change_pct: -28,
     }),
-    mkHolding("seed-first-eagle", "h-fe4", S.WPM, {
+    mkHolding("seed-peter-schiff", "h-ps4", S.WPM, {
       shares: 2_100_000,
       value_usd: 92_400_000,
       portfolio_pct: 4.9,
@@ -217,22 +217,22 @@ export const SEED_HOLDINGS_BY_SLUG: Record<string, HoldingWithSecurity[]> = {
       change_pct: null,
     }),
   ],
-  "van-eck-associates": [
-    mkHolding("seed-vaneck", "h-ve1", S.GDX, {
+  "rick-rule": [
+    mkHolding("seed-rick-rule", "h-rr1", S.GDX, {
       shares: 42_000_000,
       value_usd: 910_000_000,
       portfolio_pct: 28.5,
       change_type: "add",
       change_pct: 5,
     }),
-    mkHolding("seed-vaneck", "h-ve2", S.GDXJ, {
+    mkHolding("seed-rick-rule", "h-rr2", S.GDXJ, {
       shares: 18_500_000,
       value_usd: 462_500_000,
       portfolio_pct: 14.5,
       change_type: "unchanged",
       change_pct: 0,
     }),
-    mkHolding("seed-vaneck", "h-ve3", S.AEM, {
+    mkHolding("seed-rick-rule", "h-rr3", S.AEM, {
       shares: 4_100_000,
       value_usd: 237_800_000,
       portfolio_pct: 7.4,
@@ -241,7 +241,7 @@ export const SEED_HOLDINGS_BY_SLUG: Record<string, HoldingWithSecurity[]> = {
       change_type: "reduce",
       change_pct: -18,
     }),
-    mkHolding("seed-vaneck", "h-ve4", S.SIL, {
+    mkHolding("seed-rick-rule", "h-rr4", S.SIL, {
       shares: 9_800_000,
       value_usd: 156_800_000,
       portfolio_pct: 4.9,
@@ -251,15 +251,15 @@ export const SEED_HOLDINGS_BY_SLUG: Record<string, HoldingWithSecurity[]> = {
       change_pct: null,
     }),
   ],
-  "tocqueville-asset-management": [
-    mkHolding("seed-tocqueville", "h-tq1", S.PAAS, {
+  "don-durrett": [
+    mkHolding("seed-don-durrett", "h-dd1", S.PAAS, {
       shares: 5_500_000,
       value_usd: 143_000_000,
       portfolio_pct: 16.2,
       change_type: "unchanged",
       change_pct: 0,
     }),
-    mkHolding("seed-tocqueville", "h-tq2", S.WPM, {
+    mkHolding("seed-don-durrett", "h-dd2", S.WPM, {
       shares: 2_900_000,
       value_usd: 127_600_000,
       portfolio_pct: 14.5,
@@ -268,14 +268,14 @@ export const SEED_HOLDINGS_BY_SLUG: Record<string, HoldingWithSecurity[]> = {
       change_type: "reduce",
       change_pct: -15,
     }),
-    mkHolding("seed-tocqueville", "h-tq3", S.GDX, {
+    mkHolding("seed-don-durrett", "h-dd3", S.GDX, {
       shares: 6_200_000,
       value_usd: 134_320_000,
       portfolio_pct: 15.2,
       change_type: "add",
       change_pct: 8,
     }),
-    mkHolding("seed-tocqueville", "h-tq4", S.AEM, {
+    mkHolding("seed-don-durrett", "h-dd4", S.AEM, {
       shares: 1_600_000,
       value_usd: 92_800_000,
       portfolio_pct: 10.5,
@@ -285,15 +285,15 @@ export const SEED_HOLDINGS_BY_SLUG: Record<string, HoldingWithSecurity[]> = {
       change_pct: null,
     }),
   ],
-  "baker-steel-capital": [
-    mkHolding("seed-baker", "h-bk1", S.AG, {
+  "ross-beaty": [
+    mkHolding("seed-ross-beaty", "h-rb1", S.AG, {
       shares: 8_800_000,
       value_usd: 114_400_000,
       portfolio_pct: 18.8,
       change_type: "add",
       change_pct: 12,
     }),
-    mkHolding("seed-baker", "h-bk2", S.GDXJ, {
+    mkHolding("seed-ross-beaty", "h-rb2", S.GDXJ, {
       shares: 5_400_000,
       value_usd: 135_000_000,
       portfolio_pct: 22.2,
@@ -302,14 +302,14 @@ export const SEED_HOLDINGS_BY_SLUG: Record<string, HoldingWithSecurity[]> = {
       change_type: "reduce",
       change_pct: -10,
     }),
-    mkHolding("seed-baker", "h-bk3", S.GOLD, {
+    mkHolding("seed-ross-beaty", "h-rb3", S.GOLD, {
       shares: 4_200_000,
       value_usd: 75_600_000,
       portfolio_pct: 12.4,
       change_type: "unchanged",
       change_pct: 0,
     }),
-    mkHolding("seed-baker", "h-bk4", S.PAAS, {
+    mkHolding("seed-ross-beaty", "h-rb4", S.PAAS, {
       shares: 3_100_000,
       value_usd: 80_600_000,
       portfolio_pct: 13.2,

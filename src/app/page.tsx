@@ -1,7 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Building2, LineChart, PieChart, Shield } from "lucide-react";
-import { getInvestors, getLeaderboard } from "@/lib/data";
+import { getLeaderboard } from "@/lib/data";
+import { FEATURED_INVESTORS } from "@/lib/featured-investors";
 import { loadWithFallback } from "@/lib/safe-data";
 import { Button } from "@/components/ui/button";
 import { NewsletterStrip } from "@/components/home/NewsletterStrip";
@@ -9,8 +10,6 @@ import { NewsletterStrip } from "@/components/home/NewsletterStrip";
 export const revalidate = 300;
 
 const MOCK_STATS = {
-  managers: 5,
-  holdings: 0,
   quarter: "Q1 2025",
 };
 
@@ -26,8 +25,7 @@ const HERO_IMAGE =
   "https://images.unsplash.com/photo-1580828343064-58d38262bd85?auto=format&fit=crop&w=2400&q=82";
 
 export default async function HomePage() {
-  const investors = await loadWithFallback(() => getInvestors(), []);
-  const investorCount = investors.length > 0 ? investors.length : MOCK_STATS.managers;
+  const investorCount = FEATURED_INVESTORS.length;
 
   const liveLeaderboard = await loadWithFallback(() => getLeaderboard(undefined, 5), []);
   const leaderboard =

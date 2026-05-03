@@ -271,6 +271,41 @@ function writeSnapMem(snap: StockMarketSnapshot): void {
   snapshotMemory.set(snap.ticker.toUpperCase(), { snap: { ...snap, source: snap.source }, at: Date.now() });
 }
 
+/** Polygon snapshot `ticker` object (stocks + forex share most fields). */
+function parsePolygonSnapshotTicker(t: Record<string, unknown>): {
+  price: number | null;
+  changePct: number | null;
+  volume: number | null;
+} | null {
+  const day = t.day as { c?: number; v?: number } | undefined;
+  const min = t.min as { c?: number } | undefined;
+  const lastTrade = t.lastTrade as { p?: number } | undefined;
+  const lastQuote = t.lastQuote as { a?: number; b?: number } | undefined;
+
+  let price: number | null = null;
+  if (typeof lastTrade?.p === "number" && lastTrade.p > 0) {
+    price = lastTrade.p;
+  } else if (
+    typeof lastQuote?.a === "number" &&
+    typeof lastQuote?.b === "number" &&
+    lastQuote.a > 0 &&
+    lastQuote.b > 0
+  ) {
+    price = (lastQuote.a + lastQuote.b) / 2;
+  } else if (typeof day?.c === "number" && day.c > 0) {
+    price = day.c;
+  } else if (typeof min?.c === "number" && min.c > 0) {
+    price = min.c;
+  }
+
+  const volume = typeof day?.v === "number" && day.v >= 0 ? day.v : null;
+  const rawChange = t.todaysChangePerc;
+  const changePct =
+    typeof rawChange === "number" && Number.isFinite(rawChange) ? rawChange : null;
+  if (price == null) return null;
+  return { price, changePct, volume };
+}
+
 async function fetchPolygonSnapshot(
   symbol: string,
   apiKey: string,
@@ -286,22 +321,35 @@ async function fetchPolygonSnapshot(
   const json: unknown = await res.json();
   const t = json && typeof json === "object" ? (json as { ticker?: Record<string, unknown> }).ticker : null;
   if (!t || typeof t !== "object") return null;
-  const day = t.day as { c?: number; v?: number } | undefined;
-  const lastTrade = t.lastTrade as { p?: number } | undefined;
-  const price =
-    typeof lastTrade?.p === "number" && lastTrade.p > 0
-      ? lastTrade.p
-      : typeof day?.c === "number" && day.c > 0
-        ? day.c
-        : null;
-  const volume = typeof day?.v === "number" && day.v >= 0 ? day.v : null;
-  const rawChange = t.todaysChangePerc;
-  const changePct =
-    typeof rawChange === "number" && Number.isFinite(rawChange)
-      ? rawChange
-      : null;
-  if (price == null) return null;
-  return { price, changePct, volume };
+  return parsePolygonSnapshotTicker(t);
+}
+
+/** Forex pairs use `C:BASEQUOTE` (e.g. `C:XAUUSD`, `C:XAGUSD`). */
+async function fetchPolygonForexSnapshot(
+  symbol: string,
+  apiKey: string,
+): Promise<{ price: number | null; changePct: number | null; volume: number | null } | null> {
+  const url = new URL(
+    `/v2/snapshot/locale/global/markets/forex/tickers/${encodeURIComponent(symbol)}`,
+    polygonBaseUrl(),
+  );
+  url.searchParams.set("apiKey", apiKey);
+  const res = await fetch(url.toString(), {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  if (!res.ok) return null;
+  const json: unknown = await res.json();
+  const t = json && typeof json === "object" ? (json as { ticker?: Record<string, unknown> }).ticker : null;
+  if (!t || typeof t !== "object") return null;
+  return parsePolygonSnapshotTicker(t);
+}
+
+/** Yahoo chart symbols for Polygon forex tickers (`C:EURUSD` → `EURUSD=X`). */
+function yahooSymbolForPolygonForex(sym: string): string | null {
+  if (!sym.startsWith("C:") || sym.length < 4) return null;
+  return `${sym.slice(2)}=X`;
 }
 
 async function fetchYahooMarketSnapshot(
@@ -366,10 +414,13 @@ export async function getStockMarketSnapshot(ticker: string): Promise<StockMarke
   let pack: { price: number | null; changePct: number | null; volume: number | null } | null = null;
 
   if (apiKey) {
-    pack = await fetchPolygonSnapshot(sym, apiKey);
+    pack = sym.startsWith("C:")
+      ? await fetchPolygonForexSnapshot(sym, apiKey)
+      : await fetchPolygonSnapshot(sym, apiKey);
   }
   if (!pack || pack.price == null) {
-    pack = await fetchYahooMarketSnapshot(sym);
+    const yahooSym = yahooSymbolForPolygonForex(sym) ?? sym;
+    pack = await fetchYahooMarketSnapshot(yahooSym);
     source = "yahoo";
   }
   if (!pack || pack.price == null) return null;

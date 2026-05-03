@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { getGoldSilverStocksForPage } from "@/lib/data";
+import { getGoldSilverStocksForPage } from "@/lib/gold-silver-stocks-data";
 import { GoldSilverStocksExplorer } from "./GoldSilverStocksExplorer";
 
 export const metadata: Metadata = {

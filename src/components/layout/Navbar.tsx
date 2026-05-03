@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Layers, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { PreciousMetalsBanner } from "@/components/layout/PreciousMetalsBanner";
 
 const NAV_LINKS = [
   { href: "/investors", label: "Investors", icon: Users },
@@ -12,12 +13,7 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-50 border-b border-navy-800/80 bg-navy-950 shadow-sm">
       <div className="border-b border-white/5 bg-black/40 px-4 py-1.5 text-[11px] tracking-wide text-navy-100 sm:px-6">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 font-mono text-[10px] uppercase sm:text-[11px]">
-          <span className="text-gold-400">13F intelligence</span>
-          <span className="hidden text-navy-200 sm:inline">·</span>
-          <span className="text-navy-200">SEC filings · Gold &amp; silver miners</span>
-          <span className="ml-auto text-gold-300/90">Q1 2025 coverage</span>
-        </div>
+        <PreciousMetalsBanner />
       </div>
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-4 sm:h-16 sm:px-6">
         <Link href="/" className="group flex shrink-0 items-center gap-2.5 no-underline">

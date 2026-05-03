@@ -12,7 +12,7 @@ const NAV_LINKS = [
 export function Navbar() {
   return (
     <header className="sticky top-0 z-50 border-b border-navy-800/80 bg-navy-950 shadow-sm">
-      <div className="border-b border-white/5 bg-black/40 px-4 py-1.5 text-[11px] tracking-wide text-navy-100 sm:px-6">
+      <div className="border-b border-white/5 bg-gradient-to-b from-black/50 to-black/35 px-3 py-2 text-[11px] tracking-wide text-navy-100 sm:px-6 sm:py-1.5">
         <PreciousMetalsBanner />
       </div>
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-4 sm:h-16 sm:px-6">

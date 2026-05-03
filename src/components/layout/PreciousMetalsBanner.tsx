@@ -103,7 +103,7 @@ export function PreciousMetalsBanner() {
       >
         <QuoteRow
           label="GOLD"
-          ticker="GLD"
+          ticker="XAUUSD"
           labelClass="text-gold-400"
           quote={data?.gold ?? null}
           loading={stillLoading}
@@ -111,7 +111,7 @@ export function PreciousMetalsBanner() {
         />
         <QuoteRow
           label="SILVER"
-          ticker="SLV"
+          ticker="XAGUSD"
           labelClass="text-slate-300"
           quote={data?.silver ?? null}
           loading={stillLoading}
@@ -119,7 +119,7 @@ export function PreciousMetalsBanner() {
         />
         <QuoteRow
           label="S&P 500"
-          ticker="SPY"
+          ticker="I:SPX"
           labelClass="text-navy-200"
           quote={data?.sp500 ?? null}
           loading={stillLoading}

@@ -2,11 +2,11 @@ import { NextResponse } from "next/server";
 import { getStockMarketSnapshots } from "@/lib/stocks";
 import type { MarketBannerPayload, MarketBannerQuote } from "@/types/metals-banner";
 
-/** ETF proxies (Polygon stocks snapshot); more reliable than spot forex for many keys/tiers. */
+/** Real spot/index instruments + miner ETF. */
 const TICKERS = {
-  gold: "GLD",
-  silver: "SLV",
-  sp500: "SPY",
+  gold: "XAUUSD",
+  silver: "XAGUSD",
+  sp500: "I:SPX",
   gdx: "GDX",
 } as const;
 

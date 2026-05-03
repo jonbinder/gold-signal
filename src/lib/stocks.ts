@@ -32,6 +32,17 @@ function normalizeTicker(ticker: string): string {
   return ticker.trim().toUpperCase().replace(/^US:/, "");
 }
 
+/**
+ * Market snapshot symbols can include Polygon prefixes:
+ * - Forex: `C:XAUUSD` (we also accept bare `XAUUSD`)
+ * - Indices: `I:SPX`
+ */
+function normalizeMarketSnapshotTicker(ticker: string): string {
+  const sym = normalizeTicker(ticker);
+  if (/^[A-Z]{6}$/.test(sym)) return `C:${sym}`;
+  return sym;
+}
+
 function getAnonSupabase(): SupabaseClient | null {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -346,8 +357,41 @@ async function fetchPolygonForexSnapshot(
   return parsePolygonSnapshotTicker(t);
 }
 
-/** Yahoo chart symbols for Polygon forex tickers (`C:EURUSD` → `EURUSD=X`). */
-function yahooSymbolForPolygonForex(sym: string): string | null {
+async function fetchPolygonIndexSnapshot(
+  symbol: string,
+  apiKey: string,
+): Promise<{ price: number | null; changePct: number | null; volume: number | null } | null> {
+  const url = new URL("/v3/snapshot/indices", polygonBaseUrl());
+  url.searchParams.set("ticker.any_of", symbol);
+  url.searchParams.set("apiKey", apiKey);
+  const res = await fetch(url.toString(), {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  if (!res.ok) return null;
+  const json: unknown = await res.json();
+  const result = json && typeof json === "object" ? (json as { results?: Record<string, unknown>[] }).results?.[0] : null;
+  if (!result || typeof result !== "object") return null;
+
+  const session = result.session as { close?: number; volume?: number; change_percent?: number } | undefined;
+  const value = typeof result.value === "number" && result.value > 0 ? result.value : null;
+  const close = typeof session?.close === "number" && session.close > 0 ? session.close : null;
+  const changePctRaw =
+    typeof result.todaysChangePerc === "number" && Number.isFinite(result.todaysChangePerc)
+      ? result.todaysChangePerc
+      : typeof session?.change_percent === "number" && Number.isFinite(session.change_percent)
+        ? session.change_percent
+        : null;
+  const volume = typeof session?.volume === "number" && session.volume >= 0 ? session.volume : null;
+  const price = value ?? close;
+  if (price == null) return null;
+  return { price, changePct: changePctRaw, volume };
+}
+
+/** Yahoo chart symbols for Polygon forex and indices. */
+function yahooSymbolForPolygonInstrument(sym: string): string | null {
+  if (sym === "I:SPX") return "^GSPC";
   if (!sym.startsWith("C:") || sym.length < 4) return null;
   return `${sym.slice(2)}=X`;
 }
@@ -403,7 +447,7 @@ async function fetchYahooMarketSnapshot(
  * Cached in-memory for CACHE_TTL_MS (same process).
  */
 export async function getStockMarketSnapshot(ticker: string): Promise<StockMarketSnapshot | null> {
-  const sym = normalizeTicker(ticker);
+  const sym = normalizeMarketSnapshotTicker(ticker);
   if (!sym) return null;
 
   const cached = readSnapMem(sym);
@@ -416,10 +460,12 @@ export async function getStockMarketSnapshot(ticker: string): Promise<StockMarke
   if (apiKey) {
     pack = sym.startsWith("C:")
       ? await fetchPolygonForexSnapshot(sym, apiKey)
+      : sym.startsWith("I:")
+        ? await fetchPolygonIndexSnapshot(sym, apiKey)
       : await fetchPolygonSnapshot(sym, apiKey);
   }
   if (!pack || pack.price == null) {
-    const yahooSym = yahooSymbolForPolygonForex(sym) ?? sym;
+    const yahooSym = yahooSymbolForPolygonInstrument(sym) ?? sym;
     pack = await fetchYahooMarketSnapshot(yahooSym);
     source = "yahoo";
   }
@@ -444,7 +490,7 @@ export async function getStockMarketSnapshots(
   tickers: string[],
   concurrency = 12,
 ): Promise<Map<string, StockMarketSnapshot | null>> {
-  const unique = [...new Set(tickers.map(normalizeTicker).filter(Boolean))];
+  const unique = [...new Set(tickers.map(normalizeMarketSnapshotTicker).filter(Boolean))];
   const out = new Map<string, StockMarketSnapshot | null>();
   for (let i = 0; i < unique.length; i += concurrency) {
     const slice = unique.slice(i, i + concurrency);

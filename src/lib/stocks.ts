@@ -399,7 +399,7 @@ function yahooSymbolForPolygonInstrument(sym: string): string | null {
 async function fetchYahooMarketSnapshot(
   symbol: string,
 ): Promise<{ price: number | null; changePct: number | null; volume: number | null } | null> {
-  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=5d`;
+  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=1mo`;
   const res = await fetch(url, {
     method: "GET",
     headers: {
@@ -419,27 +419,63 @@ async function fetchYahooMarketSnapshot(
           regularMarketChangePercent?: number;
           regularMarketVolume?: number;
         };
+        indicators?: { quote?: { close?: (number | null)[]; volume?: (number | null)[] }[] };
       }
     | undefined;
   const meta = result?.meta;
-  if (!meta) return null;
+  if (!meta && !result?.indicators?.quote?.[0]?.close) return null;
   const price =
-    typeof meta.regularMarketPrice === "number" && meta.regularMarketPrice > 0
+    typeof meta?.regularMarketPrice === "number" && meta.regularMarketPrice > 0
       ? meta.regularMarketPrice
-      : typeof meta.previousClose === "number" && meta.previousClose > 0
+      : typeof meta?.previousClose === "number" && meta.previousClose > 0
         ? meta.previousClose
         : null;
+  const closes = result?.indicators?.quote?.[0]?.close;
+  const volumes = result?.indicators?.quote?.[0]?.volume;
+
+  let closeLast: number | null = null;
+  let closePrev: number | null = null;
+  if (Array.isArray(closes)) {
+    for (let i = closes.length - 1; i >= 0; i--) {
+      const v = closes[i];
+      if (typeof v === "number" && v > 0) {
+        if (closeLast == null) {
+          closeLast = v;
+        } else {
+          closePrev = v;
+          break;
+        }
+      }
+    }
+  }
+
+  const resolvedPrice = price ?? closeLast;
+  if (resolvedPrice == null) return null;
+
   let changePct =
-    typeof meta.regularMarketChangePercent === "number" && Number.isFinite(meta.regularMarketChangePercent)
+    typeof meta?.regularMarketChangePercent === "number" && Number.isFinite(meta.regularMarketChangePercent)
       ? meta.regularMarketChangePercent
       : null;
-  if (changePct != null && Math.abs(changePct) < 1.0000001 && Math.abs(changePct) > 1e-12) {
-    changePct = changePct * 100;
+  if (changePct == null && typeof meta?.previousClose === "number" && meta.previousClose > 0) {
+    changePct = ((resolvedPrice - meta.previousClose) / meta.previousClose) * 100;
   }
+  if (changePct == null && closeLast != null && closePrev != null && closePrev > 0) {
+    changePct = ((closeLast - closePrev) / closePrev) * 100;
+  }
+  const volumeFromSeries = Array.isArray(volumes)
+    ? (() => {
+        for (let i = volumes.length - 1; i >= 0; i--) {
+          const v = volumes[i];
+          if (typeof v === "number" && v >= 0) return v;
+        }
+        return null;
+      })()
+    : null;
   const volume =
-    typeof meta.regularMarketVolume === "number" && meta.regularMarketVolume >= 0 ? meta.regularMarketVolume : null;
-  if (price == null) return null;
-  return { price, changePct, volume };
+    typeof meta?.regularMarketVolume === "number" && meta.regularMarketVolume >= 0
+      ? meta.regularMarketVolume
+      : volumeFromSeries;
+  return { price: resolvedPrice, changePct, volume };
 }
 
 /**

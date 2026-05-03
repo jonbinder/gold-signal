@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { getStockMarketSnapshots } from "@/lib/stocks";
+import { getStockMarketSnapshot, getStockMarketSnapshots } from "@/lib/stocks";
+import type { StockMarketSnapshot } from "@/lib/stocks";
 import type { MarketBannerPayload, MarketBannerQuote } from "@/types/metals-banner";
 
 /** Real spot/index instruments + miner ETF. */
@@ -10,11 +11,34 @@ const TICKERS = {
   gdx: "GDX",
 } as const;
 
+const FALLBACKS = {
+  gold: ["GC=F", "GLD"],
+  silver: ["SI=F", "SLV"],
+} as const;
+
 function toQuote(
   snap: { price: number | null; changePct: number | null } | null | undefined,
 ): MarketBannerQuote | null {
   if (!snap?.price || !Number.isFinite(snap.price) || snap.price <= 0) return null;
   return { price: snap.price, changePct: snap.changePct };
+}
+
+async function resolveWithFallback(
+  primary: string,
+  extraFallbacks: readonly string[],
+  primaryMap: Map<string, StockMarketSnapshot | null>,
+): Promise<{ quote: MarketBannerQuote | null; asOf: string | null }> {
+  const primarySnap = primaryMap.get(primary);
+  const primaryQuote = toQuote(primarySnap);
+  if (primaryQuote) return { quote: primaryQuote, asOf: primarySnap?.asOf ?? null };
+
+  for (const ticker of extraFallbacks) {
+    const snap = await getStockMarketSnapshot(ticker);
+    const quote = toQuote(snap);
+    if (quote) return { quote, asOf: snap?.asOf ?? null };
+  }
+
+  return { quote: null, asOf: primarySnap?.asOf ?? null };
 }
 
 export async function GET() {
@@ -25,14 +49,16 @@ export async function GET() {
     TICKERS.gdx,
   ]);
 
-  const gold = toQuote(map.get(TICKERS.gold) ?? null);
-  const silver = toQuote(map.get(TICKERS.silver) ?? null);
+  const goldResolved = await resolveWithFallback(TICKERS.gold, FALLBACKS.gold, map);
+  const silverResolved = await resolveWithFallback(TICKERS.silver, FALLBACKS.silver, map);
+  const gold = goldResolved.quote;
+  const silver = silverResolved.quote;
   const sp500 = toQuote(map.get(TICKERS.sp500) ?? null);
   const gdx = toQuote(map.get(TICKERS.gdx) ?? null);
 
   const asOf =
-    map.get(TICKERS.gold)?.asOf ??
-    map.get(TICKERS.silver)?.asOf ??
+    goldResolved.asOf ??
+    silverResolved.asOf ??
     map.get(TICKERS.sp500)?.asOf ??
     map.get(TICKERS.gdx)?.asOf ??
     new Date().toISOString();

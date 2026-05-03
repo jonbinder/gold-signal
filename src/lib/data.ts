@@ -144,3 +144,6 @@ export function formatShares(shares: number): string {
   if (shares >= 1_000) return `${(shares / 1_000).toFixed(0)}K`;
   return shares.toString();
 }
+
+// ─── Live quotes (Polygon → Yahoo, Supabase cache) ───────────────────────────
+export { getStockQuote, getStockQuotes, type StockQuote, type StockQuoteSource } from "./stocks";

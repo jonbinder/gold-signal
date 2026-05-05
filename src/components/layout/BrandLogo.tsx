@@ -23,7 +23,7 @@ export function BrandLogo({ className, imageClassName, priority = false, sizes =
         height={682}
         priority={priority}
         sizes={sizes}
-        className={cn("h-auto w-full max-w-[220px]", imageClassName)}
+        className={cn("h-auto w-full max-w-[220px] bg-transparent object-contain", imageClassName)}
       />
     </Link>
   );

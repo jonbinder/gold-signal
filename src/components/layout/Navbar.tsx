@@ -21,7 +21,7 @@ export function Navbar() {
           priority
           sizes="(min-width: 640px) 270px, 180px"
           className="shrink-0"
-          imageClassName="max-w-[170px] sm:max-w-[260px]"
+          imageClassName="max-h-10 max-w-[170px] sm:max-h-12 sm:max-w-[250px]"
         />
 
         <nav className="flex items-center gap-1 sm:gap-2">

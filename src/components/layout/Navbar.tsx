@@ -16,12 +16,12 @@ export function Navbar() {
       <div className="border-b border-white/5 bg-gradient-to-b from-black/50 to-black/35 px-3 py-2 text-[11px] tracking-wide text-navy-100 sm:px-6 sm:py-1.5">
         <PreciousMetalsBanner />
       </div>
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:h-[4.5rem] sm:px-6">
+      <div className="mx-auto flex h-20 max-w-6xl items-center justify-between gap-3 px-4 sm:h-24 sm:gap-5 sm:px-6">
         <BrandLogo
           priority
-          sizes="(min-width: 640px) 270px, 180px"
+          sizes="(min-width: 640px) 420px, 260px"
           className="shrink-0"
-          imageClassName="max-h-10 max-w-[170px] sm:max-h-12 sm:max-w-[250px]"
+          imageClassName="w-auto max-h-14 max-w-[260px] sm:max-h-16 sm:max-w-[420px]"
         />
 
         <nav className="flex items-center gap-1 sm:gap-2">

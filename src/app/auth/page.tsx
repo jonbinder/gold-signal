@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { BrandLogo } from "@/components/layout/BrandLogo";
 
 export const metadata: Metadata = { title: "Sign In" };
 
@@ -10,9 +11,7 @@ export default function AuthPage() {
       <div className="mx-auto max-w-md px-4 sm:px-6">
         <div className="rounded-sm border border-navy-200 bg-white p-8 shadow-sm sm:p-10">
           <div className="text-center">
-            <div className="mx-auto flex size-12 items-center justify-center rounded-sm bg-gold-500 text-lg font-black text-navy-950">
-              GS
-            </div>
+            <BrandLogo className="mx-auto justify-center" imageClassName="max-w-[190px]" sizes="190px" />
             <h1 className="mt-6 text-2xl font-bold tracking-tight text-navy-900">Sign in to GoldSignal</h1>
             <p className="mt-2 text-sm text-slate-600">Track smart money in gold and silver</p>
           </div>

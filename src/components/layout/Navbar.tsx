@@ -3,6 +3,7 @@ import { Layers, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { PreciousMetalsBanner } from "@/components/layout/PreciousMetalsBanner";
+import { BrandLogo } from "@/components/layout/BrandLogo";
 
 const NAV_LINKS = [
   { href: "/investors", label: "Investors", icon: Users },
@@ -15,20 +16,13 @@ export function Navbar() {
       <div className="border-b border-white/5 bg-gradient-to-b from-black/50 to-black/35 px-3 py-2 text-[11px] tracking-wide text-navy-100 sm:px-6 sm:py-1.5">
         <PreciousMetalsBanner />
       </div>
-      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-4 sm:h-16 sm:px-6">
-        <Link href="/" className="group flex shrink-0 items-center gap-2.5 no-underline">
-          <div className="flex h-9 w-9 items-center justify-center rounded-sm bg-gold-500 text-sm font-black tracking-tight text-navy-950 shadow-sm sm:h-10 sm:w-10 sm:text-[15px]">
-            GS
-          </div>
-          <div className="flex flex-col leading-none">
-            <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-gold-400">
-              GoldSignal
-            </span>
-            <span className="text-sm font-bold tracking-tight text-white sm:text-base">
-              Holdings Intelligence
-            </span>
-          </div>
-        </Link>
+      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:h-[4.5rem] sm:px-6">
+        <BrandLogo
+          priority
+          sizes="(min-width: 640px) 270px, 180px"
+          className="shrink-0"
+          imageClassName="max-w-[170px] sm:max-w-[260px]"
+        />
 
         <nav className="flex items-center gap-1 sm:gap-2">
           {NAV_LINKS.map((link) => {

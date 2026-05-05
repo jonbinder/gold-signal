@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BrandLogo } from "@/components/layout/BrandLogo";
 
 const COLS = [
   {
@@ -39,12 +40,7 @@ export function Footer() {
       <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div className="lg:col-span-1">
-            <div className="mb-3 flex items-center gap-2">
-              <div className="flex h-9 w-9 items-center justify-center rounded-sm bg-gold-500 text-xs font-black text-navy-950">
-                GS
-              </div>
-              <span className="text-lg font-bold tracking-tight text-white">GoldSignal</span>
-            </div>
+            <BrandLogo className="mb-3" imageClassName="max-w-[220px]" sizes="220px" />
             <p className="max-w-xs text-sm leading-relaxed text-slate-400">
               Institutional 13F coverage for gold and silver miners, royalties, and ETFs — built for serious
               precious-metals investors.

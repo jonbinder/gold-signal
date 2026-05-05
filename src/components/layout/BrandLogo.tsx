@@ -19,8 +19,8 @@ export function BrandLogo({ className, imageClassName, priority = false, sizes =
       <Image
         src="/images/goldsignal-logo.png"
         alt="GoldSignal logo with Holdings Intelligence tagline"
-        width={1024}
-        height={682}
+        width={802}
+        height={217}
         priority={priority}
         sizes={sizes}
         className={cn("h-auto w-full max-w-[220px] bg-transparent object-contain", imageClassName)}

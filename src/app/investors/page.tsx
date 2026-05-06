@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { FEATURED_INVESTORS } from "@/lib/featured-investors";
 import { Button } from "@/components/ui/button";
+import { getInvestors } from "@/lib/investors";
 
 export const revalidate = 300;
 
@@ -11,7 +11,9 @@ export const metadata: Metadata = {
   description: "Gold and silver investors and allocators featured on GoldSignal.",
 };
 
-export default function InvestorsPage() {
+export default async function InvestorsPage() {
+  const investors = await getInvestors();
+
   return (
     <div className="bg-[var(--bg-void)]">
       <div className="border-b border-navy-200 bg-white">
@@ -29,7 +31,7 @@ export default function InvestorsPage() {
 
       <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-12">
         <ul className="grid list-none gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {FEATURED_INVESTORS.map((inv, idx) => (
+          {investors.map((inv, idx) => (
             <li
               key={inv.slug}
               className="flex flex-col overflow-hidden rounded-sm border border-navy-200 bg-white shadow-sm transition-shadow hover:border-gold-400/50 hover:shadow-md animate-fadeUp"
@@ -47,7 +49,8 @@ export default function InvestorsPage() {
               </div>
               <div className="flex flex-1 flex-col p-5 sm:p-6">
                 <h2 className="text-lg font-bold tracking-tight text-navy-900 sm:text-xl">{inv.name}</h2>
-                <p className="mt-3 flex-1 text-sm leading-relaxed text-slate-600">{inv.tagline}</p>
+                <p className="mt-2 font-mono text-[11px] font-semibold uppercase tracking-wide text-gold-700">{inv.title}</p>
+                <p className="mt-3 flex-1 text-sm leading-relaxed text-slate-600">{inv.description}</p>
                 <Button variant="gold" className="mt-5 w-full sm:w-auto" asChild>
                   <Link href={`/investors/${inv.slug}`}>View portfolio</Link>
                 </Button>

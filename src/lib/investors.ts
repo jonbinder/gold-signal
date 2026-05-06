@@ -19,6 +19,17 @@ export type InvestorImportRow = {
   lastUpdated?: string;
 };
 
+export type InvestorViewModel = {
+  id: string;
+  slug: string;
+  name: string;
+  imageSrc: string;
+  title: string;
+  description: string;
+  lastUpdated: string | null;
+  portfolio: InvestorPortfolioRow[];
+};
+
 export type SyncInvestorsResult = {
   investorsUpserted: number;
   holdingsUpserted: number;
@@ -42,7 +53,26 @@ export async function readInvestorsData(filePath?: string): Promise<InvestorImpo
   return parsed as InvestorImportRow[];
 }
 
-export async function syncInvestorsData(filePath?: string): Promise<SyncInvestorsResult> {
+export async function getInvestors(filePath?: string): Promise<InvestorViewModel[]> {
+  const rows = await readInvestorsData(filePath);
+  return rows.map((row) => ({
+    id: row.id,
+    slug: row.slug,
+    name: row.name,
+    imageSrc: row.photo?.startsWith("/") ? row.photo : `/${row.photo ?? "investors/placeholder.jpg"}`,
+    title: row.title ?? "Precious Metals Investor",
+    description: row.description ?? "",
+    lastUpdated: row.lastUpdated ?? null,
+    portfolio: row.portfolio ?? [],
+  }));
+}
+
+export async function getInvestorBySlug(slug: string, filePath?: string): Promise<InvestorViewModel | null> {
+  const investors = await getInvestors(filePath);
+  return investors.find((inv) => inv.slug === slug) ?? null;
+}
+
+export async function syncInvestorsToSupabase(filePath?: string): Promise<SyncInvestorsResult> {
   const supabase = getSupabaseServiceRole();
   if (!supabase) {
     throw new Error("Missing Supabase env vars. Set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.");
@@ -155,3 +185,6 @@ export async function syncInvestorsData(filePath?: string): Promise<SyncInvestor
     periodLabel: periodRow.label,
   };
 }
+
+// Backwards-compatible alias
+export const syncInvestorsData = syncInvestorsToSupabase;

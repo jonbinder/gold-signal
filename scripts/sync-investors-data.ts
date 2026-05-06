@@ -1,11 +1,11 @@
 import dotenv from "dotenv";
 import path from "path";
-import { syncInvestorsData } from "../src/lib/investors";
+import { syncInvestorsToSupabase } from "../src/lib/investors";
 
 dotenv.config({ path: path.join(process.cwd(), ".env.local") });
 
 async function main() {
-  const result = await syncInvestorsData();
+  const result = await syncInvestorsToSupabase();
   console.log(`Synced investors for ${result.periodLabel}`);
   console.log(`- Investors upserted: ${result.investorsUpserted}`);
   console.log(`- Holdings upserted: ${result.holdingsUpserted}`);

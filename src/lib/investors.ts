@@ -2,6 +2,13 @@ import { access, readFile } from "node:fs/promises";
 import path from "node:path";
 import { getSupabaseServiceRole } from "@/lib/supabase/service-role";
 
+/**
+ * Investor system source of truth:
+ * - Edit investors-data.json in the project root.
+ * - Put photos in public/investors/ named with the same slug (e.g. eric-sprott.jpg).
+ * - Run `npm run sync:investors` to upsert investors + holdings into Supabase.
+ */
+
 export type InvestorPortfolioRow = {
   ticker: string;
   shares: number;
@@ -98,6 +105,10 @@ export async function getInvestorBySlug(slug: string, filePath?: string): Promis
 }
 
 export async function syncInvestorsToSupabase(filePath?: string): Promise<SyncInvestorsResult> {
+  // Quarterly workflow:
+  // 1) Update investors-data.json portfolio rows.
+  // 2) Ensure corresponding ticker symbols exist in securities table.
+  // 3) Run `npm run sync:investors`.
   const supabase = getSupabaseServiceRole();
   if (!supabase) {
     throw new Error("Missing Supabase env vars. Set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.");

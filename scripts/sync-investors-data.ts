@@ -2,6 +2,8 @@ import dotenv from "dotenv";
 import path from "path";
 import { syncInvestorsToSupabase } from "../src/lib/investors";
 
+// Beginner-friendly command entrypoint:
+// Run "npm run sync:investors" after editing investors-data.json.
 dotenv.config({ path: path.join(process.cwd(), ".env.local") });
 
 async function main() {

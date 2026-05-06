@@ -16,11 +16,12 @@ type InvestorImageProps = {
 };
 
 export function InvestorImage({ src, alt, width, height, sizes, className, priority = false }: InvestorImageProps) {
-  const [currentSrc, setCurrentSrc] = useState(src);
+  const normalizedSrc = src.startsWith("/") ? src : `/${src}`;
+  const [currentSrc, setCurrentSrc] = useState(normalizedSrc);
 
   useEffect(() => {
-    setCurrentSrc(src);
-  }, [src]);
+    setCurrentSrc(normalizedSrc);
+  }, [normalizedSrc]);
 
   return (
     <Image
@@ -32,8 +33,11 @@ export function InvestorImage({ src, alt, width, height, sizes, className, prior
       priority={priority}
       unoptimized
       className={className}
-      // Fallback chain: bad JSON path, missing file, or runtime image load failure -> /investors/unknown.jpg
-      onError={() => setCurrentSrc(UNKNOWN_INVESTOR_IMAGE)}
+      // Fallback chain: bad JSON path, missing file, or runtime image load failure -> /investors/unknown.jpg.
+      // Guard prevents an infinite loop if unknown.jpg were ever missing.
+      onError={() => {
+        if (currentSrc !== UNKNOWN_INVESTOR_IMAGE) setCurrentSrc(UNKNOWN_INVESTOR_IMAGE);
+      }}
     />
   );
 }

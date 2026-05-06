@@ -1,93 +1,134 @@
-// Investors data source for the website and sync command.
-// How to reorder investors:
-// - Move objects up/down in this array. The /investors page preserves this exact order.
-// How to add a new investor:
-// - Copy an existing object, update id/name/slug/title/description/portfolio.
-// - Add photo at /public/investors/<slug>.jpg and set "photo": "/investors/<slug>.jpg".
-// After any change:
-// - Run: npm run sync:investors   (same as "Sync investors data")
 [
- 
-    {
-      "id": "eric-sprott",
-      "name": "Eric Sprott",
-      "slug": "eric-sprott",
-      "photo": "/investors/eric-sprott.jpg",
-      "title": "Sprott Asset Management",
-      "description": "Legendary precious metals investor and one of the largest holders of gold and silver mining stocks.",
-      "portfolio": [
-        { "ticker": "NEM", "shares": 1250000, "value": 248000000 },
-        { "ticker": "GOLD", "shares": 980000, "value": 185000000 },
-        { "ticker": "PAAS", "shares": 2100000, "value": 98000000 }
-      ],
-      "lastUpdated": "2026-05-01"
-    },
-    {
-      "id": "peter-schiff",
-      "name": "Peter Schiff",
-      "slug": "peter-schiff",
-      "photo": "/investors/peter-schiff.jpg",
-      "title": "Euro Pacific Capital",
-      "description": "Prominent gold advocate, economist, and manager of the Euro Pacific Gold Fund.",
-      "portfolio": [
-        { "ticker": "NEM", "shares": 680000, "value": 135000000 },
-        { "ticker": "AEM", "shares": 420000, "value": 89000000 },
-        { "ticker": "HL", "shares": 1450000, "value": 28500000 }
-      ],
-      "lastUpdated": "2026-05-01"
-    },
-    {
-      "id": "rick-rule",
-      "name": "Rick Rule",
-      "slug": "rick-rule",
-      "photo": "/investors/rick-rule.jpg",
-      "title": "Sprott U.S. Holdings",
-      "description": "Legendary natural resources investor and mining sector specialist.",
-      "portfolio": [
-        { "ticker": "FNV", "shares": 380000, "value": 92000000 },
-        { "ticker": "WPM", "shares": 450000, "value": 108000000 },
-        { "ticker": "PAAS", "shares": 890000, "value": 41500000 }
-      ],
-      "lastUpdated": "2026-05-01"
-    },
-    {
-      "id": "ross-beaty",
-      "name": "Ross Beaty",
-      "slug": "ross-beaty",
-      "photo": "/investors/ross-beaty.jpg",
-      "title": "Luminex Resources & Other Ventures",
-      "description": "Highly successful mining entrepreneur and major investor in gold and silver companies.",
-      "portfolio": [
-        { "ticker": "NEM", "shares": 520000, "value": 103000000 },
-        { "ticker": "GOLD", "shares": 680000, "value": 128000000 }
-      ],
-      "lastUpdated": "2026-05-01"
-    },
-    {
-        "id": "don-durrett",
-        "name": "Don Durrett",
-        "slug": "don-durrett",
-        "photo": "/investors/don-durrett.jpg",
-        "title": "Gold Stock Investor & Author",
-        "description": "Well-known gold stock analyst and author focused on undervalued gold and silver mining companies.",
-        "portfolio": [
-          { "ticker": "NEM", "shares": 45000, "value": 8950000 },
-          { "ticker": "AEM", "shares": 32000, "value": 6780000 },
-          { "ticker": "GOLD", "shares": 75000, "value": 14200000 }
-        ],
-        "lastUpdated": "2026-05-01"
-      },
-    {
-        "id": "jon-binder",
-        "name": "Jon Binder",
-        "slug": "jon-binder",
-        "photo": "/investors/jon-binder.jpg",
-        "title": "Blue Laser Capital & Other Ventures",
-        "description": "Precious metals investor and founder of Blue Laser Capital.",
-        "portfolio": [
-          { "ticker": "NEM", "shares": 520000, "value": 103000000 },
-          { "ticker": "GOLD", "shares": 680000, "value": 128000000 }
-        ],
-        "lastUpdated": "2026-05-01"
-      }
-  ]
+  {
+    "id": "eric-sprott",
+    "name": "Eric Sprott",
+    "slug": "eric-sprott",
+    "photo": "investors/eric-sprott.jpg",
+    "title": "Sprott Asset Management",
+    "description": "Legendary precious metals investor and one of the largest holders of gold and silver mining stocks.",
+    "portfolio": [
+      { "ticker": "NEM", "shares": 1250000, "value": 248000000 },
+      { "ticker": "GOLD", "shares": 980000, "value": 185000000 },
+      { "ticker": "PAAS", "shares": 2100000, "value": 98000000 }
+    ],
+    "lastUpdated": "2026-05-06"
+  },
+  {
+    "id": "peter-schiff",
+    "name": "Peter Schiff",
+    "slug": "peter-schiff",
+    "photo": "investors/peter-schiff.jpg",
+    "title": "Euro Pacific Capital",
+    "description": "Prominent gold advocate, economist, and manager of the Euro Pacific Gold Fund.",
+    "portfolio": [
+      { "ticker": "NEM", "shares": 680000, "value": 135000000 },
+      { "ticker": "AEM", "shares": 420000, "value": 89000000 },
+      { "ticker": "HL", "shares": 1450000, "value": 28500000 }
+    ],
+    "lastUpdated": "2026-05-06"
+  },
+  {
+    "id": "rick-rule",
+    "name": "Rick Rule",
+    "slug": "rick-rule",
+    "photo": "investors/rick-rule.jpg",
+    "title": "Sprott U.S. Holdings",
+    "description": "Legendary natural resources investor and mining sector specialist.",
+    "portfolio": [
+      { "ticker": "FNV", "shares": 380000, "value": 92000000 },
+      { "ticker": "WPM", "shares": 450000, "value": 108000000 },
+      { "ticker": "PAAS", "shares": 890000, "value": 41500000 }
+    ],
+    "lastUpdated": "2026-05-06"
+  },
+  {
+    "id": "ross-beaty",
+    "name": "Ross Beaty",
+    "slug": "ross-beaty",
+    "photo": "investors/ross-beaty.jpg",
+    "title": "Luminex Resources & Other Ventures",
+    "description": "Highly successful mining entrepreneur and major investor in gold and silver companies.",
+    "portfolio": [
+      { "ticker": "NEM", "shares": 520000, "value": 103000000 },
+      { "ticker": "GOLD", "shares": 680000, "value": 128000000 }
+    ],
+    "lastUpdated": "2026-05-06"
+  },
+  {
+    "id": "don-durrett",
+    "name": "Don Durrett",
+    "slug": "don-durrett",
+    "photo": "investors/don-durrett.jpg",
+    "title": "Gold Stock Investor & Author",
+    "description": "Well-known gold stock analyst and author focused on undervalued gold and silver mining companies.",
+    "portfolio": [
+      { "ticker": "NEM", "shares": 45000, "value": 8950000 },
+      { "ticker": "AEM", "shares": 32000, "value": 6780000 },
+      { "ticker": "GOLD", "shares": 75000, "value": 14200000 }
+    ],
+    "lastUpdated": "2026-05-06"
+  },
+  {
+    "id": "john-hathaway",
+    "name": "John Hathaway",
+    "slug": "john-hathaway",
+    "photo": "investors/john-hathaway.jpg",
+    "title": "Sprott Gold & Silver",
+    "description": "Senior portfolio manager at Sprott and one of the most respected gold fund managers.",
+    "portfolio": [],
+    "lastUpdated": "2026-05-06"
+  },
+  {
+    "id": "adrian-day",
+    "name": "Adrian Day",
+    "slug": "adrian-day",
+    "photo": "investors/adrian-day.jpg",
+    "title": "Adrian Day Asset Management",
+    "description": "Longtime gold advocate and manager of the Global Gold Fund.",
+    "portfolio": [],
+    "lastUpdated": "2026-05-06"
+  },
+  {
+    "id": "kevin-smith",
+    "name": "Kevin Smith",
+    "slug": "kevin-smith",
+    "photo": "investors/kevin-smith.jpg",
+    "title": "Crescat Capital",
+    "description": "Founder of Crescat Precious Metals Fund, known for high-conviction gold and silver bets.",
+    "portfolio": [],
+    "lastUpdated": "2026-05-06"
+  },
+  {
+    "id": "rob-mcewen",
+    "name": "Rob McEwen",
+    "slug": "rob-mcewen",
+    "photo": "investors/rob-mcewen.jpg",
+    "title": "McEwen Mining",
+    "description": "Founder of McEwen Mining and former CEO of Goldcorp.",
+    "portfolio": [],
+    "lastUpdated": "2026-05-06"
+  },
+  {
+    "id": "pierre-lassonde",
+    "name": "Pierre Lassonde",
+    "slug": "pierre-lassonde",
+    "photo": "investors/pierre-lassonde.jpg",
+    "title": "Franco-Nevada",
+    "description": "Co-founder of Franco-Nevada, legendary figure in the gold royalty sector.",
+    "portfolio": [],
+    "lastUpdated": "2026-05-06"
+  },
+  {
+    "id": "jon-binder",
+    "name": "Jon Binder",
+    "slug": "jon-binder",
+    "photo": "investors/jon-binder.jpg",
+    "title": "Blue Laser Capital & Other Ventures",
+    "description": "Precious metals investor and founder of Blue Laser Capital.",
+    "portfolio": [
+      { "ticker": "NEM", "shares": 520000, "value": 103000000 },
+      { "ticker": "GOLD", "shares": 680000, "value": 128000000 }
+    ],
+    "lastUpdated": "2026-05-06"
+  }
+]

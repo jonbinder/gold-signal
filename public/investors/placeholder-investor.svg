@@ -1,0 +1,14 @@
+<svg width="600" height="420" viewBox="0 0 600 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="600" y2="420" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1F2937"/>
+      <stop offset="1" stop-color="#111827"/>
+    </linearGradient>
+  </defs>
+  <rect width="600" height="420" fill="url(#bg)"/>
+  <circle cx="300" cy="160" r="72" fill="#374151"/>
+  <path d="M168 344C168 278.83 220.83 226 286 226H314C379.17 226 432 278.83 432 344V352H168V344Z" fill="#374151"/>
+  <text x="300" y="390" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" fill="#D4AF37">
+    Investor Photo
+  </text>
+</svg>

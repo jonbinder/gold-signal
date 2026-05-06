@@ -1,4 +1,4 @@
-import { readFile } from "node:fs/promises";
+import { access, readFile } from "node:fs/promises";
 import path from "node:path";
 import { getSupabaseServiceRole } from "@/lib/supabase/service-role";
 
@@ -37,6 +37,9 @@ export type SyncInvestorsResult = {
   periodLabel: string;
 };
 
+const INVESTOR_PHOTO_PLACEHOLDER = "/investors/placeholder-investor.svg";
+const photoExistsCache = new Map<string, boolean>();
+
 function getQuarterLabel(date: Date): string {
   const month = date.getUTCMonth();
   const quarter = Math.floor(month / 3) + 1;
@@ -53,18 +56,40 @@ export async function readInvestorsData(filePath?: string): Promise<InvestorImpo
   return parsed as InvestorImportRow[];
 }
 
+async function resolveInvestorPhotoSrc(slug: string, photo?: string): Promise<string> {
+  // Maintainers: place investor photos under public/investors/.
+  // Naming convention: use the investor slug, e.g. public/investors/eric-sprott.jpg
+  const relative = (photo ?? `investors/${slug}.jpg`).replace(/^\/+/, "");
+  const absolute = path.join(process.cwd(), "public", relative);
+
+  if (!photoExistsCache.has(absolute)) {
+    try {
+      await access(absolute);
+      photoExistsCache.set(absolute, true);
+    } catch {
+      photoExistsCache.set(absolute, false);
+    }
+  }
+
+  return photoExistsCache.get(absolute) ? `/${relative}` : INVESTOR_PHOTO_PLACEHOLDER;
+}
+
 export async function getInvestors(filePath?: string): Promise<InvestorViewModel[]> {
   const rows = await readInvestorsData(filePath);
-  return rows.map((row) => ({
-    id: row.id,
-    slug: row.slug,
-    name: row.name,
-    imageSrc: row.photo?.startsWith("/") ? row.photo : `/${row.photo ?? "investors/placeholder.jpg"}`,
-    title: row.title ?? "Precious Metals Investor",
-    description: row.description ?? "",
-    lastUpdated: row.lastUpdated ?? null,
-    portfolio: row.portfolio ?? [],
-  }));
+  const resolvedRows = await Promise.all(
+    rows.map(async (row) => ({
+      id: row.id,
+      slug: row.slug,
+      name: row.name,
+      imageSrc: await resolveInvestorPhotoSrc(row.slug, row.photo),
+      title: row.title ?? "Precious Metals Investor",
+      description: row.description ?? "",
+      lastUpdated: row.lastUpdated ?? null,
+      portfolio: row.portfolio ?? [],
+    })),
+  );
+
+  return resolvedRows;
 }
 
 export async function getInvestorBySlug(slug: string, filePath?: string): Promise<InvestorViewModel | null> {

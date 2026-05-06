@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 import { notFound } from "next/navigation";
@@ -19,26 +20,23 @@ function formatShares(value: number) {
 export const revalidate = 300;
 
 interface Props {
-  params: Promise<{ id: string }>;
+  params: Promise<{ slug: string }>;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { id: slug } = await params;
+  const { slug } = await params;
   const fallbackTitle = slug
     .split("-")
     .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
     .join(" ");
 
   const investor = await getInvestorBySlug(slug);
-  const title = investor?.name ?? fallbackTitle;
-
-  return { title };
+  return { title: investor?.name ?? fallbackTitle };
 }
 
 export default async function InvestorPage({ params }: Props) {
-  const { id: slug } = await params;
+  const { slug } = await params;
   const investor = await getInvestorBySlug(slug);
-
   if (!investor) notFound();
 
   const holdings = [...investor.portfolio].sort((a, b) => b.value - a.value);
@@ -56,12 +54,23 @@ export default async function InvestorPage({ params }: Props) {
             Investors
           </Link>
           <div className="mt-6 flex flex-col justify-between gap-8 lg:flex-row lg:items-start">
-            <div className="max-w-3xl">
-              <h1 className="text-3xl font-bold tracking-tight text-navy-900 sm:text-4xl">{investor.name}</h1>
-              <p className="mt-3 font-mono text-xs font-semibold uppercase tracking-wide text-gold-700">{investor.title}</p>
-              <p className="mt-3 text-sm leading-relaxed text-slate-600 sm:text-base">{investor.description}</p>
-              <div className="mt-4">
-                <span className="badge badge-gold text-[10px]">JSON-backed profile</span>
+            <div className="flex items-start gap-5">
+              <div className="relative h-24 w-24 overflow-hidden rounded-sm border border-navy-200 bg-navy-100 shadow-sm sm:h-28 sm:w-28">
+                <Image
+                  src={investor.imageSrc}
+                  alt={`${investor.name} photo`}
+                  fill
+                  className="object-cover object-top"
+                  sizes="(max-width: 640px) 96px, 112px"
+                />
+              </div>
+              <div className="max-w-3xl">
+                <h1 className="text-3xl font-bold tracking-tight text-navy-900 sm:text-4xl">{investor.name}</h1>
+                <p className="mt-3 font-mono text-xs font-semibold uppercase tracking-wide text-gold-700">{investor.title}</p>
+                <p className="mt-3 text-sm leading-relaxed text-slate-600 sm:text-base">{investor.description}</p>
+                <div className="mt-4">
+                  <span className="badge badge-gold text-[10px]">JSON-backed profile</span>
+                </div>
               </div>
             </div>
             <div className="shrink-0 rounded-sm border border-navy-200 bg-navy-50 px-6 py-5 text-right shadow-sm">
@@ -108,9 +117,7 @@ export default async function InvestorPage({ params }: Props) {
                         </span>
                         <div
                           className="h-1 rounded-sm bg-gold-400/80"
-                          style={{
-                            width: `${Math.max(6, Math.round(((totalValue > 0 ? h.value / totalValue : 0) * 100) * 3))}px`,
-                          }}
+                          style={{ width: `${Math.max(6, Math.round(((totalValue > 0 ? h.value / totalValue : 0) * 100) * 3))}px` }}
                         />
                       </div>
                     </td>

@@ -54,14 +54,38 @@ function getQuarterLabel(date: Date): string {
   return `Q${quarter} ${date.getUTCFullYear()}`;
 }
 
+function stripJsonComments(content: string): string {
+  // Supports `// ...` and `/* ... */` comments in investors-data.json.
+  return content
+    .replace(/^\uFEFF/, "")
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .replace(/^\s*\/\/.*$/gm, "");
+}
+
+function validateInvestorsData(rows: InvestorImportRow[]) {
+  const seen = new Set<string>();
+  rows.forEach((row, i) => {
+    const idx = i + 1;
+    if (!row.slug?.trim()) throw new Error(`Invalid investors-data.json: row ${idx} is missing slug.`);
+    if (!row.name?.trim()) throw new Error(`Invalid investors-data.json: row ${idx} (${row.slug}) is missing name.`);
+    if (seen.has(row.slug)) throw new Error(`Invalid investors-data.json: duplicate slug "${row.slug}".`);
+    seen.add(row.slug);
+    if (!Array.isArray(row.portfolio)) {
+      throw new Error(`Invalid investors-data.json: row ${idx} (${row.slug}) portfolio must be an array.`);
+    }
+  });
+}
+
 export async function readInvestorsData(filePath?: string): Promise<InvestorImportRow[]> {
   const resolved = filePath ?? path.join(process.cwd(), "investors-data.json");
   const raw = await readFile(resolved, "utf8");
-  const parsed = JSON.parse(raw) as unknown;
+  const parsed = JSON.parse(stripJsonComments(raw)) as unknown;
   if (!Array.isArray(parsed)) {
     throw new Error("investors-data.json must be a JSON array.");
   }
-  return parsed as InvestorImportRow[];
+  const rows = parsed as InvestorImportRow[];
+  validateInvestorsData(rows);
+  return rows;
 }
 
 async function resolveInvestorPhotoSrc(slug: string, photo?: string): Promise<string> {

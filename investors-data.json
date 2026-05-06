@@ -1,18 +1,13 @@
+// Investors data source for the website and sync command.
+// How to reorder investors:
+// - Move objects up/down in this array. The /investors page preserves this exact order.
+// How to add a new investor:
+// - Copy an existing object, update id/name/slug/title/description/portfolio.
+// - Add photo at /public/investors/<slug>.jpg and set "photo": "/investors/<slug>.jpg".
+// After any change:
+// - Run: npm run sync:investors   (same as "Sync investors data")
 [
-    {
-      "id": "don-durrett",
-      "name": "Don Durrett",
-      "slug": "don-durrett",
-      "photo": "/investors/don-durrett.jpg",
-      "title": "Gold Stock Investor & Author",
-      "description": "Well-known gold stock analyst and author focused on undervalued gold and silver mining companies.",
-      "portfolio": [
-        { "ticker": "NEM", "shares": 45000, "value": 8950000 },
-        { "ticker": "AEM", "shares": 32000, "value": 6780000 },
-        { "ticker": "GOLD", "shares": 75000, "value": 14200000 }
-      ],
-      "lastUpdated": "2026-05-01"
-    },
+ 
     {
       "id": "eric-sprott",
       "name": "Eric Sprott",
@@ -68,6 +63,20 @@
       ],
       "lastUpdated": "2026-05-01"
     },
+    {
+        "id": "don-durrett",
+        "name": "Don Durrett",
+        "slug": "don-durrett",
+        "photo": "/investors/don-durrett.jpg",
+        "title": "Gold Stock Investor & Author",
+        "description": "Well-known gold stock analyst and author focused on undervalued gold and silver mining companies.",
+        "portfolio": [
+          { "ticker": "NEM", "shares": 45000, "value": 8950000 },
+          { "ticker": "AEM", "shares": 32000, "value": 6780000 },
+          { "ticker": "GOLD", "shares": 75000, "value": 14200000 }
+        ],
+        "lastUpdated": "2026-05-01"
+      },
     {
         "id": "jon-binder",
         "name": "Jon Binder",

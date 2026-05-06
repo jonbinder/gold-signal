@@ -12,6 +12,7 @@ export const metadata: Metadata = {
 };
 
 export default async function InvestorsPage() {
+  // Preserve the exact array order from investors-data.json.
   const investors = await getInvestors();
 
   return (

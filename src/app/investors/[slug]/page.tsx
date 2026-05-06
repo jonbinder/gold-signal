@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 import { notFound } from "next/navigation";
 import { getInvestorBySlug } from "@/lib/investors";
+import { InvestorImage } from "@/components/investors/InvestorImage";
 
 function formatUSD(value: number) {
   return new Intl.NumberFormat("en-US", {
@@ -56,12 +56,11 @@ export default async function InvestorPage({ params }: Props) {
           <div className="mt-6 flex flex-col justify-between gap-8 lg:flex-row lg:items-start">
             <div className="flex items-start gap-5">
               <div className="relative h-24 w-24 overflow-hidden rounded-sm border border-navy-200 bg-navy-100 shadow-sm sm:h-28 sm:w-28">
-                <Image
+                <InvestorImage
                   src={investor.imageSrc}
                   alt={`${investor.name} photo`}
                   width={112}
                   height={112}
-                  unoptimized
                   className="h-full w-full object-cover object-top"
                   sizes="(max-width: 640px) 96px, 112px"
                 />

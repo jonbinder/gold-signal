@@ -44,7 +44,7 @@ export type SyncInvestorsResult = {
   periodLabel: string;
 };
 
-const INVESTOR_PHOTO_PLACEHOLDER = "/investors/placeholder-investor.svg";
+const INVESTOR_PHOTO_PLACEHOLDER = "/investors/unknown.jpg";
 const photoExistsCache = new Map<string, boolean>();
 let publicInvestorsFilesCache: Map<string, string> | null = null;
 

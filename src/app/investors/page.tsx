@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { getInvestors } from "@/lib/investors";
+import { InvestorImage } from "@/components/investors/InvestorImage";
 
 export const revalidate = 0;
 
@@ -39,12 +39,11 @@ export default async function InvestorsPage() {
               style={{ animationDelay: `${idx * 50}ms` }}
             >
               <div className="relative aspect-[4/3] w-full bg-navy-100 sm:aspect-[3/2]">
-                <Image
+                <InvestorImage
                   src={inv.imageSrc}
                   alt={inv.name}
                   width={640}
                   height={420}
-                  unoptimized
                   className="h-full w-full object-cover object-top"
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                   priority={idx < 2}

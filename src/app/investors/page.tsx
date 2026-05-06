@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { getInvestors } from "@/lib/investors";
 
-export const revalidate = 300;
+export const revalidate = 0;
 
 export const metadata: Metadata = {
   title: "Investors",
@@ -41,8 +41,10 @@ export default async function InvestorsPage() {
                 <Image
                   src={inv.imageSrc}
                   alt={inv.name}
-                  fill
-                  className="object-cover object-top"
+                  width={640}
+                  height={420}
+                  unoptimized
+                  className="h-full w-full object-cover object-top"
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                   priority={idx < 2}
                 />

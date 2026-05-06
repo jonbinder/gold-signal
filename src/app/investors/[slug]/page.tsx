@@ -17,7 +17,7 @@ function formatShares(value: number) {
   return new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }).format(value);
 }
 
-export const revalidate = 300;
+export const revalidate = 0;
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -59,8 +59,10 @@ export default async function InvestorPage({ params }: Props) {
                 <Image
                   src={investor.imageSrc}
                   alt={`${investor.name} photo`}
-                  fill
-                  className="object-cover object-top"
+                  width={112}
+                  height={112}
+                  unoptimized
+                  className="h-full w-full object-cover object-top"
                   sizes="(max-width: 640px) 96px, 112px"
                 />
               </div>

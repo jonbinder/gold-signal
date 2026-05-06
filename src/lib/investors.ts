@@ -1,4 +1,4 @@
-import { access, readFile } from "node:fs/promises";
+import { access, readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 import { getSupabaseServiceRole } from "@/lib/supabase/service-role";
 
@@ -46,6 +46,7 @@ export type SyncInvestorsResult = {
 
 const INVESTOR_PHOTO_PLACEHOLDER = "/investors/placeholder-investor.svg";
 const photoExistsCache = new Map<string, boolean>();
+let publicInvestorsFilesCache: Map<string, string> | null = null;
 
 function getQuarterLabel(date: Date): string {
   const month = date.getUTCMonth();
@@ -66,19 +67,50 @@ export async function readInvestorsData(filePath?: string): Promise<InvestorImpo
 async function resolveInvestorPhotoSrc(slug: string, photo?: string): Promise<string> {
   // Maintainers: place investor photos under public/investors/.
   // Naming convention: use the investor slug, e.g. public/investors/eric-sprott.jpg
-  const relative = (photo ?? `investors/${slug}.jpg`).replace(/^\/+/, "");
-  const absolute = path.join(process.cwd(), "public", relative);
+  const publicInvestorsDir = path.join(process.cwd(), "public", "investors");
+  const requested = (photo ?? `/investors/${slug}.jpg`).replace(/^\/+/, "");
+  const requestedName = path.basename(requested);
+  const expectedName = `${slug}.jpg`;
 
-  if (!photoExistsCache.has(absolute)) {
+  // Prefer explicit JSON path, then canonical /investors/[slug].jpg.
+  const candidates = [requestedName, expectedName];
+
+  if (!publicInvestorsFilesCache) {
+    const files = await readdir(publicInvestorsDir).catch(() => []);
+    publicInvestorsFilesCache = new Map(files.map((f) => [f.toLowerCase(), f]));
+  }
+
+  for (const candidate of candidates) {
+    const fromDir = publicInvestorsFilesCache.get(candidate.toLowerCase());
+    if (!fromDir) continue;
+    const relative = `investors/${fromDir}`;
+    const absolute = path.join(process.cwd(), "public", relative);
+    if (!photoExistsCache.has(absolute)) {
+      try {
+        await access(absolute);
+        photoExistsCache.set(absolute, true);
+      } catch {
+        photoExistsCache.set(absolute, false);
+      }
+    }
+    if (photoExistsCache.get(absolute)) return `/${relative}`;
+  }
+
+  // Backward compatibility for older files such as public/investors/eric.jpg.
+  const legacyFirstName = slug.split("-")[0];
+  const legacyRelative = `investors/${legacyFirstName}.jpg`;
+  const legacyAbsolute = path.join(process.cwd(), "public", legacyRelative);
+
+  if (!photoExistsCache.has(legacyAbsolute)) {
     try {
-      await access(absolute);
-      photoExistsCache.set(absolute, true);
+      await access(legacyAbsolute);
+      photoExistsCache.set(legacyAbsolute, true);
     } catch {
-      photoExistsCache.set(absolute, false);
+      photoExistsCache.set(legacyAbsolute, false);
     }
   }
 
-  return photoExistsCache.get(absolute) ? `/${relative}` : INVESTOR_PHOTO_PLACEHOLDER;
+  return photoExistsCache.get(legacyAbsolute) ? `/${legacyRelative}` : INVESTOR_PHOTO_PLACEHOLDER;
 }
 
 export async function getInvestors(filePath?: string): Promise<InvestorViewModel[]> {
@@ -115,6 +147,7 @@ export async function syncInvestorsToSupabase(filePath?: string): Promise<SyncIn
   }
 
   const investors = await readInvestorsData(filePath);
+  publicInvestorsFilesCache = null;
   if (investors.length === 0) {
     throw new Error("No investors found in investors-data.json.");
   }
@@ -147,7 +180,7 @@ export async function syncInvestorsToSupabase(filePath?: string): Promise<SyncIn
     name: inv.name,
     firm: inv.title ?? null,
     bio: inv.description ?? null,
-    logo_url: inv.photo ? `/${inv.photo.replace(/^\/+/, "")}` : null,
+    logo_url: inv.photo ? (inv.photo.startsWith("/") ? inv.photo : `/${inv.photo}`) : `/investors/${inv.slug}.jpg`,
     is_active: true,
   }));
 

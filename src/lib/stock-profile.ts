@@ -129,23 +129,6 @@ export const getPolygonTickerDetails = cache(async (ticker: string): Promise<Pol
   return fetchPolygonTickerDetailsInner(ticker);
 });
 
-/** Short company names for investor portfolio tables (parallel-safe). */
-export const getTickerCompanyNames = cache(async (tickers: string[]): Promise<Map<string, string>> => {
-  const unique = [...new Set(tickers.map(normalizeTicker).filter(Boolean))];
-  const out = new Map<string, string>();
-  const concurrency = 10;
-  for (let i = 0; i < unique.length; i += concurrency) {
-    const slice = unique.slice(i, i + concurrency);
-    await Promise.all(
-      slice.map(async (t) => {
-        const d = await getPolygonTickerDetails(t);
-        out.set(t, d?.name ?? t);
-      }),
-    );
-  }
-  return out;
-});
-
 type AggBar = { h?: number; l?: number };
 type AggResponse = { results?: AggBar[] };
 

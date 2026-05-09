@@ -5,14 +5,16 @@ import { getSupabaseServiceRole } from "@/lib/supabase/service-role";
 /**
  * Investor system source of truth:
  * - Edit investors-data.json in the project root.
+ * - Each portfolio row: `ticker`, `company` (display name), `percentage` (weight 0–100).
  * - Put photos in public/investors/ named with the same slug (e.g. eric-sprott.jpg).
- * - Run `npm run sync:investors` to upsert investors + holdings into Supabase.
+ * - Run `npm run sync:investors` to upsert investors + holdings into Supabase (optional).
  */
 
 export type InvestorPortfolioRow = {
   ticker: string;
-  shares: number;
-  value: number;
+  company: string;
+  /** Portfolio weight as reported in investors-data.json (0–100). */
+  percentage: number;
 };
 
 export type InvestorImportRow = {
@@ -65,6 +67,17 @@ function stripJsonComments(content: string): string {
     .replace(/^\s*\/\/.*$/gm, "");
 }
 
+function validatePortfolioRows(slug: string, portfolio: InvestorPortfolioRow[]) {
+  portfolio.forEach((p, j) => {
+    const idx = j + 1;
+    if (!p.ticker?.trim()) throw new Error(`Invalid investors-data.json (${slug}): portfolio row ${idx} is missing ticker.`);
+    if (!p.company?.trim()) throw new Error(`Invalid investors-data.json (${slug}): portfolio row ${idx} is missing company.`);
+    if (typeof p.percentage !== "number" || !Number.isFinite(p.percentage)) {
+      throw new Error(`Invalid investors-data.json (${slug}): portfolio row ${idx} must have a numeric percentage.`);
+    }
+  });
+}
+
 function validateInvestorsData(rows: InvestorImportRow[]) {
   const seen = new Set<string>();
   rows.forEach((row, i) => {
@@ -76,6 +89,7 @@ function validateInvestorsData(rows: InvestorImportRow[]) {
     if (!Array.isArray(row.portfolio)) {
       throw new Error(`Invalid investors-data.json: row ${idx} (${row.slug}) portfolio must be an array.`);
     }
+    validatePortfolioRows(row.slug, row.portfolio);
   });
 }
 
@@ -152,7 +166,11 @@ export async function getInvestors(filePath?: string): Promise<InvestorViewModel
       website: row.website?.trim() ? row.website.trim() : null,
       description: row.description ?? "",
       lastUpdated: row.lastUpdated ?? null,
-      portfolio: row.portfolio ?? [],
+      portfolio: (row.portfolio ?? []).map((p) => ({
+        ticker: p.ticker.trim().toUpperCase(),
+        company: (p.company ?? "").trim(),
+        percentage: p.percentage,
+      })),
     })),
   );
 
@@ -166,7 +184,7 @@ export async function getInvestorBySlug(slug: string, filePath?: string): Promis
 
 export async function syncInvestorsToSupabase(filePath?: string): Promise<SyncInvestorsResult> {
   // Quarterly workflow:
-  // 1) Update investors-data.json portfolio rows.
+  // 1) Update investors-data.json portfolio rows (ticker, company, percentage).
   // 2) Ensure corresponding ticker symbols exist in securities table.
   // 3) Run `npm run sync:investors`.
   const supabase = getSupabaseServiceRole();
@@ -242,6 +260,7 @@ export async function syncInvestorsToSupabase(filePath?: string): Promise<SyncIn
     period_id: string;
     shares: number;
     value_usd: number;
+    portfolio_pct: number;
     change_type: "unchanged";
   }> = [];
 
@@ -255,12 +274,16 @@ export async function syncInvestorsToSupabase(filePath?: string): Promise<SyncIn
         skippedTickers.add(ticker);
         continue;
       }
+      const pct = row.percentage;
+      // DB requires shares/value_usd; derive proportional placeholders from % weight for sync ordering.
+      const scale = Math.round(pct * 10_000);
       holdingsPayload.push({
         investor_id: investorId,
         security_id: securityId,
         period_id: periodRow.id,
-        shares: Math.trunc(row.shares),
-        value_usd: Math.trunc(row.value),
+        shares: Math.max(1, scale),
+        value_usd: Math.max(1, Math.round(pct * 1_000_000)),
+        portfolio_pct: Math.round(pct * 100) / 100,
         change_type: "unchanged",
       });
     }

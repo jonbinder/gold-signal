@@ -4,7 +4,6 @@ import { ChevronLeft } from "lucide-react";
 import { notFound } from "next/navigation";
 import { getInvestorBySlug } from "@/lib/investors";
 import { InvestorImage } from "@/components/investors/InvestorImage";
-import { getTickerCompanyNames } from "@/lib/stock-profile";
 
 export const revalidate = 60;
 
@@ -32,15 +31,17 @@ function websiteDisplay(url: string): string {
   }
 }
 
+function formatPct(pct: number): string {
+  const n = Math.round(pct);
+  return `${n}%`;
+}
+
 export default async function InvestorPage({ params }: Props) {
   const { slug } = await params;
   const investor = await getInvestorBySlug(slug);
   if (!investor) notFound();
 
-  const holdings = [...investor.portfolio].sort((a, b) => b.value - a.value);
-  const totalValue = holdings.reduce((s, h) => s + h.value, 0);
-  const tickers = holdings.map((h) => h.ticker);
-  const names = await getTickerCompanyNames(tickers);
+  const holdings = [...investor.portfolio].sort((a, b) => b.percentage - a.percentage);
 
   return (
     <div className="bg-[var(--bg-void)]">
@@ -103,30 +104,26 @@ export default async function InvestorPage({ params }: Props) {
                 <tr>
                   <th className="text-right">% Portfolio</th>
                   <th>Ticker</th>
-                  <th>Company</th>
+                  <th>Company name</th>
                 </tr>
               </thead>
               <tbody>
-                {holdings.map((h) => {
-                  const pct = totalValue > 0 ? Math.round((h.value / totalValue) * 100) : 0;
-                  const company = names.get(h.ticker.toUpperCase()) ?? h.ticker;
-                  return (
-                    <tr key={h.ticker}>
-                      <td className="text-right font-mono text-sm font-semibold text-navy-900">{pct}%</td>
-                      <td>
-                        <span className="font-mono text-sm font-bold tracking-wide text-gold-700">{h.ticker}</span>
-                      </td>
-                      <td>
-                        <Link
-                          href={`/stocks/${h.ticker.toUpperCase()}`}
-                          className="font-medium text-blue-600 underline decoration-blue-600/30 underline-offset-2 hover:text-blue-700"
-                        >
-                          {company}
-                        </Link>
-                      </td>
-                    </tr>
-                  );
-                })}
+                {holdings.map((h) => (
+                  <tr key={`${h.ticker}-${h.company}`}>
+                    <td className="text-right font-mono text-sm font-semibold text-navy-900">{formatPct(h.percentage)}</td>
+                    <td>
+                      <span className="font-mono text-sm font-bold tracking-wide text-gold-700">{h.ticker}</span>
+                    </td>
+                    <td>
+                      <Link
+                        href={`/stocks/${h.ticker}`}
+                        className="font-medium text-blue-600 underline decoration-blue-600/30 underline-offset-2 hover:text-blue-700"
+                      >
+                        {h.company}
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>

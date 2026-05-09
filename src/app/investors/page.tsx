@@ -24,7 +24,7 @@ export default async function InvestorsPage() {
           </p>
           <h1 className="mt-2 text-3xl font-bold tracking-tight text-navy-900 sm:text-4xl">Investor coverage</h1>
           <p className="mt-2 max-w-2xl text-sm text-slate-600 sm:text-base">
-            Institutional voices in precious metals. Open a profile for portfolio weights backed by filing-period data.
+            Institutional voices in precious metals. Each profile lists portfolio weights as curated in our data file.
           </p>
         </div>
       </div>
@@ -52,6 +52,11 @@ export default async function InvestorsPage() {
                 <h2 className="text-lg font-bold tracking-tight text-navy-900 sm:text-xl">{inv.name}</h2>
                 <p className="mt-2 font-mono text-[11px] font-semibold uppercase tracking-wide text-gold-700">{inv.title}</p>
                 <p className="mt-3 flex-1 text-sm leading-relaxed text-slate-600">{inv.description}</p>
+                <p className="mt-3 font-mono text-[10px] uppercase tracking-wider text-slate-500">
+                  {inv.portfolio.length === 0
+                    ? "No positions listed"
+                    : `${inv.portfolio.length} ${inv.portfolio.length === 1 ? "position" : "positions"}`}
+                </p>
                 <Button variant="gold" className="mt-5 w-full sm:w-auto" asChild>
                   <Link href={`/investors/${inv.slug}`}>View portfolio</Link>
                 </Button>

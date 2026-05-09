@@ -1,19 +1,25 @@
 [
-  {
-    "id": "eric-sprott",
-    "name": "Eric Sprott",
-    "slug": "eric-sprott",
-    "photo": "investors/eric-sprott.jpg",
-    "title": "Sprott Asset Management",
-    "website": "https://sprott.com",
-    "description": "Legendary precious metals investor and one of the largest holders of gold and silver mining stocks.",
-    "portfolio": [
-      { "ticker": "NEM", "shares": 1250000, "value": 248000000 },
-      { "ticker": "GOLD", "shares": 980000, "value": 185000000 },
-      { "ticker": "PAAS", "shares": 2100000, "value": 98000000 }
-    ],
-    "lastUpdated": "2026-05-06"
-  },
+ {
+  "id": "eric-sprott",
+  "name": "Eric Sprott",
+  "slug": "eric-sprott",
+  "photo": "investors/eric-sprott.jpg",
+  "title": "Independent Precious Metals Investor",
+  "website": "https://sprott.com",
+  "description": "One of the most legendary and aggressive individual investors in gold and silver mining stocks, especially junior explorers and developers. Known for taking large stakes (often 10-40%+ of companies) via private placements and open market purchases.",
+  "portfolio": [
+    { "ticker": "HYMC", "company": "Hycroft Mining Holding Corporation", "percentage": 28 },
+    { "ticker": "USA", "company": "Americas Gold and Silver Corporation", "percentage": 14 },
+    { "ticker": "ABRA", "company": "AbraSilver Resource Corp.", "percentage": 9 },
+    { "ticker": "NFG", "company": "New Found Gold Corp.", "percentage": 8 },
+    { "ticker": "DSV", "company": "Discovery Silver Corp.", "percentage": 7 },
+    { "ticker": "HSLV", "company": "Highlander Silver Corp.", "percentage": 6 },
+    { "ticker": "OCG", "company": "Outcrop Silver & Gold Ltd.", "percentage": 5 },
+    { "ticker": "LGC", "company": "Lavras Gold Corp.", "percentage": 4 },
+    { "ticker": "AE", "company": "American Eagle Gold Corp.", "percentage": 3 },
+    { "ticker": "BRC", "company": "Blackrock Silver Corp.", "percentage": 3 }
+  ]
+},
   {
     "id": "peter-schiff",
     "name": "Peter Schiff",
@@ -23,9 +29,9 @@
     "website": "https://europac.com",
     "description": "Prominent gold advocate, economist, and manager of the Euro Pacific Gold Fund.",
     "portfolio": [
-      { "ticker": "NEM", "shares": 680000, "value": 135000000 },
-      { "ticker": "AEM", "shares": 420000, "value": 89000000 },
-      { "ticker": "HL", "shares": 1450000, "value": 28500000 }
+      { "ticker": "NEM", "company": "Newmont Corporation", "percentage": 35 },
+      { "ticker": "AEM", "company": "Agnico Eagle Mines", "percentage": 28 },
+      { "ticker": "HL", "company": "Hecla Mining", "percentage": 22 }
     ],
     "lastUpdated": "2026-05-06"
   },
@@ -38,9 +44,9 @@
     "website": "https://sprott.com",
     "description": "Legendary natural resources investor and mining sector specialist.",
     "portfolio": [
-      { "ticker": "FNV", "shares": 380000, "value": 92000000 },
-      { "ticker": "WPM", "shares": 450000, "value": 108000000 },
-      { "ticker": "PAAS", "shares": 890000, "value": 41500000 }
+      { "ticker": "FNV", "company": "Franco-Nevada", "percentage": 38 },
+      { "ticker": "WPM", "company": "Wheaton Precious Metals", "percentage": 35 },
+      { "ticker": "PAAS", "company": "Pan American Silver", "percentage": 27 }
     ],
     "lastUpdated": "2026-05-06"
   },
@@ -52,8 +58,8 @@
     "title": "Luminex Resources & Other Ventures",
     "description": "Highly successful mining entrepreneur and major investor in gold and silver companies.",
     "portfolio": [
-      { "ticker": "NEM", "shares": 520000, "value": 103000000 },
-      { "ticker": "GOLD", "shares": 680000, "value": 128000000 }
+      { "ticker": "NEM", "company": "Newmont Corporation", "percentage": 52 },
+      { "ticker": "GOLD", "company": "Barrick Gold", "percentage": 48 }
     ],
     "lastUpdated": "2026-05-06"
   },
@@ -65,9 +71,9 @@
     "title": "Gold Stock Investor & Author",
     "description": "Well-known gold stock analyst and author focused on undervalued gold and silver mining companies.",
     "portfolio": [
-      { "ticker": "NEM", "shares": 45000, "value": 8950000 },
-      { "ticker": "AEM", "shares": 32000, "value": 6780000 },
-      { "ticker": "GOLD", "shares": 75000, "value": 14200000 }
+      { "ticker": "NEM", "company": "Newmont Corporation", "percentage": 42 },
+      { "ticker": "AEM", "company": "Agnico Eagle Mines", "percentage": 31 },
+      { "ticker": "GOLD", "company": "Barrick Gold", "percentage": 27 }
     ],
     "lastUpdated": "2026-05-06"
   },
@@ -129,8 +135,9 @@
     "title": "Blue Laser Capital & Other Ventures",
     "description": "Precious metals investor and founder of Blue Laser Capital.",
     "portfolio": [
-      { "ticker": "NEM", "shares": 520000, "value": 103000000 },
-      { "ticker": "GOLD", "shares": 680000, "value": 128000000 }
+      { "ticker": "FASS", "company": "Fat Ass Exploration, Inc.", "percentage": 47 },
+      { "ticker": "GOLD", "company": "Barrick Gold", "percentage": 45 },
+      { "ticker": "AEM", "company": "Agnico Eagle Mines", "percentage": 22 }
     ],
     "lastUpdated": "2026-05-06"
   }

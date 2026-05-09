@@ -8,6 +8,7 @@ import {
   formatHeadquarters,
   formatMarketCapDisplay,
   getStockPageModel,
+  type InsiderEmptyReason,
 } from "@/lib/stock-profile";
 
 export const revalidate = 120;
@@ -37,6 +38,29 @@ function fmtUsd(n: number, digits = 2) {
   }).format(n);
 }
 
+function fmtShares(n: number | null): string {
+  if (n == null || !Number.isFinite(n)) return "—";
+  return new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }).format(n);
+}
+
+function fmtInsiderValueUsd(n: number | null): string {
+  if (n == null || !Number.isFinite(n)) return "—";
+  return fmtUsd(n);
+}
+
+function insiderEmptyMessage(reason: InsiderEmptyReason): string {
+  switch (reason) {
+    case "no_api_key":
+      return "Insider transactions are unavailable because no Polygon/Massive API key is configured.";
+    case "fetch_failed":
+      return "We couldn’t load insider filings right now. Please try again later.";
+    case "no_recent_filings":
+      return "No recent Form 4 insider transactions were found for this symbol.";
+    default:
+      return "No insider transactions to display.";
+  }
+}
+
 function fmtEmployees(n: number | null): string {
   if (n == null || !Number.isFinite(n)) return "—";
   return new Intl.NumberFormat("en-US").format(Math.round(n));
@@ -57,7 +81,7 @@ export default async function StockDetailPage({ params }: Props) {
   if (!(await isTrackedTicker(sym))) notFound();
 
   const model = await getStockPageModel(sym);
-  const { details, snapshot, week52, pctAbove52WeekLow, insider, ceo, nextEarningsDate, logoUrl } = model;
+  const { details, snapshot, week52, pctAbove52WeekLow, insider, insiderEmptyReason, ceo, nextEarningsDate, logoUrl } = model;
 
   const displayName = details?.name ?? sym;
   const description = details?.description ?? "";
@@ -195,21 +219,27 @@ export default async function StockDetailPage({ params }: Props) {
         <div className="overflow-hidden rounded-sm border border-navy-200 bg-white shadow-sm">
           <div className="border-b border-navy-200 bg-navy-100 px-4 py-3 sm:px-6">
             <h2 className="text-sm font-bold uppercase tracking-wide text-navy-900">Insider buying / selling</h2>
-            <p className="mt-1 text-xs text-slate-600">Recent Form 4 transactions (Polygon.io SEC filings).</p>
+            <p className="mt-1 text-xs text-slate-600">
+              Recent SEC Form 4 transactions (non-derivative common stock), sourced from Massive/Polygon.
+            </p>
           </div>
           {insider.length === 0 ? (
-            <div className="px-6 py-12 text-center text-sm text-slate-500">
-              No recent insider transactions returned for this symbol. Data requires a Polygon plan with Form 4 access.
+            <div className="px-6 py-12 text-center">
+              <p className="text-sm text-slate-600">
+                {insiderEmptyReason ? insiderEmptyMessage(insiderEmptyReason) : "No insider transactions to display."}
+              </p>
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="gs-table min-w-[640px]">
+              <table className="gs-table min-w-[880px]">
                 <thead>
                   <tr>
                     <th>Type</th>
-                    <th>Date</th>
                     <th>Title</th>
                     <th>Name</th>
+                    <th className="text-right tabular-nums">Shares</th>
+                    <th className="text-right tabular-nums">Value</th>
+                    <th>Date</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -217,16 +247,22 @@ export default async function StockDetailPage({ params }: Props) {
                     <tr key={`${row.dateIso}-${row.name}-${row.title}-${i}`}>
                       <td>
                         <span
-                          className={`font-bold ${
+                          className={`inline-block min-w-[2.75rem] font-semibold ${
                             row.type === "BUY" ? "text-emerald-700" : "text-red-700"
                           }`}
                         >
                           {row.type}
                         </span>
                       </td>
-                      <td className="whitespace-nowrap font-mono text-sm text-navy-800">{row.date}</td>
-                      <td className="font-mono text-sm text-navy-800">{row.title}</td>
-                      <td className="font-mono text-sm font-medium uppercase tracking-wide text-navy-900">{row.name}</td>
+                      <td className="max-w-[12rem] truncate font-mono text-sm text-navy-800" title={row.title}>
+                        {row.title}
+                      </td>
+                      <td className="max-w-[14rem] truncate font-mono text-sm font-medium uppercase tracking-wide text-navy-900" title={row.name}>
+                        {row.name}
+                      </td>
+                      <td className="whitespace-nowrap text-right font-mono text-sm tabular-nums text-navy-800">{fmtShares(row.shares)}</td>
+                      <td className="whitespace-nowrap text-right font-mono text-sm tabular-nums text-navy-800">{fmtInsiderValueUsd(row.valueUsd)}</td>
+                      <td className="whitespace-nowrap font-mono text-sm text-navy-700">{row.date}</td>
                     </tr>
                   ))}
                 </tbody>

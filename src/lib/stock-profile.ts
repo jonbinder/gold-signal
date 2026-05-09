@@ -22,11 +22,18 @@ export type InsiderTransactionRow = {
   type: "BUY" | "SELL";
   /** Display-formatted transaction date, e.g. "May 1, 2026". */
   date: string;
-  /** ISO YYYY-MM-DD used for sorting / dedupe. */
+  /** ISO YYYY-MM-DD used for sorting / keys. */
   dateIso: string;
   title: string;
   name: string;
+  /** Share count for this line item (may be null if not reported). */
+  shares: number | null;
+  /** Approximate USD value (from filing or shares × price). */
+  valueUsd: number | null;
 };
+
+/** Why the insider table has no rows (only meaningful when `insider` is empty). */
+export type InsiderEmptyReason = "no_api_key" | "no_recent_filings" | "fetch_failed";
 
 export type YahooSupplement = {
   ceo: string | null;
@@ -167,16 +174,24 @@ type Form4Row = {
   is_ten_percent_owner?: boolean;
   filing_date?: string;
   transaction_date?: string;
+  accession_number?: string;
+  transaction_shares?: number | null;
+  transaction_price_per_share?: number | null;
+  transaction_value?: number | null;
 };
 
 type Form4Response = { results?: Form4Row[]; status?: string };
 
-async function fetchForm4Raw(sym: string): Promise<Form4Row[] | null> {
+type Form4FetchOutcome =
+  | { kind: "rows"; rows: Form4Row[] }
+  | { kind: "empty_ok" }
+  | { kind: "failed" };
+
+async function fetchForm4Raw(sym: string): Promise<Form4FetchOutcome> {
   const apiKey = process.env.POLYGON_API_KEY?.trim();
-  if (!apiKey) return null;
+  if (!apiKey) return { kind: "failed" };
 
   const bases = [...new Set([polygonBaseUrl(), "https://api.polygon.io", "https://api.massive.com"])];
-  // Massive/Polygon SEC filings endpoints use the literal "vX" version segment.
   const paths = ["/stocks/filings/vX/form-4"];
 
   for (const base of bases) {
@@ -184,7 +199,7 @@ async function fetchForm4Raw(sym: string): Promise<Form4Row[] | null> {
       const url = new URL(path, base.endsWith("/") ? base : `${base}/`);
       url.searchParams.set("apiKey", apiKey);
       url.searchParams.set("tickers.any_of", sym);
-      url.searchParams.set("limit", "40");
+      url.searchParams.set("limit", "100");
       url.searchParams.set("sort", "filing_date.desc");
 
       const res = await fetch(url.toString(), {
@@ -201,10 +216,13 @@ async function fetchForm4Raw(sym: string): Promise<Form4Row[] | null> {
       } catch {
         continue;
       }
-      if (json?.results && json.results.length > 0) return json.results;
+      const list = json?.results;
+      if (!Array.isArray(list)) continue;
+      if (list.length === 0) return { kind: "empty_ok" };
+      return { kind: "rows", rows: list };
     }
   }
-  return null;
+  return { kind: "failed" };
 }
 
 function shortInsiderTitle(r: Form4Row): string {
@@ -284,27 +302,63 @@ function formatTransactionDate(iso: string | undefined): { display: string; iso:
   };
 }
 
-async function fetchForm4Transactions(ticker: string): Promise<InsiderTransactionRow[]> {
-  const sym = normalizeTicker(ticker);
-  const rows = await fetchForm4Raw(sym);
-  if (!rows?.length) return [];
+function parseTransactionFinancials(r: Form4Row): { shares: number | null; valueUsd: number | null } {
+  const rawShares = r.transaction_shares;
+  const shares =
+    typeof rawShares === "number" && Number.isFinite(rawShares) && rawShares >= 0
+      ? rawShares
+      : null;
 
+  let valueUsd: number | null = null;
+  const tv = r.transaction_value;
+  if (typeof tv === "number" && Number.isFinite(tv) && tv >= 0) {
+    valueUsd = tv;
+  } else if (shares != null) {
+    const p = r.transaction_price_per_share;
+    if (typeof p === "number" && Number.isFinite(p) && p >= 0) {
+      valueUsd = shares * p;
+    }
+  }
+  return { shares, valueUsd };
+}
+
+function classifyForm4Side(r: Form4Row): "BUY" | "SELL" | null {
+  const code = (r.transaction_code ?? "").toUpperCase();
+  const disposed = r.transaction_acquired_disposed;
+  if (code === "P" || code === "M") return "BUY";
+  if (code === "S" || code === "F") return "SELL";
+  if (disposed === "A") return "BUY";
+  if (disposed === "D") return "SELL";
+  return null;
+}
+
+async function fetchForm4Transactions(ticker: string): Promise<{
+  rows: InsiderTransactionRow[];
+  emptyReason: InsiderEmptyReason | null;
+}> {
+  if (!process.env.POLYGON_API_KEY?.trim()) {
+    return { rows: [], emptyReason: "no_api_key" };
+  }
+
+  const sym = normalizeTicker(ticker);
+  const outcome = await fetchForm4Raw(sym);
+
+  if (outcome.kind === "failed") {
+    return { rows: [], emptyReason: "fetch_failed" };
+  }
+  if (outcome.kind === "empty_ok") {
+    return { rows: [], emptyReason: "no_recent_filings" };
+  }
+
+  const rows = outcome.rows;
   const out: InsiderTransactionRow[] = [];
   const seen = new Set<string>();
 
   for (const r of rows) {
     if (r.record_type && r.record_type !== "transaction") continue;
-    // Massive returns "non_derivative" / "derivative".
     if (r.security_type && r.security_type !== "non_derivative") continue;
 
-    const code = r.transaction_code ?? "";
-    const disposed = r.transaction_acquired_disposed;
-    let side: "BUY" | "SELL" | null = null;
-    if (code === "P") side = "BUY";
-    else if (code === "S" || code === "F") side = "SELL";
-    else if (disposed === "A") side = "BUY";
-    else if (disposed === "D") side = "SELL";
-
+    const side = classifyForm4Side(r);
     if (!side) continue;
 
     const date = formatTransactionDate(r.transaction_date) ?? formatTransactionDate(r.filing_date);
@@ -312,15 +366,35 @@ async function fetchForm4Transactions(ticker: string): Promise<InsiderTransactio
 
     const title = shortInsiderTitle(r);
     const name = formatInsiderName(r.owner_name ?? "Unknown");
-    const dedupeKey = `${side}|${title}|${name}|${date.iso}`;
+    const { shares, valueUsd } = parseTransactionFinancials(r);
+
+    const acc = r.accession_number ?? "x";
+    const dedupeKey = `${acc}|${r.transaction_date ?? ""}|${r.filing_date ?? ""}|${name}|${side}|${String(r.transaction_shares)}|${r.transaction_code ?? ""}`;
     if (seen.has(dedupeKey)) continue;
     seen.add(dedupeKey);
-    out.push({ type: side, date: date.display, dateIso: date.iso, title, name });
+
+    out.push({
+      type: side,
+      date: date.display,
+      dateIso: date.iso,
+      title,
+      name,
+      shares,
+      valueUsd,
+    });
   }
 
-  // Most recent first by transaction date.
-  out.sort((a, b) => b.dateIso.localeCompare(a.dateIso));
-  return out.slice(0, 6);
+  if (out.length === 0) {
+    return { rows: [], emptyReason: "no_recent_filings" };
+  }
+
+  out.sort((a, b) => {
+    const cmp = b.dateIso.localeCompare(a.dateIso);
+    if (cmp !== 0) return cmp;
+    return b.name.localeCompare(a.name);
+  });
+
+  return { rows: out.slice(0, 20), emptyReason: null };
 }
 
 // ─── Yahoo crumb handshake (cookie + crumb required since 2023) ─────────────
@@ -483,6 +557,7 @@ export type StockPageModel = {
   week52: { high: number; low: number } | null;
   pctAbove52WeekLow: number | null;
   insider: InsiderTransactionRow[];
+  insiderEmptyReason: InsiderEmptyReason | null;
   ceo: string | null;
   nextEarningsDate: string | null;
   logoUrl: string | null;
@@ -490,7 +565,7 @@ export type StockPageModel = {
 
 export const getStockPageModel = cache(async (ticker: string): Promise<StockPageModel> => {
   const sym = normalizeTicker(ticker);
-  const [details, snapshot, week52, insider, yahoo] = await Promise.all([
+  const [details, snapshot, week52, insiderResult, yahoo] = await Promise.all([
     getPolygonTickerDetails(sym),
     getStockMarketSnapshot(sym),
     fetch52WeekHighLow(sym),
@@ -515,7 +590,8 @@ export const getStockPageModel = cache(async (ticker: string): Promise<StockPage
     snapshot,
     week52,
     pctAbove52WeekLow,
-    insider,
+    insider: insiderResult.rows,
+    insiderEmptyReason: insiderResult.emptyReason,
     ceo,
     nextEarningsDate: nextEarnings,
     logoUrl,

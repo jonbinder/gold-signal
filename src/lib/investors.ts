@@ -21,6 +21,8 @@ export type InvestorImportRow = {
   slug: string;
   photo?: string;
   title?: string;
+  /** Public-facing firm / personal website (https://...) */
+  website?: string;
   description?: string;
   portfolio: InvestorPortfolioRow[];
   lastUpdated?: string;
@@ -32,6 +34,7 @@ export type InvestorViewModel = {
   name: string;
   imageSrc: string;
   title: string;
+  website: string | null;
   description: string;
   lastUpdated: string | null;
   portfolio: InvestorPortfolioRow[];
@@ -146,6 +149,7 @@ export async function getInvestors(filePath?: string): Promise<InvestorViewModel
       name: row.name,
       imageSrc: await resolveInvestorPhotoSrc(row.slug, row.photo),
       title: row.title ?? "Precious Metals Investor",
+      website: row.website?.trim() ? row.website.trim() : null,
       description: row.description ?? "",
       lastUpdated: row.lastUpdated ?? null,
       portfolio: row.portfolio ?? [],

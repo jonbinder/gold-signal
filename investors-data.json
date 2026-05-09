@@ -5,6 +5,7 @@
     "slug": "eric-sprott",
     "photo": "investors/eric-sprott.jpg",
     "title": "Sprott Asset Management",
+    "website": "https://sprott.com",
     "description": "Legendary precious metals investor and one of the largest holders of gold and silver mining stocks.",
     "portfolio": [
       { "ticker": "NEM", "shares": 1250000, "value": 248000000 },
@@ -19,6 +20,7 @@
     "slug": "peter-schiff",
     "photo": "investors/peter-schiff.jpg",
     "title": "Euro Pacific Capital",
+    "website": "https://europac.com",
     "description": "Prominent gold advocate, economist, and manager of the Euro Pacific Gold Fund.",
     "portfolio": [
       { "ticker": "NEM", "shares": 680000, "value": 135000000 },
@@ -33,6 +35,7 @@
     "slug": "rick-rule",
     "photo": "investors/rick-rule.jpg",
     "title": "Sprott U.S. Holdings",
+    "website": "https://sprott.com",
     "description": "Legendary natural resources investor and mining sector specialist.",
     "portfolio": [
       { "ticker": "FNV", "shares": 380000, "value": 92000000 },

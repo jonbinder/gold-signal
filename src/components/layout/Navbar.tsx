@@ -7,7 +7,7 @@ import { BrandLogo } from "@/components/layout/BrandLogo";
 
 const NAV_LINKS = [
   { href: "/investors", label: "Investors", icon: Users },
-  { href: "/gold-silver-stocks", label: "Stocks", icon: Layers },
+  { href: "/stocks", label: "Stocks", icon: Layers },
 ] as const;
 
 export function Navbar() {
@@ -37,7 +37,7 @@ export function Navbar() {
                 )}
               >
                 <Icon className="size-4 shrink-0 opacity-80 sm:size-[18px]" strokeWidth={1.5} aria-hidden />
-                <span className="max-w-[4.5rem] truncate sm:max-w-none">{link.label}</span>
+                <span className="max-w-[4.5rem] truncate uppercase sm:max-w-none">{link.label}</span>
               </Link>
             );
           })}

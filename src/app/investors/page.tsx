@@ -24,8 +24,7 @@ export default async function InvestorsPage() {
           </p>
           <h1 className="mt-2 text-3xl font-bold tracking-tight text-navy-900 sm:text-4xl">Investor coverage</h1>
           <p className="mt-2 max-w-2xl text-sm text-slate-600 sm:text-base">
-            Five well-known voices in precious metals and mining. Open a profile for illustrative portfolio tables
-            (demo data — not live 13F).
+            Institutional voices in precious metals. Open a profile for portfolio weights backed by filing-period data.
           </p>
         </div>
       </div>

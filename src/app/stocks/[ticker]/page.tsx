@@ -51,9 +51,13 @@ function fmtInsiderValueUsd(n: number | null): string {
 function insiderEmptyMessage(reason: InsiderEmptyReason): string {
   switch (reason) {
     case "no_api_key":
-      return "Insider transactions are unavailable because no Polygon/Massive API key is configured.";
+      return "Server is missing POLYGON_API_KEY. Set it in .env.local and on Vercel (Project → Settings → Environment Variables) and redeploy.";
+    case "auth_failed":
+      return "Polygon/Massive rejected the API key (HTTP 401/403). Verify the key value on Vercel and that it matches the active plan.";
+    case "plan_required":
+      return "Your Polygon/Massive plan does not currently include Form 4 access. Upgrade or check the plan tier on the Massive dashboard.";
     case "fetch_failed":
-      return "We couldn’t load insider filings right now. Please try again later.";
+      return "We couldn’t load insider filings right now. Please try again in a moment.";
     case "no_recent_filings":
       return "No recent Form 4 insider transactions were found for this symbol.";
     default:

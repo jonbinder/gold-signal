@@ -33,7 +33,12 @@ export type InsiderTransactionRow = {
 };
 
 /** Why the insider table has no rows (only meaningful when `insider` is empty). */
-export type InsiderEmptyReason = "no_api_key" | "no_recent_filings" | "fetch_failed";
+export type InsiderEmptyReason =
+  | "no_api_key"
+  | "no_recent_filings"
+  | "fetch_failed"
+  | "auth_failed"
+  | "plan_required";
 
 export type YahooSupplement = {
   ceo: string | null;
@@ -44,6 +49,31 @@ function polygonBaseUrl(): string {
   const raw = process.env.POLYGON_REST_BASE_URL?.trim();
   if (raw) return raw.replace(/\/$/, "");
   return DEFAULT_POLYGON_BASE;
+}
+
+let warnedNoPolygonKey = false;
+
+/**
+ * Reads `POLYGON_API_KEY` from the server environment, trimming any stray
+ * whitespace/newlines that can sneak in via Vercel's env var UI. Logs a single
+ * warning per process if the key is missing so the issue is visible in
+ * production logs (Vercel → Functions → Logs).
+ */
+function getPolygonApiKey(): string | null {
+  const raw = process.env.POLYGON_API_KEY;
+  const trimmed = typeof raw === "string" ? raw.trim() : "";
+  if (!trimmed) {
+    if (!warnedNoPolygonKey) {
+      warnedNoPolygonKey = true;
+      console.warn(
+        "[stock-profile] POLYGON_API_KEY is not set. " +
+          "Set it locally in .env.local and on Vercel under Project → Settings → Environment Variables, " +
+          "then redeploy. Insider transactions and Polygon-backed data will be unavailable until configured.",
+      );
+    }
+    return null;
+  }
+  return trimmed;
 }
 
 function normalizeTicker(ticker: string): string {
@@ -87,7 +117,7 @@ export function resolveStockLogoUrl(details: PolygonTickerDetails | null): strin
 }
 
 async function polygonJson<T>(path: string, params: Record<string, string | undefined>): Promise<T | null> {
-  const apiKey = process.env.POLYGON_API_KEY?.trim();
+  const apiKey = getPolygonApiKey();
   if (!apiKey) return null;
   const url = new URL(path, polygonBaseUrl());
   url.searchParams.set("apiKey", apiKey);
@@ -185,44 +215,110 @@ type Form4Response = { results?: Form4Row[]; status?: string };
 type Form4FetchOutcome =
   | { kind: "rows"; rows: Form4Row[] }
   | { kind: "empty_ok" }
-  | { kind: "failed" };
+  | { kind: "failed" }
+  | { kind: "auth_failed" }
+  | { kind: "plan_required" }
+  | { kind: "no_api_key" };
 
 async function fetchForm4Raw(sym: string): Promise<Form4FetchOutcome> {
-  const apiKey = process.env.POLYGON_API_KEY?.trim();
-  if (!apiKey) return { kind: "failed" };
+  const apiKey = getPolygonApiKey();
+  if (!apiKey) return { kind: "no_api_key" };
 
   const bases = [...new Set([polygonBaseUrl(), "https://api.polygon.io", "https://api.massive.com"])];
-  const paths = ["/stocks/filings/vX/form-4"];
+  const path = "/stocks/filings/vX/form-4";
+
+  let sawAuthFailure = false;
+  let sawPlanFailure = false;
+  let sawOtherFailure = false;
 
   for (const base of bases) {
-    for (const path of paths) {
-      const url = new URL(path, base.endsWith("/") ? base : `${base}/`);
-      url.searchParams.set("apiKey", apiKey);
-      url.searchParams.set("tickers.any_of", sym);
-      url.searchParams.set("limit", "100");
-      url.searchParams.set("sort", "filing_date.desc");
+    const url = new URL(path, base.endsWith("/") ? base : `${base}/`);
+    url.searchParams.set("apiKey", apiKey);
+    url.searchParams.set("tickers.any_of", sym);
+    url.searchParams.set("limit", "100");
+    url.searchParams.set("sort", "filing_date.desc");
 
-      const res = await fetch(url.toString(), {
+    let res: Response;
+    try {
+      res = await fetch(url.toString(), {
         method: "GET",
         headers: { Accept: "application/json" },
-        next: { revalidate: 3600 },
+        // Avoid serving stale "failed" responses from before the plan upgrade —
+        // this endpoint is small and the page itself is `force-dynamic`.
+        cache: "no-store",
       });
-      if (!res.ok) continue;
-      const text = await res.text();
-      if (!text.trim()) continue;
-      let json: Form4Response;
-      try {
-        json = JSON.parse(text) as Form4Response;
-      } catch {
-        continue;
-      }
-      const list = json?.results;
-      if (!Array.isArray(list)) continue;
-      if (list.length === 0) return { kind: "empty_ok" };
-      return { kind: "rows", rows: list };
+    } catch (err) {
+      sawOtherFailure = true;
+      console.warn(`[stock-profile] Form 4 fetch threw for ${sym} via ${base}:`, err);
+      continue;
     }
+
+    if (res.status === 401 || res.status === 403) {
+      sawAuthFailure = true;
+      const body = (await safeReadBody(res)).slice(0, 300);
+      console.warn(
+        `[stock-profile] Form 4 auth failure for ${sym} via ${base} ` +
+          `(HTTP ${res.status}). Body: ${body || "<empty>"}`,
+      );
+      continue;
+    }
+
+    if (res.status === 402 || res.status === 426) {
+      sawPlanFailure = true;
+      const body = (await safeReadBody(res)).slice(0, 300);
+      console.warn(
+        `[stock-profile] Form 4 plan/upgrade required for ${sym} via ${base} ` +
+          `(HTTP ${res.status}). Body: ${body || "<empty>"}`,
+      );
+      continue;
+    }
+
+    if (!res.ok) {
+      sawOtherFailure = true;
+      const body = (await safeReadBody(res)).slice(0, 200);
+      console.warn(
+        `[stock-profile] Form 4 fetch failed for ${sym} via ${base} ` +
+          `(HTTP ${res.status}). Body: ${body || "<empty>"}`,
+      );
+      continue;
+    }
+
+    const text = await safeReadBody(res);
+    if (!text.trim()) {
+      sawOtherFailure = true;
+      continue;
+    }
+
+    let json: Form4Response;
+    try {
+      json = JSON.parse(text) as Form4Response;
+    } catch (err) {
+      sawOtherFailure = true;
+      console.warn(`[stock-profile] Form 4 JSON parse failed for ${sym} via ${base}:`, err);
+      continue;
+    }
+
+    const list = json?.results;
+    if (!Array.isArray(list)) {
+      sawOtherFailure = true;
+      continue;
+    }
+    if (list.length === 0) return { kind: "empty_ok" };
+    return { kind: "rows", rows: list };
   }
+
+  if (sawPlanFailure) return { kind: "plan_required" };
+  if (sawAuthFailure) return { kind: "auth_failed" };
+  if (sawOtherFailure) return { kind: "failed" };
   return { kind: "failed" };
+}
+
+async function safeReadBody(res: Response): Promise<string> {
+  try {
+    return await res.text();
+  } catch {
+    return "";
+  }
 }
 
 function shortInsiderTitle(r: Form4Row): string {
@@ -336,13 +432,18 @@ async function fetchForm4Transactions(ticker: string): Promise<{
   rows: InsiderTransactionRow[];
   emptyReason: InsiderEmptyReason | null;
 }> {
-  if (!process.env.POLYGON_API_KEY?.trim()) {
-    return { rows: [], emptyReason: "no_api_key" };
-  }
-
   const sym = normalizeTicker(ticker);
   const outcome = await fetchForm4Raw(sym);
 
+  if (outcome.kind === "no_api_key") {
+    return { rows: [], emptyReason: "no_api_key" };
+  }
+  if (outcome.kind === "auth_failed") {
+    return { rows: [], emptyReason: "auth_failed" };
+  }
+  if (outcome.kind === "plan_required") {
+    return { rows: [], emptyReason: "plan_required" };
+  }
   if (outcome.kind === "failed") {
     return { rows: [], emptyReason: "fetch_failed" };
   }

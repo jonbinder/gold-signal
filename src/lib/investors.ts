@@ -204,6 +204,14 @@ export async function syncInvestorsToSupabase(filePath?: string): Promise<SyncIn
   }, new Date(0));
   const periodLabel = getQuarterLabel(latestDate.getTime() > 0 ? latestDate : new Date());
 
+  const { error: clearLatestError } = await supabase
+    .from("reporting_periods")
+    .update({ is_latest: false })
+    .eq("is_latest", true);
+  if (clearLatestError) {
+    throw new Error(`Failed to clear prior latest period: ${clearLatestError.message}`);
+  }
+
   const { data: periodRow, error: periodError } = await supabase
     .from("reporting_periods")
     .upsert(

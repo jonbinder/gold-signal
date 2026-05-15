@@ -1,39 +1,55 @@
 [
- {
-  "id": "eric-sprott",
-  "name": "Eric Sprott",
-  "slug": "eric-sprott",
-  "photo": "investors/eric-sprott.jpg",
-  "title": "Independent Precious Metals Investor",
-  "website": "https://sprott.com",
-  "description": "One of the most legendary and aggressive individual investors in gold and silver mining stocks, especially junior explorers and developers. Known for taking large stakes (often 10-40%+ of companies) via private placements and open market purchases.",
-  "portfolio": [
-    { "ticker": "HYMC", "company": "Hycroft Mining Holding Corporation", "percentage": 28 },
-    { "ticker": "USA", "company": "Americas Gold and Silver Corporation", "percentage": 14 },
-    { "ticker": "ABRA", "company": "AbraSilver Resource Corp.", "percentage": 9 },
-    { "ticker": "NFG", "company": "New Found Gold Corp.", "percentage": 8 },
-    { "ticker": "DSV", "company": "Discovery Silver Corp.", "percentage": 7 },
-    { "ticker": "HSLV", "company": "Highlander Silver Corp.", "percentage": 6 },
-    { "ticker": "OCG", "company": "Outcrop Silver & Gold Ltd.", "percentage": 5 },
-    { "ticker": "LGC", "company": "Lavras Gold Corp.", "percentage": 4 },
-    { "ticker": "AE", "company": "American Eagle Gold Corp.", "percentage": 3 },
-    { "ticker": "BRC", "company": "Blackrock Silver Corp.", "percentage": 3 }
-  ]
-},
+  {
+    "id": "eric-sprott",
+    "name": "Eric Sprott",
+    "slug": "eric-sprott",
+    "photo": "investors/eric-sprott.jpg",
+    "title": "Independent Precious Metals Investor",
+    "website": "https://sprott.com",
+    "description": "One of the most legendary and aggressive individual investors in gold and silver mining stocks, especially junior explorers and developers. Known for taking large stakes (often 10-40%+ of companies) via private placements and open market purchases.",
+    "dataSource": "Public disclosures and SEDAR+ filings",
+    "portfolio": [
+      { "ticker": "USA", "company": "Americas Gold and Silver Corporation", "percentage": 18, "note": "14.7% stake as of Dec 2025" },
+      { "ticker": "DSV", "company": "Discovery Silver Corp.", "percentage": 14, "note": "Owns the Cordero project in Mexico" },
+      { "ticker": "NFG", "company": "New Found Gold Corp.", "percentage": 12 },
+      { "ticker": "CKG", "company": "Chesapeake Gold Corp.", "percentage": 10 },
+      { "ticker": "SLVR", "company": "Silverco Mining Ltd.", "percentage": 9, "note": "14.2% stake acquired Oct 2025" },
+      { "ticker": "ERD", "company": "Erdene Resource Development Corp.", "percentage": 8 },
+      { "ticker": "STGO", "company": "Steppe Gold Ltd.", "percentage": 7 },
+      { "ticker": "AEM", "company": "Agnico Eagle Mines Ltd.", "percentage": 7 },
+      { "ticker": "TUD", "company": "Tudor Gold Corp.", "percentage": 5 },
+      { "ticker": "ORR", "company": "OR Royalties Inc.", "percentage": 5 },
+      { "ticker": "WM", "company": "Wallbridge Mining Co. Ltd.", "percentage": 5 }
+    ],
+    "lastUpdated": "2025-12-15"
+  },
   {
     "id": "peter-schiff",
     "name": "Peter Schiff",
     "slug": "peter-schiff",
     "photo": "investors/peter-schiff.jpg",
-    "title": "Euro Pacific Capital",
+    "title": "Euro Pacific Asset Management",
     "website": "https://europac.com",
-    "description": "Prominent gold advocate, economist, and manager of the Euro Pacific Gold Fund.",
+    "description": "Prominent gold advocate, economist, and owning member of Euro Pacific Asset Management. Note: portfolio reflects holdings of the EuroPac Gold Fund (EPGFX), of which Schiff is an owning member; the fund is actively managed by Adrian Day.",
+    "dataSource": "SEC NPORT-P filing, July 31, 2025",
     "portfolio": [
-      { "ticker": "NEM", "company": "Newmont Corporation", "percentage": 35 },
-      { "ticker": "AEM", "company": "Agnico Eagle Mines", "percentage": 28 },
-      { "ticker": "HL", "company": "Hecla Mining", "percentage": 22 }
+      { "ticker": "AEM", "company": "Agnico Eagle Mines Ltd.", "percentage": 8.5 },
+      { "ticker": "FSM", "company": "Fortuna Silver Mines Inc.", "percentage": 7.1 },
+      { "ticker": "PAAS", "company": "Pan American Silver Corp.", "percentage": 5.8 },
+      { "ticker": "WPM", "company": "Wheaton Precious Metals Corp.", "percentage": 6.1 },
+      { "ticker": "RGLD", "company": "Royal Gold Inc.", "percentage": 5.0 },
+      { "ticker": "FNV", "company": "Franco-Nevada Corp.", "percentage": 5.1 },
+      { "ticker": "OR", "company": "Osisko Gold Royalties Ltd.", "percentage": 7.3 },
+      { "ticker": "B2G", "company": "B2Gold Corp.", "percentage": 5.1 },
+      { "ticker": "GOLD", "company": "Barrick Mining Corp.", "percentage": 4.9 },
+      { "ticker": "MTA", "company": "Metalla Royalty & Streaming Ltd.", "percentage": 5.2 },
+      { "ticker": "TFPM", "company": "Triple Flag Precious Metals Corp.", "percentage": 3.0 },
+      { "ticker": "HSTR", "company": "Heliostar Metals Ltd.", "percentage": 3.6 },
+      { "ticker": "DKG", "company": "Dakota Gold Corp.", "percentage": 2.1 },
+      { "ticker": "AU", "company": "AngloGold Ashanti Ltd.", "percentage": 0.4 },
+      { "ticker": "NEM", "company": "Newmont Corp.", "percentage": 1.7 }
     ],
-    "lastUpdated": "2026-05-06"
+    "lastUpdated": "2025-07-31"
   },
   {
     "id": "rick-rule",
@@ -42,26 +58,34 @@
     "photo": "investors/rick-rule.jpg",
     "title": "Sprott U.S. Holdings",
     "website": "https://sprott.com",
-    "description": "Legendary natural resources investor and mining sector specialist.",
-    "portfolio": [
-      { "ticker": "FNV", "company": "Franco-Nevada", "percentage": 38 },
-      { "ticker": "WPM", "company": "Wheaton Precious Metals", "percentage": 35 },
-      { "ticker": "PAAS", "company": "Pan American Silver", "percentage": 27 }
-    ],
-    "lastUpdated": "2026-05-06"
+    "description": "Legendary natural resources investor and mining sector specialist. Rule is known for investing through Sprott U.S. Holdings vehicles and private placements; specific personal portfolio weightings are not publicly disclosed.",
+    "dataSource": "Public commentary and interviews — not from filings",
+    "portfolio": [],
+    "portfolioNote": "No public 13F or portfolio disclosure available. Recommend sourcing from interview commentary or removing from investor list until verifiable data is available.",
+    "lastUpdated": "2026-05-15"
   },
   {
     "id": "ross-beaty",
     "name": "Ross Beaty",
     "slug": "ross-beaty",
     "photo": "investors/ross-beaty.jpg",
-    "title": "Luminex Resources & Other Ventures",
-    "description": "Highly successful mining entrepreneur and major investor in gold and silver companies.",
+    "title": "Pan American Silver, Equinox Gold (Founder/Chairman)",
+    "website": "https://panamericansilver.com",
+    "description": "Geologist and resource entrepreneur with over 50 years of experience. Founder and Chairman of Pan American Silver Corp. (1994) and Equinox Gold Corp. (2018). Member of the Canadian Mining Hall of Fame and recipient of the Order of Canada. Estimated net worth of at least $592 million.",
+    "dataSource": "GuruFocus insider tracking from SEC Form 4 and SEDAR+ filings",
     "portfolio": [
-      { "ticker": "NEM", "company": "Newmont Corporation", "percentage": 52 },
-      { "ticker": "GOLD", "company": "Barrick Gold", "percentage": 48 }
+      { "ticker": "PAAS", "company": "Pan American Silver Corp.", "percentage": 38.67, "note": "2,828,680 shares, ~$229M value; Founder & Chairman" },
+      { "ticker": "ARG", "company": "Amerigo Resources Ltd.", "percentage": 19.79, "note": "17,747,792 shares, ~$117M value; 10% security holder" },
+      { "ticker": "NUAG", "company": "New Pacific Metals Corp.", "percentage": 19.40, "note": "14,724,068 shares, ~$115M value; 10% security holder" },
+      { "ticker": "EQX", "company": "Equinox Gold Corp.", "percentage": 8.00, "note": "Founder & Chairman; previously held 23.9M shares (~7.4%)" },
+      { "ticker": "LUM", "company": "Lumina Gold Corp.", "percentage": 6.00, "note": "10% security holder; Cangrejos Gold-Copper project in Ecuador" },
+      { "ticker": "INE", "company": "Innergex Renewable Energy Inc.", "percentage": 5.00 },
+      { "ticker": "RIWI", "company": "RIWI Corp.", "percentage": 1.50 },
+      { "ticker": "DEC", "company": "Decade Resources Ltd.", "percentage": 0.80 },
+      { "ticker": "MTB", "company": "MTB Metals Corp.", "percentage": 0.84 }
     ],
-    "lastUpdated": "2026-05-06"
+    "portfolioNote": "Top 3 weightings sourced directly from GuruFocus insider data. Remaining positions are smaller holdings with approximate weightings based on the combined ~22% allocation across the smaller stakes.",
+    "lastUpdated": "2026-05-10"
   },
   {
     "id": "don-durrett",
@@ -69,23 +93,84 @@
     "slug": "don-durrett",
     "photo": "investors/don-durrett.jpg",
     "title": "Gold Stock Investor & Author",
-    "description": "Well-known gold stock analyst and author focused on undervalued gold and silver mining companies.",
+    "website": "https://goldstockdata.com",
+    "description": "Well-known gold stock analyst, author, and founder of GoldStockData.com. Focused on undervalued gold and silver mining companies, with an emphasis on quality juniors and mid-tier producers.",
+    "dataSource": "GoldStockData.com watchlist",
     "portfolio": [
-      { "ticker": "NEM", "company": "Newmont Corporation", "percentage": 42 },
-      { "ticker": "AEM", "company": "Agnico Eagle Mines", "percentage": 31 },
-      { "ticker": "GOLD", "company": "Barrick Gold", "percentage": 27 }
+      { "ticker": "FRES", "company": "Fresnillo Plc", "percentage": 9.5 },
+      { "ticker": "CDE", "company": "Coeur Mining Inc.", "percentage": 8.0 },
+      { "ticker": "AG", "company": "First Majestic Silver Corp.", "percentage": 7.5 },
+      { "ticker": "PAAS", "company": "Pan American Silver Corp.", "percentage": 7.0 },
+      { "ticker": "HL", "company": "Hecla Mining Company", "percentage": 6.5 },
+      { "ticker": "DSV", "company": "Discovery Silver Corp.", "percentage": 5.5 },
+      { "ticker": "EXK", "company": "Endeavour Silver Corp.", "percentage": 5.0 },
+      { "ticker": "ASM", "company": "Avino Silver & Gold Mines Ltd.", "percentage": 4.5 },
+      { "ticker": "USA", "company": "Americas Gold & Silver Corp.", "percentage": 4.5 },
+      { "ticker": "ASL", "company": "Andean Silver Ltd.", "percentage": 4.0 },
+      { "ticker": "AYA", "company": "Aya Gold & Silver Inc.", "percentage": 4.0 },
+      { "ticker": "VZLA", "company": "Vizsla Silver Corp.", "percentage": 4.0 },
+      { "ticker": "WGX", "company": "Westgold Resources Ltd.", "percentage": 4.0 },
+      { "ticker": "RMS", "company": "Ramelius Resources Ltd.", "percentage": 3.5 },
+      { "ticker": "GGP", "company": "Greatland Resources Ltd.", "percentage": 3.5 },
+      { "ticker": "RRL", "company": "Regis Resources Ltd.", "percentage": 3.0 },
+      { "ticker": "GGD", "company": "Gogold Resources", "percentage": 3.0 },
+      { "ticker": "SCY", "company": "Santacruz Silver Mining Ltd.", "percentage": 2.5 },
+      { "ticker": "BMC", "company": "BMC Minerals Ltd.", "percentage": 2.5 },
+      { "ticker": "NEXG", "company": "NexGold Mining Corp.", "percentage": 2.0 },
+      { "ticker": "CMM", "company": "Capricorn Metals Ltd.", "percentage": 2.0 },
+      { "ticker": "TSK", "company": "Talisker Resources Ltd.", "percentage": 1.5 },
+      { "ticker": "AUMB", "company": "1911 Gold Corp.", "percentage": 1.0 },
+      { "ticker": "GSVR", "company": "Guanajuato Silver", "percentage": 1.0 },
+      { "ticker": "TUF", "company": "Honey Badger Silver", "percentage": 0.5 }
     ],
-    "lastUpdated": "2026-05-06"
+    "lastUpdated": "2026-05-15"
   },
   {
     "id": "john-hathaway",
     "name": "John Hathaway",
     "slug": "john-hathaway",
     "photo": "investors/john-hathaway.jpg",
-    "title": "Sprott Gold & Silver",
-    "description": "Senior portfolio manager at Sprott and one of the most respected gold fund managers.",
-    "portfolio": [],
-    "lastUpdated": "2026-05-06"
+    "title": "Sprott Gold Equity Fund",
+    "website": "https://sprott.com",
+    "description": "Senior Portfolio Manager at Sprott Asset Management USA and Managing Partner at Sprott Inc. Co-manages the Sprott Gold Equity Fund (SGDLX) since 1998, one of the longest-tenured gold fund managers in the industry.",
+    "dataSource": "Sprott Gold Equity Fund (SGDLX) holdings, December 31, 2025",
+    "portfolio": [
+      { "ticker": "CDE", "company": "Coeur Mining Inc.", "percentage": 5.28 },
+      { "ticker": "GMIN", "company": "G Mining Ventures Corp.", "percentage": 5.12 },
+      { "ticker": "OGC", "company": "OceanaGold Corp.", "percentage": 4.77 },
+      { "ticker": "IAG", "company": "IAMGOLD Corp.", "percentage": 4.21 },
+      { "ticker": "GOLD", "company": "Barrick Mining Corp.", "percentage": 3.97 },
+      { "ticker": "AEM", "company": "Agnico Eagle Mines Ltd.", "percentage": 3.64 },
+      { "ticker": "DPM", "company": "DPM Metals Inc.", "percentage": 3.63 },
+      { "ticker": "EGO", "company": "Eldorado Gold Corp.", "percentage": 3.20 },
+      { "ticker": "RMS", "company": "Ramelius Resources Ltd.", "percentage": 3.09 },
+      { "ticker": "EQX", "company": "Equinox Gold Corp.", "percentage": 3.05 },
+      { "ticker": "TXG", "company": "Torex Gold Resources Inc.", "percentage": 2.87 },
+      { "ticker": "I80", "company": "i-80 Gold Corp.", "percentage": 2.65 },
+      { "ticker": "PPTA", "company": "Perpetua Resources Corp.", "percentage": 2.46 },
+      { "ticker": "OR", "company": "OR Royalties Inc.", "percentage": 2.45 },
+      { "ticker": "KGC", "company": "Kinross Gold Corp.", "percentage": 2.41 },
+      { "ticker": "VZLA", "company": "Vizsla Silver Corp.", "percentage": 2.30 },
+      { "ticker": "VALE.L", "company": "Valterra Platinum Ltd.", "percentage": 2.25 },
+      { "ticker": "AU", "company": "AngloGold Ashanti Plc", "percentage": 2.21 },
+      { "ticker": "WGX", "company": "Westgold Resources Ltd.", "percentage": 2.15 },
+      { "ticker": "EMR", "company": "Emerald Resources NL", "percentage": 2.12 },
+      { "ticker": "DSV", "company": "Discovery Silver Corp.", "percentage": 2.03 },
+      { "ticker": "WDO", "company": "Wesdome Gold Mines Ltd.", "percentage": 1.97 },
+      { "ticker": "WPM", "company": "Wheaton Precious Metals Corp.", "percentage": 1.95 },
+      { "ticker": "AGI", "company": "Alamos Gold Inc.", "percentage": 1.82 },
+      { "ticker": "GMD", "company": "Genesis Minerals Ltd.", "percentage": 1.73 },
+      { "ticker": "LUG", "company": "Lundin Gold Inc.", "percentage": 1.45 },
+      { "ticker": "SSRM", "company": "SSR Mining Inc.", "percentage": 1.29 },
+      { "ticker": "OBM", "company": "Ora Banda Mining Ltd.", "percentage": 1.25 },
+      { "ticker": "WAF", "company": "West African Resources Ltd.", "percentage": 0.76 },
+      { "ticker": "MAU", "company": "Montage Gold Corp.", "percentage": 0.62 },
+      { "ticker": "EXK", "company": "Endeavour Silver Corp.", "percentage": 0.56 },
+      { "ticker": "NFG", "company": "New Found Gold Corp.", "percentage": 0.54 },
+      { "ticker": "SXG", "company": "Southern Cross Gold Consolidated Ltd.", "percentage": 0.51 },
+      { "ticker": "EVN", "company": "Evolution Mining Ltd.", "percentage": 0.33 }
+    ],
+    "lastUpdated": "2025-12-31"
   },
   {
     "id": "adrian-day",
@@ -93,9 +178,32 @@
     "slug": "adrian-day",
     "photo": "investors/adrian-day.jpg",
     "title": "Adrian Day Asset Management",
-    "description": "Longtime gold advocate and manager of the Global Gold Fund.",
-    "portfolio": [],
-    "lastUpdated": "2026-05-06"
+    "website": "https://adriandayassetmanagement.com",
+    "description": "Founder of Adrian Day Asset Management (est. 1991) and Portfolio Manager of the EuroPac Gold Fund (EPGFX). Day favors royalty companies and high-quality juniors over major producers.",
+    "dataSource": "EuroPac Gold Fund (EPGFX), SEC NPORT-P, July 31, 2025",
+    "portfolio": [
+      { "ticker": "AEM", "company": "Agnico Eagle Mines Ltd.", "percentage": 8.5 },
+      { "ticker": "OR", "company": "Osisko Gold Royalties Ltd.", "percentage": 7.3 },
+      { "ticker": "FSM", "company": "Fortuna Silver Mines Inc.", "percentage": 7.1 },
+      { "ticker": "WPM", "company": "Wheaton Precious Metals Corp.", "percentage": 6.1 },
+      { "ticker": "PAAS", "company": "Pan American Silver Corp.", "percentage": 5.8 },
+      { "ticker": "MTA", "company": "Metalla Royalty & Streaming Ltd.", "percentage": 5.2 },
+      { "ticker": "FNV", "company": "Franco-Nevada Corp.", "percentage": 5.1 },
+      { "ticker": "B2G", "company": "B2Gold Corp.", "percentage": 5.1 },
+      { "ticker": "RGLD", "company": "Royal Gold Inc.", "percentage": 5.0 },
+      { "ticker": "GOLD", "company": "Barrick Mining Corp.", "percentage": 4.9 },
+      { "ticker": "ELE", "company": "Elemental Altus Royalties Corp.", "percentage": 3.4 },
+      { "ticker": "HSTR", "company": "Heliostar Metals Ltd.", "percentage": 3.6 },
+      { "ticker": "TFPM", "company": "Triple Flag Precious Metals Corp.", "percentage": 3.0 },
+      { "ticker": "DKG", "company": "Dakota Gold Corp.", "percentage": 2.1 },
+      { "ticker": "AUAG", "company": "Aurion Resources Ltd.", "percentage": 1.9 },
+      { "ticker": "ALS", "company": "Altius Minerals Corp.", "percentage": 1.4 },
+      { "ticker": "NEM", "company": "Newmont Corp.", "percentage": 1.7 },
+      { "ticker": "PRB", "company": "Probe Gold Inc.", "percentage": 1.4 },
+      { "ticker": "ORE", "company": "Orogen Royalties Inc.", "percentage": 1.2 },
+      { "ticker": "G2", "company": "G2 Goldfields Inc.", "percentage": 1.0 }
+    ],
+    "lastUpdated": "2025-07-31"
   },
   {
     "id": "kevin-smith",
@@ -103,42 +211,61 @@
     "slug": "kevin-smith",
     "photo": "investors/kevin-smith.jpg",
     "title": "Crescat Capital",
-    "description": "Founder of Crescat Precious Metals Fund, known for high-conviction gold and silver bets.",
+    "website": "https://www.crescat.net",
+    "description": "Founder and Portfolio Manager of the Crescat Precious Metals Fund. Known for an activist strategy taking meaningful stakes in junior miners with tier-1 gold, silver, copper and zinc discoveries. Often co-invests alongside Eric Sprott and Rob McEwen.",
+    "dataSource": "Public commentary — private hedge fund, holdings not publicly disclosed",
     "portfolio": [],
-    "lastUpdated": "2026-05-06"
+    "portfolioNote": "Crescat Precious Metals Fund is a private hedge fund and does not file public holdings disclosures. Known co-investments include Goliath Resources alongside Rob McEwen and Eric Sprott.",
+    "lastUpdated": "2026-05-15"
   },
   {
     "id": "rob-mcewen",
     "name": "Rob McEwen",
     "slug": "rob-mcewen",
     "photo": "investors/rob-mcewen.jpg",
-    "title": "McEwen Mining",
-    "description": "Founder of McEwen Mining and former CEO of Goldcorp.",
-    "portfolio": [],
-    "lastUpdated": "2026-05-06"
+    "title": "McEwen Inc.",
+    "website": "https://www.mcewenmining.com",
+    "description": "Founder of McEwen Inc. (formerly McEwen Mining) and former CEO of Goldcorp. Personally invested over $205 million across his companies; takes a $1/year salary. Member of the Canadian Mining Hall of Fame.",
+    "dataSource": "Public insider disclosures, June 2025",
+    "portfolio": [
+      { "ticker": "MUX", "company": "McEwen Inc.", "percentage": 60, "note": "15% ownership of McEwen Inc." },
+      { "ticker": "MCEWEN-COPPER", "company": "McEwen Copper (private)", "percentage": 30, "note": "13% ownership stake" },
+      { "ticker": "CGC", "company": "Canadian Gold Corp.", "percentage": 10, "note": "32.9% personal stake" }
+    ],
+    "portfolioNote": "Percentages represent approximate weighting of his public mining investments based on $205M total invested. McEwen's portfolio is concentrated in companies he founded or chairs.",
+    "lastUpdated": "2025-06-30"
   },
   {
     "id": "pierre-lassonde",
     "name": "Pierre Lassonde",
     "slug": "pierre-lassonde",
     "photo": "investors/pierre-lassonde.jpg",
-    "title": "Franco-Nevada",
-    "description": "Co-founder of Franco-Nevada, legendary figure in the gold royalty sector.",
-    "portfolio": [],
-    "lastUpdated": "2026-05-06"
+    "title": "Franco-Nevada (Co-Founder)",
+    "website": "https://www.franco-nevada.com",
+    "description": "Co-founder of Franco-Nevada Corporation, pioneer of the gold royalty business model. Legendary figure in the gold royalty sector; member of the Canadian Mining Hall of Fame.",
+    "dataSource": "TipRanks insider tracking and public director filings",
+    "portfolio": [
+      { "ticker": "FNV", "company": "Franco-Nevada Corp.", "percentage": 50, "note": "Co-founder, largest personal holding" },
+      { "ticker": "OLA", "company": "Orla Mining Ltd.", "percentage": 15 },
+      { "ticker": "ATX", "company": "ATEX Resources Inc.", "percentage": 10 },
+      { "ticker": "NGD", "company": "New Gold Inc.", "percentage": 8 },
+      { "ticker": "CXB", "company": "Calibre Mining Corp.", "percentage": 7 },
+      { "ticker": "FOM", "company": "Formation Metals Inc.", "percentage": 5 },
+      { "ticker": "FMT", "company": "Forsys Metals Corp.", "percentage": 5 }
+    ],
+    "portfolioNote": "Percentages are approximate weightings based on publicly disclosed insider holdings. Exact dollar values not publicly available.",
+    "lastUpdated": "2026-04-10"
   },
   {
     "id": "jon-binder",
     "name": "Jon Binder",
     "slug": "jon-binder",
     "photo": "investors/jon-binder.jpg",
-    "title": "Blue Laser Capital & Other Ventures",
+    "title": "Blue Laser Capital",
     "description": "Precious metals investor and founder of Blue Laser Capital.",
-    "portfolio": [
-      { "ticker": "FASS", "company": "Fat Ass Exploration, Inc.", "percentage": 47 },
-      { "ticker": "GOLD", "company": "Barrick Gold", "percentage": 45 },
-      { "ticker": "AEM", "company": "Agnico Eagle Mines", "percentage": 22 }
-    ],
-    "lastUpdated": "2026-05-06"
+    "dataSource": "No public filings available",
+    "portfolio": [],
+    "portfolioNote": "Blue Laser Capital does not file public holdings disclosures. Recommend sourcing from interviews or removing until verifiable data is available.",
+    "lastUpdated": "2026-05-15"
   }
 ]

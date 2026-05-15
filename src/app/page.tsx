@@ -35,7 +35,7 @@ export default async function HomePage() {
               GoldSignal.ai
             </p>
             <h1 className="text-balance text-3xl font-bold leading-tight tracking-tight text-white sm:text-4xl md:text-[2.65rem]">
-              Follow the investors. Own the names they own.
+              Follow the Smart Money in Gold and Silver
             </h1>
             <p className="mx-auto mt-4 max-w-xl text-pretty text-sm leading-relaxed text-navy-100 sm:text-base">
               A focused view of precious-metals fund managers and the exact equities in their portfolios — nothing else.

@@ -29,9 +29,9 @@
   --border-mid: rgba(15, 23, 42, 0.14);
   --border-bright: rgba(201, 151, 46, 0.45);
 
-  --font-display: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-display-loaded), Georgia, "Times New Roman", serif;
   --font-mono: var(--font-mono-loaded), ui-monospace, monospace;
-  --font-body: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-body-loaded), ui-sans-serif, system-ui, sans-serif;
 
   --text-primary: #0f172a;
   --text-secondary: #475569;
@@ -50,7 +50,8 @@
 }
 
 @theme {
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-body-loaded), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-display-loaded), Georgia, serif;
   --font-mono: var(--font-mono-loaded), ui-monospace, monospace;
 
   --color-navy-50: #f0f4f8;
@@ -220,4 +221,20 @@ h3 {
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
   border-radius: 4px;
+}
+
+/* ── Homepage dark luxury theme ─────────────────────────── */
+.home-theme {
+  --bg-primary: #0a0a0a;
+  --bg-secondary: #111111;
+  --gold: #d4a017;
+  --gold-light: #e8b84b;
+  --text-primary: #ffffff;
+  --text-secondary: #aaaaaa;
+  --red: #e53935;
+  --border: rgba(212, 160, 23, 0.2);
+}
+
+.font-display {
+  font-family: var(--font-display-loaded), Georgia, "Times New Roman", serif;
 }

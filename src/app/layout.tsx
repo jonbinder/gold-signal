@@ -1,19 +1,18 @@
 import type { Metadata } from "next";
-import { Inter, JetBrains_Mono } from "next/font/google";
+import { DM_Sans, Playfair_Display } from "next/font/google";
 import "@/styles/globals.css";
-import { Navbar } from "@/components/layout/Navbar";
-import { Footer } from "@/components/layout/Footer";
 import { cn } from "@/lib/utils";
 
-const inter = Inter({
+const dmSans = DM_Sans({
   subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-body-loaded",
   display: "swap",
 });
 
-const jetbrainsMono = JetBrains_Mono({
+const playfair = Playfair_Display({
   subsets: ["latin"],
-  variable: "--font-mono-loaded",
+  variable: "--font-display-loaded",
+  weight: ["700", "800", "900"],
   display: "swap",
 });
 
@@ -33,18 +32,10 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={cn(inter.variable, jetbrainsMono.variable, "scroll-smooth")}>
-      <body className="min-h-dvh bg-[var(--bg-void)] font-sans text-[var(--text-primary)] antialiased">
-        <Navbar />
-        <main className="min-h-[60vh]">{children}</main>
-        <Footer />
-      </body>
+    <html lang="en" className={cn(dmSans.variable, playfair.variable, "scroll-smooth")}>
+      <body className="min-h-dvh font-sans antialiased">{children}</body>
     </html>
   );
 }

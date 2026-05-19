@@ -7,6 +7,39 @@ const HERO_CARD_COUNT = 6;
 const STORAGE_KEY = 'gs_email';
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+const FORMSPREE_PORTFOLIO_URL = 'https://formspree.io/f/xlgvdzyq';
+const FORMSPREE_UNLOCK_URL = 'https://formspree.io/f/xlgvdzyq';
+
+async function submitToFormspree(
+  url: string,
+  body: Record<string, string>
+): Promise<boolean> {
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  return response.ok;
+}
+
+function showFormError(form: HTMLFormElement, message: string, className: string) {
+  let el = form.querySelector<HTMLElement>(`.${className}`);
+  if (!el) {
+    el = document.createElement('p');
+    el.className = className;
+    el.setAttribute('role', 'alert');
+    el.style.color = '#8B2635';
+    el.style.marginTop = '0.75rem';
+    el.style.fontSize = '0.875rem';
+    form.appendChild(el);
+  }
+  el.textContent = message;
+}
+
+function clearFormError(form: HTMLFormElement, className: string) {
+  form.querySelector(`.${className}`)?.remove();
+}
+
 type ScoreTier = 'high' | 'mid' | 'low';
 
 type Stock = {
@@ -270,6 +303,8 @@ export default function GoldSignalClient() {
         }
         emailInput?.setCustomValidity('');
 
+        clearFormError(gateForm, 'email-gate__error');
+
         const btn = gateForm.querySelector('button[type="submit"]') as HTMLButtonElement | null;
         const originalLabel = btn?.textContent ?? 'Unlock Full List';
         if (btn) {
@@ -277,13 +312,23 @@ export default function GoldSignalClient() {
           btn.textContent = 'Unlocking...';
         }
 
-        await new Promise((resolve) => setTimeout(resolve, 1500));
+        const ok = await submitToFormspree(FORMSPREE_UNLOCK_URL, {
+          email,
+          source: 'GoldSignal.ai Rankings Unlock',
+        });
 
-        unlockRankings(email);
-
-        if (btn) {
-          btn.disabled = false;
-          btn.textContent = originalLabel;
+        if (ok) {
+          unlockRankings(email);
+        } else {
+          showFormError(
+            gateForm,
+            'Something went wrong. Please try again in a moment.',
+            'email-gate__error'
+          );
+          if (btn) {
+            btn.disabled = false;
+            btn.textContent = originalLabel;
+          }
         }
       };
 
@@ -319,16 +364,34 @@ export default function GoldSignalClient() {
           return;
         }
 
+        clearFormError(form, 'portfolio-form__error');
+
         const btn = form.querySelector('.btn--submit') as HTMLButtonElement | null;
+        const originalLabel = btn?.textContent ?? 'Submit for Review';
         if (btn) {
           btn.disabled = true;
-          btn.textContent = 'Analyzing...';
+          btn.textContent = 'Submitting...';
         }
 
-        const submission = { name, email, tickers };
-        await new Promise((resolve) => setTimeout(resolve, 2000));
+        const ok = await submitToFormspree(FORMSPREE_PORTFOLIO_URL, {
+          name,
+          email,
+          tickers,
+          source: 'GoldSignal.ai Portfolio Review Form',
+        });
 
-        console.log('Portfolio submission:', submission);
+        if (!ok) {
+          showFormError(
+            form,
+            'Something went wrong. Please try again in a moment.',
+            'portfolio-form__error'
+          );
+          if (btn) {
+            btn.disabled = false;
+            btn.textContent = originalLabel;
+          }
+          return;
+        }
 
         card.innerHTML = `
           <div class="portfolio-form__success" role="status">

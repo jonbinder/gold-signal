@@ -42,7 +42,7 @@ function isValidEmail(email) {
   return EMAIL_RE.test(String(email).trim());
 }
 
-function formatWeeklyChange(value) {
+function formatMonthlyChange(value) {
   const n = Number(value);
   if (n > 0) {
     return {
@@ -86,14 +86,14 @@ function buildRankingRow(stock, rank, { locked = false } = {}) {
   const tr = document.createElement('tr');
   tr.className = `fade-in rankings-row${locked ? ' rankings-row--locked' : ''}`;
 
-  const weekly = formatWeeklyChange(stock.weeklyChange);
+  const monthly = formatMonthlyChange(stock.monthlyChange);
 
   tr.innerHTML = `
     <td class="mono">${rank}</td>
     <td class="mono rankings-table__ticker">${stock.ticker}</td>
     <td>${stock.company}</td>
     <td>${stock.sector}</td>
-    <td class="mono ${weekly.className}">${weekly.text}</td>
+    <td class="mono ${monthly.className}">${monthly.text}</td>
     <td></td>
   `;
 

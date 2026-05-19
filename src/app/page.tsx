@@ -123,7 +123,7 @@ export default function HomePage() {
           <header className="section-header section-header--dark">
             <h2 className="section-header__title">Stock Rankings</h2>
             <p className="section-header__sub">
-              Gold &amp; silver equities ranked by SignalScore — refreshed weekly from institutional
+              Gold &amp; silver equities ranked by SignalScore — refreshed monthly from institutional
               filings and market data.
             </p>
           </header>
@@ -135,7 +135,7 @@ export default function HomePage() {
                   <th scope="col">Ticker</th>
                   <th scope="col">Company</th>
                   <th scope="col">Sector</th>
-                  <th scope="col">Weekly</th>
+                  <th scope="col">Monthly</th>
                   <th scope="col">SignalScore</th>
                 </tr>
               </thead>

@@ -16,30 +16,30 @@ export type StockRow = {
   ticker: string;
   company: string;
   sector: string;
-  weeklyChange: number;
+  monthlyChange: number;
   signalScore: number;
 };
 
 const SAMPLE_STOCKS: StockRow[] = [
-  { ticker: "NEM", company: "Newmont Corporation", sector: "Gold Mining", weeklyChange: 2.4, signalScore: 94 },
-  { ticker: "FNV", company: "Franco-Nevada Corp", sector: "Royalty & Streaming", weeklyChange: 1.8, signalScore: 91 },
-  { ticker: "WPM", company: "Wheaton Precious Metals", sector: "Silver Streaming", weeklyChange: 3.1, signalScore: 89 },
-  { ticker: "GOLD", company: "Barrick Gold Corporation", sector: "Gold Mining", weeklyChange: -0.6, signalScore: 87 },
-  { ticker: "AEM", company: "Agnico Eagle Mines", sector: "Gold Mining", weeklyChange: 1.2, signalScore: 85 },
-  { ticker: "KGC", company: "Kinross Gold", sector: "Gold Mining", weeklyChange: 0.9, signalScore: 83 },
-  { ticker: "AG", company: "First Majestic Silver", sector: "Silver Mining", weeklyChange: 4.2, signalScore: 81 },
-  { ticker: "PAAS", company: "Pan American Silver", sector: "Silver Mining", weeklyChange: -1.1, signalScore: 78 },
-  { ticker: "RGLD", company: "Royal Gold", sector: "Royalty & Streaming", weeklyChange: 0, signalScore: 76 },
-  { ticker: "GDX", company: "VanEck Gold Miners ETF", sector: "ETF", weeklyChange: 2.0, signalScore: 72 },
-  { ticker: "HL", company: "Hecla Mining", sector: "Silver Mining", weeklyChange: -2.3, signalScore: 58 },
-  { ticker: "MUX", company: "McEwen Mining", sector: "Gold Mining", weeklyChange: -3.5, signalScore: 52 },
+  { ticker: "NEM", company: "Newmont Corporation", sector: "Gold Mining", monthlyChange: 2.4, signalScore: 94 },
+  { ticker: "FNV", company: "Franco-Nevada Corp", sector: "Royalty & Streaming", monthlyChange: 1.8, signalScore: 91 },
+  { ticker: "WPM", company: "Wheaton Precious Metals", sector: "Silver Streaming", monthlyChange: 3.1, signalScore: 89 },
+  { ticker: "GOLD", company: "Barrick Gold Corporation", sector: "Gold Mining", monthlyChange: -0.6, signalScore: 87 },
+  { ticker: "AEM", company: "Agnico Eagle Mines", sector: "Gold Mining", monthlyChange: 1.2, signalScore: 85 },
+  { ticker: "KGC", company: "Kinross Gold", sector: "Gold Mining", monthlyChange: 0.9, signalScore: 83 },
+  { ticker: "AG", company: "First Majestic Silver", sector: "Silver Mining", monthlyChange: 4.2, signalScore: 81 },
+  { ticker: "PAAS", company: "Pan American Silver", sector: "Silver Mining", monthlyChange: -1.1, signalScore: 78 },
+  { ticker: "RGLD", company: "Royal Gold", sector: "Royalty & Streaming", monthlyChange: 0, signalScore: 76 },
+  { ticker: "GDX", company: "VanEck Gold Miners ETF", sector: "ETF", monthlyChange: 2.0, signalScore: 72 },
+  { ticker: "HL", company: "Hecla Mining", sector: "Silver Mining", monthlyChange: -2.3, signalScore: 58 },
+  { ticker: "MUX", company: "McEwen Mining", sector: "Gold Mining", monthlyChange: -3.5, signalScore: 52 },
 ];
 
 const EXCEL_HEADERS = [
   "Ticker",
   "Company",
   "Sector",
-  "Weekly Change (%)",
+  "Monthly Change (%)",
   "Signal Score",
 ] as const;
 
@@ -80,9 +80,9 @@ function rowToStock(row: Record<string, unknown>, rowNum: number): StockRow | nu
 
   const company = String(cell(row, "company") ?? "").trim();
   const sector = String(cell(row, "sector") ?? "").trim();
-  const weeklyChange = parseNumber(
-    cell(row, "weekly change", "weeklychange", "weekly change %"),
-    "Weekly Change (%)",
+  const monthlyChange = parseNumber(
+    cell(row, "monthly change", "monthlychange", "monthly change %", "weekly change", "weeklychange"),
+    "Monthly Change (%)",
     rowNum
   );
   const signalScore = parseNumber(
@@ -99,13 +99,13 @@ function rowToStock(row: Record<string, unknown>, rowNum: number): StockRow | nu
     throw new Error(`Row ${rowNum}: Company and Sector are required for ticker ${ticker}`);
   }
 
-  return { ticker, company, sector, weeklyChange, signalScore };
+  return { ticker, company, sector, monthlyChange, signalScore };
 }
 
 export function stocksToSheetRows(stocks: StockRow[]): (string | number)[][] {
   return [
     [...EXCEL_HEADERS],
-    ...stocks.map((s) => [s.ticker, s.company, s.sector, s.weeklyChange, s.signalScore]),
+    ...stocks.map((s) => [s.ticker, s.company, s.sector, s.monthlyChange, s.signalScore]),
   ];
 }
 
@@ -150,9 +150,22 @@ export function writeStocksJson(stocks: StockRow[], filePath = JSON_PATH): void 
   fs.writeFileSync(filePath, `${JSON.stringify(sorted, null, 2)}\n`, "utf8");
 }
 
+function normalizeStock(raw: Record<string, unknown>): StockRow {
+  const weekly = raw.weeklyChange;
+  const monthly = raw.monthlyChange;
+  return {
+    ticker: String(raw.ticker),
+    company: String(raw.company),
+    sector: String(raw.sector),
+    monthlyChange: Number(monthly ?? weekly ?? 0),
+    signalScore: Number(raw.signalScore),
+  };
+}
+
 function loadSeedStocks(): StockRow[] {
   if (fs.existsSync(JSON_PATH)) {
-    return JSON.parse(fs.readFileSync(JSON_PATH, "utf8")) as StockRow[];
+    const parsed = JSON.parse(fs.readFileSync(JSON_PATH, "utf8")) as Record<string, unknown>[];
+    return parsed.map(normalizeStock);
   }
   return SAMPLE_STOCKS;
 }
@@ -168,6 +181,18 @@ function main(): void {
   ensureExcelExists();
   const stocks = readStocksFromExcel();
   writeStocksJson(stocks);
+  try {
+    writeStocksExcel(stocks);
+  } catch (err) {
+    const code = err && typeof err === "object" && "code" in err ? String(err.code) : "";
+    if (code === "EBUSY") {
+      console.warn(
+        "Could not update GoldSignal_Stocks.xlsx (file is open in Excel). Close it and run stocks:sync again to refresh column headers."
+      );
+    } else {
+      throw err;
+    }
+  }
   console.log(`Synced ${stocks.length} stocks → public/data/stocks.json`);
   console.log("Edit GoldSignal_Stocks.xlsx, then run: npm run stocks:sync");
 }

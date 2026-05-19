@@ -1321,7 +1321,7 @@ h1, h2, h3 {
     gap: 16px;
   }
 
-  /* --- Rankings: hide sector & weekly, tighter cells --- */
+  /* --- Rankings: hide sector & monthly, tighter cells --- */
   .rankings-table {
     min-width: 0;
   }

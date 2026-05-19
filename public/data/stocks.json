@@ -1,0 +1,14 @@
+[
+  { "ticker": "NEM", "company": "Newmont Corporation", "sector": "Gold Mining", "weeklyChange": 2.4, "signalScore": 94 },
+  { "ticker": "FNV", "company": "Franco-Nevada Corp", "sector": "Royalty & Streaming", "weeklyChange": 1.8, "signalScore": 91 },
+  { "ticker": "WPM", "company": "Wheaton Precious Metals", "sector": "Silver Streaming", "weeklyChange": 3.1, "signalScore": 89 },
+  { "ticker": "GOLD", "company": "Barrick Gold Corporation", "sector": "Gold Mining", "weeklyChange": -0.6, "signalScore": 87 },
+  { "ticker": "AEM", "company": "Agnico Eagle Mines", "sector": "Gold Mining", "weeklyChange": 1.2, "signalScore": 85 },
+  { "ticker": "KGC", "company": "Kinross Gold", "sector": "Gold Mining", "weeklyChange": 0.9, "signalScore": 83 },
+  { "ticker": "AG", "company": "First Majestic Silver", "sector": "Silver Mining", "weeklyChange": 4.2, "signalScore": 81 },
+  { "ticker": "PAAS", "company": "Pan American Silver", "sector": "Silver Mining", "weeklyChange": -1.1, "signalScore": 78 },
+  { "ticker": "RGLD", "company": "Royal Gold", "sector": "Royalty & Streaming", "weeklyChange": 0, "signalScore": 76 },
+  { "ticker": "GDX", "company": "VanEck Gold Miners ETF", "sector": "ETF", "weeklyChange": 2.0, "signalScore": 72 },
+  { "ticker": "HL", "company": "Hecla Mining", "sector": "Silver Mining", "weeklyChange": -2.3, "signalScore": 58 },
+  { "ticker": "MUX", "company": "McEwen Mining", "sector": "Gold Mining", "weeklyChange": -3.5, "signalScore": 52 }
+]

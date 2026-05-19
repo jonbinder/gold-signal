@@ -1,0 +1,1210 @@
+/* ==========================================================================
+   GoldSignal.ai — global styles
+   ========================================================================== */
+
+@import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&display=swap");
+
+/* --- Color & typography tokens --- */
+:root {
+  --gold: #C9971C;
+  --gold-light: #E8B84B;
+  --gold-pale: #FBF3DC;
+  --gold-dim: #A67B14;
+  --ink: #111009;
+  --paper: #FDFAF2;
+  --white: #ffffff;
+  --green: #2D6A4F;
+  --green-bg: #EAF4EE;
+  --amber: #A05C00;
+  --amber-bg: #FBF3DC;
+  --red: #8B2635;
+  --red-bg: #FAEAEC;
+  --font-display: "Playfair Display", Georgia, serif;
+  --font-body: "DM Sans", system-ui, sans-serif;
+  --font-mono: "DM Mono", ui-monospace, monospace;
+  --nav-height: 64px;
+  --max-hero: 1100px;
+  --max-content: 1100px;
+  --radius-sm: 4px;
+  --radius: 8px;
+  --radius-lg: 12px;
+  --border-light: rgba(17, 16, 9, 0.12);
+  --border-gold: rgba(201, 151, 28, 0.35);
+  --shadow-card: 0 8px 32px rgba(17, 16, 9, 0.08);
+}
+
+/* --- Reset --- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: calc(var(--nav-height) + 16px);
+}
+
+body {
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.6;
+  color: var(--ink);
+  background: var(--paper);
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+ul, ol {
+  list-style: none;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.mono {
+  font-family: var(--font-mono);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* --- Shared: buttons --- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 24px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  border: 2px solid transparent;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, border-color 0.2s, opacity 0.2s;
+}
+
+.btn--primary {
+  background: var(--gold);
+  color: var(--ink);
+  border-color: var(--gold);
+}
+
+.btn--primary:hover {
+  background: var(--gold-light);
+  border-color: var(--gold-light);
+}
+
+.btn--secondary {
+  background: transparent;
+  color: var(--ink);
+  border-color: var(--ink);
+}
+
+.btn--secondary:hover {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.btn--cta {
+  background: var(--ink);
+  color: var(--gold);
+  border-color: var(--ink);
+  border-radius: var(--radius-sm);
+  padding: 10px 20px;
+  font-size: 13px;
+}
+
+.btn--cta:hover {
+  background: #2a2820;
+}
+
+.btn--unlock {
+  background: var(--gold);
+  color: var(--ink);
+  border-color: var(--gold);
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+}
+
+.btn--submit {
+  background: var(--ink);
+  color: var(--gold);
+  border-color: var(--ink);
+  border-radius: var(--radius-sm);
+}
+
+.btn--submit:hover {
+  background: #2a2820;
+}
+
+.btn--full {
+  width: 100%;
+}
+
+/* --- Shared: score badges (80+ green, 60–79 amber, <60 red) --- */
+.score {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-weight: 500;
+  border-radius: var(--radius-sm);
+}
+
+.score--high {
+  color: var(--green);
+  background: var(--green-bg);
+}
+
+.score--mid {
+  color: var(--amber);
+  background: var(--amber-bg);
+}
+
+.score--low {
+  color: var(--red);
+  background: var(--red-bg);
+}
+
+.rankings-table .score {
+  font-size: 1.125rem;
+  min-width: 2.75rem;
+  padding: 6px 12px;
+}
+
+.score-card .score {
+  font-size: 13px;
+  min-width: 2rem;
+  padding: 2px 8px;
+}
+
+.change--up {
+  font-family: var(--font-mono);
+  color: var(--green);
+}
+
+.change--down {
+  font-family: var(--font-mono);
+  color: var(--red);
+}
+
+.change--flat {
+  font-family: var(--font-mono);
+  color: rgba(253, 250, 242, 0.45);
+}
+
+/* --- Section headers --- */
+.section-header {
+  max-width: var(--max-content);
+  margin: 0 auto 40px;
+  padding: 0 48px;
+}
+
+.section-header--dark .section-header__title,
+.section-header--dark .section-header__sub {
+  color: var(--paper);
+}
+
+.section-header--center {
+  text-align: center;
+}
+
+.section-header__title {
+  font-size: clamp(1.75rem, 3vw, 2.25rem);
+  margin-bottom: 12px;
+}
+
+.section-header__sub {
+  font-size: 17px;
+  font-weight: 300;
+  opacity: 0.85;
+  max-width: 36rem;
+}
+
+.section-header--center .section-header__sub {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* ==========================================================================
+   1. NAV
+   ========================================================================== */
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  height: var(--nav-height);
+  padding: 0 48px;
+  background: rgba(253, 250, 242, 0.94);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border-gold);
+}
+
+.nav__logo {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.nav__logo-accent {
+  color: var(--gold);
+}
+
+.nav__links {
+  display: flex;
+  gap: 32px;
+  flex: 1;
+}
+
+.nav__links a {
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  opacity: 0.85;
+  transition: color 0.2s, opacity 0.2s;
+}
+
+.nav__links a:hover {
+  opacity: 1;
+  color: var(--gold);
+}
+
+.nav__cta {
+  margin-left: auto;
+}
+
+.nav--scrolled {
+  box-shadow: 0 4px 20px rgba(17, 16, 9, 0.08);
+  border-bottom-color: rgba(17, 16, 9, 0.12);
+}
+
+/* ==========================================================================
+   2. HERO
+   ========================================================================== */
+.hero {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: start;
+  max-width: var(--max-hero);
+  margin: 0 auto;
+  padding: 64px 48px 80px;
+}
+
+.hero__eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--gold-dim);
+  margin-bottom: 20px;
+}
+
+.hero__eyebrow::before {
+  content: "";
+  display: block;
+  width: 24px;
+  height: 2px;
+  background: var(--gold);
+  flex-shrink: 0;
+}
+
+.hero__title {
+  font-family: var(--font-display);
+  font-size: 48px;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.hero__title em {
+  font-style: italic;
+  color: var(--gold);
+}
+
+.hero__sub {
+  font-size: 17px;
+  font-weight: 300;
+  line-height: 1.65;
+  opacity: 0.88;
+  margin-bottom: 32px;
+  max-width: 28rem;
+}
+
+.hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 40px;
+}
+
+.hero__stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  padding-top: 28px;
+  border-top: 1px solid var(--border-light);
+}
+
+.hero__stat-value {
+  display: block;
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+
+.hero__stat-label {
+  font-size: 13px;
+  font-weight: 400;
+  opacity: 0.65;
+}
+
+/* Score card (hero right) */
+.score-card {
+  background: var(--ink);
+  border-radius: var(--radius-lg);
+  padding: 20px 24px;
+  box-shadow: var(--shadow-card);
+  color: var(--paper);
+}
+
+.score-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(253, 250, 242, 0.1);
+}
+
+.score-card__label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gold-light);
+}
+
+.score-card__pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--green);
+  animation: pulse 2s ease infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(45, 106, 79, 0.5); }
+  50% { box-shadow: 0 0 0 6px rgba(45, 106, 79, 0); }
+}
+
+.score-card__row {
+  display: grid;
+  grid-template-columns: 24px 52px 1fr minmax(60px, 80px) 40px;
+  align-items: center;
+  gap: 8px 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(253, 250, 242, 0.06);
+  font-size: 13px;
+}
+
+.score-card__row:last-child {
+  border-bottom: none;
+}
+
+.score-card__rank {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: rgba(253, 250, 242, 0.4);
+}
+
+.score-card__ticker {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  color: var(--gold-light);
+}
+
+.score-card__name {
+  opacity: 0.7;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.score-card__bar {
+  grid-column: 4;
+  height: 4px;
+  background: rgba(253, 250, 242, 0.12);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.score-card__bar-fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+}
+
+.score-card__bar-fill--high {
+  background: var(--green);
+}
+
+.score-card__bar-fill--mid {
+  background: var(--gold-light);
+}
+
+.score-card__bar-fill--low {
+  background: var(--red);
+}
+
+/* Scroll reveal */
+.fade-in {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.fade-in.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.score-card__row .score {
+  grid-column: 5;
+  justify-self: end;
+}
+
+/* ==========================================================================
+   3. INVESTORS
+   ========================================================================== */
+.investors {
+  max-width: var(--max-content);
+  margin: 0 auto;
+  padding: 80px 48px;
+}
+
+.investors__grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.investor-card {
+  background: var(--white);
+  border: 1px solid var(--border-gold);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.investor-card:hover {
+  box-shadow: var(--shadow-card);
+  transform: translateY(-2px);
+}
+
+.investor-card__avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--gold-pale);
+  color: var(--gold-dim);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 16px;
+}
+
+.investor-card__name {
+  font-family: var(--font-display);
+  font-size: 18px;
+  margin-bottom: 6px;
+}
+
+.investor-card__role {
+  font-size: 13px;
+  opacity: 0.7;
+  line-height: 1.45;
+  margin-bottom: 16px;
+}
+
+.investor-card__tickers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.pill {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 4px 8px;
+  background: var(--gold-pale);
+  color: var(--gold-dim);
+  border-radius: var(--radius-sm);
+}
+
+/* ==========================================================================
+   4. RANKINGS
+   ========================================================================== */
+.rankings {
+  width: 100%;
+  background: var(--ink);
+  padding: 80px 0 96px;
+}
+
+.rankings .section-header {
+  margin-bottom: 40px;
+}
+
+.rankings__table-wrap {
+  max-width: var(--max-content);
+  margin: 0 auto;
+  padding: 0 48px;
+  position: relative;
+}
+
+.rankings-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.rankings-table th {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-align: left;
+  padding: 12px 16px;
+  color: rgba(253, 250, 242, 0.45);
+  border-bottom: 1px solid rgba(253, 250, 242, 0.12);
+}
+
+.rankings-table td {
+  padding: 16px;
+  font-size: 14px;
+  color: var(--paper);
+  border-bottom: 1px solid rgba(253, 250, 242, 0.06);
+  vertical-align: middle;
+}
+
+.rankings-table td.mono,
+.rankings-table .mono {
+  font-family: var(--font-mono);
+}
+
+.rankings-table__ticker {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  color: var(--gold);
+}
+
+.rankings-table--ghost td {
+  color: rgba(253, 250, 242, 0.3);
+}
+
+.rankings-row--locked {
+  display: none;
+}
+
+/* Lock row / email gate */
+.lock-row,
+.email-gate {
+  margin-top: 16px;
+}
+
+.email-gate__panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 32px 24px;
+  background: rgba(253, 250, 242, 0.05);
+  border: 1px solid rgba(253, 250, 242, 0.1);
+  border-radius: var(--radius-lg);
+}
+
+.email-gate__title {
+  font-family: var(--font-display);
+  font-size: 24px;
+  color: var(--paper);
+  margin-bottom: 8px;
+}
+
+.email-gate__text {
+  font-size: 14px;
+  color: rgba(253, 250, 242, 0.7);
+  margin-bottom: 20px;
+  max-width: 22rem;
+}
+
+.email-gate__form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  width: 100%;
+  max-width: 420px;
+}
+
+.email-gate__form input {
+  flex: 1;
+  min-width: 200px;
+  padding: 12px 16px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  border: 1px solid rgba(253, 250, 242, 0.2);
+  border-radius: var(--radius-sm);
+  background: rgba(253, 250, 242, 0.08);
+  color: var(--paper);
+}
+
+.email-gate__form input::placeholder {
+  color: rgba(253, 250, 242, 0.4);
+}
+
+.email-gate__form input:focus {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+.email-gate.is-unlocked,
+.email-gate[hidden] {
+  display: none;
+}
+
+/* ==========================================================================
+   5. SIGNAL SCORE EXPLAINED
+   ========================================================================== */
+.explained {
+  max-width: var(--max-content);
+  margin: 0 auto;
+  padding: 96px 48px;
+}
+
+.explained__grid {
+  display: grid;
+  grid-template-columns: 1fr 1.15fr;
+  gap: 56px;
+  align-items: start;
+}
+
+.explained__score-panel {
+  background: var(--white);
+  border: 1px solid var(--border-gold);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  box-shadow: var(--shadow-card);
+}
+
+.explained__score-label {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.55;
+  margin-bottom: 8px;
+}
+
+.explained__score-header {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 28px;
+}
+
+.explained__score-value {
+  font-family: var(--font-display);
+  font-size: 72px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--gold);
+}
+
+.explained__rating-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--green);
+  background: var(--green-bg);
+  border-radius: var(--radius-sm);
+  margin-bottom: 8px;
+}
+
+.sub-scores {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sub-score {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto auto;
+  gap: 6px 12px;
+  align-items: center;
+}
+
+.sub-score__label {
+  grid-column: 1;
+  font-size: 13px;
+}
+
+.sub-score__value {
+  grid-column: 2;
+  grid-row: 1;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--green);
+}
+
+.sub-score__bar {
+  grid-column: 1 / -1;
+  height: 6px;
+  background: var(--gold-pale);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.sub-score__fill {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--gold), var(--gold-light));
+  border-radius: 999px;
+}
+
+.explained__metrics {
+  display: flex;
+  flex-direction: column;
+}
+
+.metric {
+  display: flex;
+  gap: 20px;
+  padding: 24px 0;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.metric:first-child {
+  padding-top: 0;
+}
+
+.metric:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.metric__num {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--gold);
+  line-height: 1.2;
+}
+
+.metric__title {
+  font-family: var(--font-display);
+  font-size: 18px;
+  margin-bottom: 8px;
+}
+
+.metric__desc {
+  font-size: 15px;
+  font-weight: 300;
+  line-height: 1.6;
+  opacity: 0.82;
+}
+
+/* ==========================================================================
+   6. PORTFOLIO FORM
+   ========================================================================== */
+.portfolio-review {
+  background: var(--gold-pale);
+  padding: 96px 48px;
+}
+
+.portfolio-review .section-header {
+  margin-bottom: 32px;
+}
+
+.portfolio-form {
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.portfolio-form__card {
+  background: var(--white);
+  border: 1px solid var(--border-gold);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  box-shadow: var(--shadow-card);
+}
+
+.portfolio-form__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.portfolio-form__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.portfolio-form__field--full {
+  margin-bottom: 20px;
+}
+
+.portfolio-form__label {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.portfolio-form input,
+.portfolio-form textarea {
+  padding: 12px 14px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  background: var(--paper);
+}
+
+.portfolio-form textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.portfolio-form input:focus,
+.portfolio-form textarea:focus {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+.portfolio-form__note {
+  text-align: center;
+  font-size: 13px;
+  opacity: 0.7;
+  margin-top: 16px;
+}
+
+.portfolio-form__success {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 20px;
+  padding: 16px 8px;
+}
+
+.portfolio-form__check {
+  flex-shrink: 0;
+}
+
+.portfolio-form__success-text {
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 1.55;
+  color: var(--green);
+  max-width: 28rem;
+}
+
+/* ==========================================================================
+   7. FOOTER
+   ========================================================================== */
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+  background: var(--ink);
+  color: rgba(253, 250, 242, 0.75);
+  padding: 32px 48px;
+}
+
+.footer__logo {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--paper);
+  flex-shrink: 0;
+}
+
+.footer__source {
+  flex: 1;
+  text-align: center;
+  font-size: 13px;
+  line-height: 1.5;
+  max-width: 32rem;
+  margin: 0 auto;
+}
+
+.footer__copy {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  opacity: 0.5;
+  flex-shrink: 0;
+}
+
+/* ==========================================================================
+   Responsive — tablet & mobile
+   ========================================================================== */
+
+/* Tablet / mobile (≤768px) */
+@media (max-width: 768px) {
+  /* --- Nav: logo + CTA only --- */
+  .nav {
+    padding: 0 32px;
+    gap: 16px;
+  }
+
+  .nav__links {
+    display: none;
+  }
+
+  .nav__cta {
+    margin-left: auto;
+    font-size: 12px;
+    padding: 8px 14px;
+  }
+
+  /* --- Section padding: 64px → 32px --- */
+  .hero {
+    grid-template-columns: 1fr;
+    gap: 32px;
+    padding: 32px;
+  }
+
+  .investors {
+    padding: 32px;
+  }
+
+  .rankings {
+    padding: 32px 0;
+  }
+
+  .explained {
+    padding: 32px;
+  }
+
+  .portfolio-review {
+    padding: 32px;
+  }
+
+  .section-header {
+    padding: 0;
+    margin-bottom: 24px;
+  }
+
+  .rankings__table-wrap {
+    padding: 0 32px;
+  }
+
+  /* --- Hero: stacked, 32px title, card below copy --- */
+  .hero__title {
+    font-size: 32px;
+  }
+
+  .hero__sub {
+    max-width: none;
+  }
+
+  .hero__stats {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  .score-card {
+    order: 1;
+  }
+
+  .score-card__row {
+    grid-template-columns: 20px 48px 1fr minmax(48px, 64px) 40px;
+  }
+
+  .score-card__bar {
+    display: none;
+  }
+
+  /* --- Investors: 2 columns on tablet --- */
+  .investors__grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  /* --- Rankings: hide sector & weekly, tighter cells --- */
+  .rankings-table {
+    min-width: 0;
+  }
+
+  .rankings-table th,
+  .rankings-table td {
+    padding: 10px 8px;
+    font-size: 13px;
+  }
+
+  .rankings-table th:nth-child(4),
+  .rankings-table td:nth-child(4),
+  .rankings-table th:nth-child(5),
+  .rankings-table td:nth-child(5) {
+    display: none;
+  }
+
+  .rankings-table__ticker {
+    font-family: var(--font-mono);
+  }
+
+  .rankings-table .score {
+    font-size: 1rem;
+    min-width: 2.25rem;
+    padding: 4px 8px;
+  }
+
+  .email-gate__panel {
+    padding: 24px 16px;
+  }
+
+  .email-gate__form {
+    flex-direction: column;
+  }
+
+  .email-gate__form input,
+  .email-gate__form .btn {
+    width: 100%;
+  }
+
+  /* --- SignalScore: single column, score panel on top --- */
+  .explained__grid {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+
+  .explained__score-panel {
+    order: -1;
+  }
+
+  .explained__score-value {
+    font-size: 56px;
+  }
+
+  /* --- Portfolio: single-column name/email --- */
+  .portfolio-form__row {
+    grid-template-columns: 1fr;
+  }
+
+  /* --- Footer: stacked, centered --- */
+  .footer {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 20px;
+    padding: 32px;
+  }
+
+  .footer__logo {
+    order: 1;
+  }
+
+  .footer__source {
+    order: 2;
+    flex: none;
+    max-width: none;
+    margin: 0;
+  }
+
+  .footer__copy {
+    order: 3;
+  }
+}
+
+/* Small mobile (≤480px) */
+@media (max-width: 480px) {
+  .nav {
+    padding: 0 20px;
+  }
+
+  .hero,
+  .investors,
+  .explained,
+  .portfolio-review {
+    padding: 32px 20px;
+  }
+
+  .rankings__table-wrap {
+    padding: 0 20px;
+  }
+
+  .hero__stats {
+    grid-template-columns: 1fr;
+  }
+
+  .hero__actions {
+    flex-direction: column;
+  }
+
+  .hero__actions .btn {
+    width: 100%;
+  }
+
+  /* --- Investors: 1 column on mobile --- */
+  .investors__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .rankings-table th,
+  .rankings-table td {
+    padding: 8px 6px;
+    font-size: 12px;
+  }
+}

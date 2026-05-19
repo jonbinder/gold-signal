@@ -1,0 +1,8 @@
+@import url("/css/styles.css");
+
+/* Map next/font variables from layout.tsx */
+:root {
+  --font-display: var(--font-display-loaded), "Playfair Display", Georgia, serif;
+  --font-body: var(--font-body-loaded), "DM Sans", system-ui, sans-serif;
+  --font-mono: var(--font-mono-loaded), "DM Mono", ui-monospace, monospace;
+}

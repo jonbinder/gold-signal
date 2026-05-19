@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GoldSignal.ai — Gold &amp; Silver Stock Rankings Powered by AI</title>
+  <meta name="description" content="See which gold and silver stocks the world's biggest investors are buying. SignalScore ranks every stock using 13F filings, insider trades, PE ratios, and more.">
+  <link rel="canonical" href="https://goldsignal.ai/">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%23C9971C'/%3E%3C/svg%3E" type="image/svg+xml">
+  <meta property="og:title" content="GoldSignal.ai — Gold &amp; Silver Stock Rankings Powered by AI">
+  <meta property="og:description" content="See which gold and silver stocks the world's biggest investors are buying. SignalScore ranks every stock using 13F filings, insider trades, PE ratios, and more.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://goldsignal.ai/">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FinancialService",
+    "name": "GoldSignal.ai",
+    "description": "See which gold and silver stocks the world's biggest investors are buying. SignalScore ranks every stock using 13F filings, insider trades, PE ratios, and more.",
+    "url": "https://goldsignal.ai/"
+  }
+  </script>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- 1. Sticky navigation -->
+  <nav class="nav" id="nav" aria-label="Main">
+    <a href="#" class="nav__logo">
+      Gold<span class="nav__logo-accent">Signal</span>.ai
+    </a>
+    <ul class="nav__links">
+      <li><a href="#rankings">Rankings</a></li>
+      <li><a href="#investors">Investors</a></li>
+      <li><a href="#signalscore">SignalScore</a></li>
+      <li><a href="#about">About</a></li>
+    </ul>
+    <a href="#portfolio-review" class="btn btn--cta nav__cta">Free Portfolio Review</a>
+  </nav>
+
+  <main>
+
+    <!-- 2. Hero -->
+    <section class="hero" id="about">
+      <div class="hero__content">
+        <p class="hero__eyebrow">Powered by 13F · Insider · PE · Forward PE</p>
+        <h1 class="hero__title">Rank <em>gold &amp; silver</em> stocks with institutional-grade intelligence</h1>
+        <p class="hero__sub">GoldSignal.ai scores every major precious metals stock from 0–100 using proprietary SignalScore — built on 13F filings, insider activity, valuation ratios, and famous investor portfolios.</p>
+        <div class="hero__actions">
+          <a href="#rankings" class="btn btn--primary">View Rankings</a>
+          <a href="#portfolio-review" class="btn btn--secondary">Free Portfolio Review</a>
+        </div>
+        <div class="hero__stats">
+          <div class="hero__stat">
+            <span class="hero__stat-value mono">120+</span>
+            <span class="hero__stat-label">Stocks ranked</span>
+          </div>
+          <div class="hero__stat">
+            <span class="hero__stat-value mono">13F</span>
+            <span class="hero__stat-label">Filing data</span>
+          </div>
+          <div class="hero__stat">
+            <span class="hero__stat-value mono">24h</span>
+            <span class="hero__stat-label">Portfolio review</span>
+          </div>
+        </div>
+      </div>
+      <aside class="score-card" aria-label="Live sample rankings">
+        <div class="score-card__header">
+          <span class="score-card__label mono">SignalScore Live</span>
+          <span class="score-card__pulse" aria-hidden="true"></span>
+        </div>
+        <ul class="score-card__list" id="score-card-list"></ul>
+      </aside>
+    </section>
+
+    <!-- 3. Famous Investors -->
+    <section class="investors" id="investors">
+      <header class="section-header">
+        <h2 class="section-header__title">Famous Investors</h2>
+        <p class="section-header__sub">Track where the smartest money in precious metals is positioned — updated from latest 13F disclosures.</p>
+      </header>
+      <div class="investors__grid" id="investors-grid">
+      </div>
+    </section>
+
+    <!-- 4. Stock Rankings -->
+    <section class="rankings" id="rankings">
+      <header class="section-header section-header--dark">
+        <h2 class="section-header__title">Stock Rankings</h2>
+        <p class="section-header__sub">Gold &amp; silver equities ranked by SignalScore — refreshed weekly from institutional filings and market data.</p>
+      </header>
+      <div class="rankings__table-wrap">
+        <table class="rankings-table">
+          <thead>
+            <tr>
+              <th scope="col">Rank</th>
+              <th scope="col">Ticker</th>
+              <th scope="col">Company</th>
+              <th scope="col">Sector</th>
+              <th scope="col">Weekly</th>
+              <th scope="col">SignalScore</th>
+            </tr>
+          </thead>
+          <tbody id="rankings-tbody"></tbody>
+        </table>
+        <div class="email-gate lock-row" id="email-gate">
+          <div class="email-gate__panel">
+            <h3 class="email-gate__title">Unlock the full rankings</h3>
+            <p class="email-gate__text">Get access to all 120+ gold &amp; silver stocks ranked by SignalScore.</p>
+            <form class="email-gate__form" id="gate-form" novalidate>
+              <label class="sr-only" for="gate-email">Email</label>
+              <input type="email" id="gate-email" name="email" placeholder="you@email.com" required autocomplete="email">
+              <button type="submit" class="btn btn--unlock">Unlock Full List</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. SignalScore Explained -->
+    <section class="explained" id="signalscore">
+      <header class="section-header">
+        <h2 class="section-header__title">SignalScore Explained</h2>
+        <p class="section-header__sub">A proprietary 0–100 composite score synthesizing institutional conviction, insider behavior, valuation, and smart-money overlap.</p>
+      </header>
+      <div class="explained__grid">
+        <aside class="explained__score-panel">
+          <p class="explained__score-label">Sample composite</p>
+          <div class="explained__score-header">
+            <p class="explained__score-value">87</p>
+            <span class="explained__rating-badge">Strong Conviction</span>
+          </div>
+          <ul class="sub-scores">
+            <li class="sub-score">
+              <span class="sub-score__label">13F Institutional Conviction</span>
+              <span class="mono sub-score__value">92</span>
+              <span class="sub-score__bar"><span class="sub-score__fill" style="width: 92%"></span></span>
+            </li>
+            <li class="sub-score">
+              <span class="sub-score__label">Insider Buying vs Selling</span>
+              <span class="mono sub-score__value">88</span>
+              <span class="sub-score__bar"><span class="sub-score__fill" style="width: 88%"></span></span>
+            </li>
+            <li class="sub-score">
+              <span class="sub-score__label">PE Ratio</span>
+              <span class="mono sub-score__value">79</span>
+              <span class="sub-score__bar"><span class="sub-score__fill" style="width: 79%"></span></span>
+            </li>
+            <li class="sub-score">
+              <span class="sub-score__label">Forward PE Ratio</span>
+              <span class="mono sub-score__value">84</span>
+              <span class="sub-score__bar"><span class="sub-score__fill" style="width: 84%"></span></span>
+            </li>
+            <li class="sub-score">
+              <span class="sub-score__label">Famous Investor Overlap</span>
+              <span class="mono sub-score__value">91</span>
+              <span class="sub-score__bar"><span class="sub-score__fill" style="width: 91%"></span></span>
+            </li>
+            <li class="sub-score">
+              <span class="sub-score__label">Sector Momentum</span>
+              <span class="mono sub-score__value">86</span>
+              <span class="sub-score__bar"><span class="sub-score__fill" style="width: 86%"></span></span>
+            </li>
+          </ul>
+        </aside>
+        <ol class="explained__metrics">
+          <li class="metric fade-in">
+            <span class="metric__num mono">01</span>
+            <div>
+              <h3 class="metric__title">Institutional 13F Data</h3>
+              <p class="metric__desc">We parse quarterly SEC 13F filings to measure net institutional accumulation, position concentration, and quarter-over-quarter changes across the top 500 holders.</p>
+            </div>
+          </li>
+          <li class="metric fade-in">
+            <span class="metric__num mono">02</span>
+            <div>
+              <h3 class="metric__title">Insider Buying vs Selling</h3>
+              <p class="metric__desc">Form 4 insider transactions are weighted by recency and dollar size — net buying boosts the score; clustered selling or option exercises reduce it.</p>
+            </div>
+          </li>
+          <li class="metric fade-in">
+            <span class="metric__num mono">03</span>
+            <div>
+              <h3 class="metric__title">PE Ratio Analysis</h3>
+              <p class="metric__desc">Trailing PE is benchmarked against sector medians and historical ranges for each issuer, rewarding stocks trading below fair value on earnings.</p>
+            </div>
+          </li>
+          <li class="metric fade-in">
+            <span class="metric__num mono">04</span>
+            <div>
+              <h3 class="metric__title">Forward PE Projection</h3>
+              <p class="metric__desc">Consensus forward PE captures analyst expectations — we score stocks where forward multiples imply upside relative to peers and gold price scenarios.</p>
+            </div>
+          </li>
+          <li class="metric fade-in">
+            <span class="metric__num mono">05</span>
+            <div>
+              <h3 class="metric__title">Famous Investor Portfolio Tracking</h3>
+              <p class="metric__desc">Overlap with disclosed holdings of Eric Sprott, Peter Schiff, Rick Rule, John Hathaway, and other tracked precious-metals specialists adds a conviction layer to every rank.</p>
+            </div>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- 6. Free Portfolio Review -->
+    <section class="portfolio-review" id="portfolio-review">
+      <header class="section-header section-header--center">
+        <h2 class="section-header__title">Free Portfolio Review</h2>
+        <p class="section-header__sub">Submit your holdings and receive a personalized SignalScore breakdown for each position.</p>
+      </header>
+      <form class="portfolio-form" id="portfolio-form" novalidate>
+        <div class="portfolio-form__card">
+          <div class="portfolio-form__row">
+            <label class="portfolio-form__field">
+              <span class="portfolio-form__label">Name</span>
+              <input type="text" name="name" id="review-name" required autocomplete="name" placeholder="Your name">
+            </label>
+            <label class="portfolio-form__field">
+              <span class="portfolio-form__label">Email</span>
+              <input type="email" name="email" id="review-email" required autocomplete="email" placeholder="you@email.com">
+            </label>
+          </div>
+          <label class="portfolio-form__field portfolio-form__field--full">
+            <span class="portfolio-form__label">Tickers in your portfolio</span>
+            <textarea name="tickers" id="review-tickers" rows="4" placeholder="NEM, FNV, WPM, AG…" required></textarea>
+          </label>
+          <button type="submit" class="btn btn--submit btn--full">Submit for Review</button>
+          <p class="portfolio-form__note">You will receive your SignalScore report by email within 24 hours</p>
+        </div>
+      </form>
+    </section>
+
+  </main>
+
+  <!-- 7. Footer -->
+  <footer class="footer">
+    <a href="#" class="footer__logo">
+      Gold<span class="nav__logo-accent">Signal</span>.ai
+    </a>
+    <p class="footer__source">Data sourced from SEC EDGAR 13F/Form 4 filings, exchange feeds, and consensus estimates. Not investment advice.</p>
+    <p class="footer__copy mono">&copy; 2026 GoldSignal.ai. All rights reserved.</p>
+  </footer>
+
+  <script src="js/main.js" type="module"></script>
+</body>
+</html>

@@ -1,5 +1,10 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import GoldSignalClient from "./components/GoldSignalClient";
+import { SiteNav } from "@/components/goldsignal/SiteNav";
+import { SiteFooter } from "@/components/goldsignal/SiteFooter";
+import { getInvestors, getStocks, investorInitials } from "@/lib/goldsignal/data";
+import { ScoreBadge } from "@/components/goldsignal/ScoreBadge";
 
 const structuredData = {
   "@context": "https://schema.org",
@@ -29,7 +34,35 @@ export const metadata: Metadata = {
   },
 };
 
+function hubLinks(investorCount: number) {
+  return [
+  {
+    href: "/investors",
+    title: "Investors",
+    description: `${investorCount} famous gold & silver investors — portfolios synced from your Excel workbook.`,
+    cta: "Browse investors",
+  },
+  {
+    href: "/stocks",
+    title: "Stocks",
+    description: "Full SignalScore rankings for every precious metals stock you track.",
+    cta: "View rankings",
+  },
+  {
+    href: "/signalscore",
+    title: "SignalScore",
+    description: "How we calculate the 0–100 composite rating across filings, insiders, and valuation.",
+    cta: "Read methodology",
+  },
+] as const;
+}
+
 export default function HomePage() {
+  const investors = getInvestors();
+  const topStocks = getStocks().slice(0, 6);
+  const featuredInvestors = investors.slice(0, 4);
+  const HUB_LINKS = hubLinks(investors.length);
+
   return (
     <>
       <script
@@ -37,32 +70,9 @@ export default function HomePage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
 
-      {/* 1. Sticky navigation */}
-      <nav className="nav" id="nav" aria-label="Main">
-        <a href="#" className="nav__logo">
-          Gold<span className="nav__logo-accent">Signal</span>.ai
-        </a>
-        <ul className="nav__links">
-          <li>
-            <a href="#rankings">Rankings</a>
-          </li>
-          <li>
-            <a href="#investors">Investors</a>
-          </li>
-          <li>
-            <a href="#signalscore">SignalScore</a>
-          </li>
-          <li>
-            <a href="#about">About</a>
-          </li>
-        </ul>
-        <a href="#portfolio-review" className="btn btn--cta nav__cta">
-          Free Portfolio Review
-        </a>
-      </nav>
+      <SiteNav />
 
       <main>
-        {/* 2. Hero */}
         <section className="hero" id="about">
           <div className="hero__content">
             <p className="hero__eyebrow">Powered by 13F · Insider · PE · Forward PE</p>
@@ -70,61 +80,78 @@ export default function HomePage() {
               Rank <em>gold &amp; silver</em> stocks with institutional-grade intelligence
             </h1>
             <p className="hero__sub">
-              GoldSignal.ai scores every major precious metals stock from 0–100 using proprietary
-              SignalScore — built on 13F filings, insider activity, valuation ratios, and famous
-              investor portfolios.
+              GoldSignal.ai scores precious metals equities from 0–100 using SignalScore — and tracks
+              where the world&apos;s top mining investors are positioned.
             </p>
-            <div className="hero__actions">
-              <a href="#rankings" className="btn btn--primary">
-                View Rankings
-              </a>
-              <a href="#portfolio-review" className="btn btn--secondary">
-                Free Portfolio Review
-              </a>
-            </div>
             <div className="hero__stats">
               <div className="hero__stat">
-                <span className="hero__stat-value mono">120+</span>
+                <span className="hero__stat-value mono">{getStocks().length}+</span>
                 <span className="hero__stat-label">Stocks ranked</span>
               </div>
               <div className="hero__stat">
-                <span className="hero__stat-value mono">13F</span>
-                <span className="hero__stat-label">Filing data</span>
+                <span className="hero__stat-value mono">{investors.length}</span>
+                <span className="hero__stat-label">Investors tracked</span>
               </div>
               <div className="hero__stat">
-                <span className="hero__stat-value mono">24h</span>
-                <span className="hero__stat-label">Portfolio review</span>
+                <span className="hero__stat-value mono">0–100</span>
+                <span className="hero__stat-label">SignalScore scale</span>
               </div>
             </div>
           </div>
-          <aside className="score-card" aria-label="Live sample rankings">
-            <div className="score-card__header">
-              <span className="score-card__label mono">SignalScore Live</span>
-              <span className="score-card__pulse" aria-hidden="true" />
-            </div>
-            <ul className="score-card__list" id="score-card-list" />
-          </aside>
         </section>
 
-        {/* 3. Famous Investors */}
-        <section className="investors" id="investors">
+        <section className="hub" aria-label="Explore GoldSignal">
           <header className="section-header">
-            <h2 className="section-header__title">Famous Investors</h2>
+            <h2 className="section-header__title">Explore GoldSignal</h2>
             <p className="section-header__sub">
-              Track where the smartest money in precious metals is positioned — updated from latest
-              13F disclosures.
+              Three views into the same dataset — updated when you push changes to GitHub.
             </p>
           </header>
-          <div className="investors__grid" id="investors-grid" />
+          <div className="hub__grid">
+            {HUB_LINKS.map((item) => (
+              <Link key={item.href} href={item.href} className="hub-card">
+                <h3 className="hub-card__title">{item.title}</h3>
+                <p className="hub-card__text">{item.description}</p>
+                <span className="hub-card__cta">{item.cta} →</span>
+              </Link>
+            ))}
+          </div>
         </section>
 
-        {/* 4. Stock Rankings */}
-        <section className="rankings" id="rankings">
-          <header className="section-header section-header--dark">
-            <h2 className="section-header__title">Stock Rankings</h2>
+        <section className="investors investors--preview" id="investors-preview">
+          <header className="section-header">
+            <h2 className="section-header__title">Featured investors</h2>
             <p className="section-header__sub">
-              Gold &amp; silver equities ranked by SignalScore — refreshed monthly from institutional
-              filings and market data.
+              <Link href="/investors">View all {investors.length} investors →</Link>
+            </p>
+          </header>
+          <div className="investors__grid">
+            {featuredInvestors.map((investor) => (
+              <article key={investor.slug} className="investor-card fade-in visible">
+                <div className="investor-card__avatar mono" aria-hidden="true">
+                  {investorInitials(investor.name)}
+                </div>
+                <h3 className="investor-card__name">
+                  <Link href={`/investors/${investor.slug}`}>{investor.name}</Link>
+                </h3>
+                <p className="investor-card__role">{investor.role}</p>
+                <div className="investor-card__tickers">
+                  {investor.tickers.slice(0, 4).map((ticker) => (
+                    <span key={ticker} className="pill mono">
+                      {ticker}
+                    </span>
+                  ))}
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="rankings rankings--preview" id="rankings-preview">
+          <header className="section-header section-header--dark">
+            <h2 className="section-header__title">Top SignalScores</h2>
+            <p className="section-header__sub">
+              <Link href="/stocks">Full stock rankings →</Link>
             </p>
           </header>
           <div className="rankings__table-wrap">
@@ -134,159 +161,25 @@ export default function HomePage() {
                   <th scope="col">Rank</th>
                   <th scope="col">Ticker</th>
                   <th scope="col">Company</th>
-                  <th scope="col">Sector</th>
-                  <th scope="col">Monthly</th>
                   <th scope="col">SignalScore</th>
                 </tr>
               </thead>
-              <tbody id="rankings-tbody" />
+              <tbody>
+                {topStocks.map((stock, index) => (
+                  <tr key={stock.ticker}>
+                    <td className="mono">{index + 1}</td>
+                    <td className="mono rankings-table__ticker">{stock.ticker}</td>
+                    <td>{stock.company}</td>
+                    <td>
+                      <ScoreBadge score={stock.signalScore} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
             </table>
-            <div className="email-gate lock-row" id="email-gate">
-              <div className="email-gate__panel">
-                <h3 className="email-gate__title">Unlock the full rankings</h3>
-                <p className="email-gate__text">
-                  Get access to all 120+ gold &amp; silver stocks ranked by SignalScore.
-                </p>
-                <form className="email-gate__form" id="gate-form" noValidate>
-                  <label className="sr-only" htmlFor="gate-email">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    id="gate-email"
-                    name="email"
-                    placeholder="you@email.com"
-                    required
-                    autoComplete="email"
-                  />
-                  <button type="submit" className="btn btn--unlock">
-                    Unlock Full List
-                  </button>
-                </form>
-              </div>
-            </div>
           </div>
         </section>
 
-        {/* 5. SignalScore Explained */}
-        <section className="explained" id="signalscore">
-          <header className="section-header">
-            <h2 className="section-header__title">SignalScore Explained</h2>
-            <p className="section-header__sub">
-              A proprietary 0–100 composite score synthesizing institutional conviction, insider
-              behavior, valuation, and smart-money overlap.
-            </p>
-          </header>
-          <div className="explained__grid">
-            <aside className="explained__score-panel">
-              <p className="explained__score-label">Sample composite</p>
-              <div className="explained__score-header">
-                <p className="explained__score-value">87</p>
-                <span className="explained__rating-badge">Strong Conviction</span>
-              </div>
-              <ul className="sub-scores">
-                <li className="sub-score">
-                  <span className="sub-score__label">13F Institutional Conviction</span>
-                  <span className="mono sub-score__value">92</span>
-                  <span className="sub-score__bar">
-                    <span className="sub-score__fill" style={{ width: "92%" }} />
-                  </span>
-                </li>
-                <li className="sub-score">
-                  <span className="sub-score__label">Insider Buying vs Selling</span>
-                  <span className="mono sub-score__value">88</span>
-                  <span className="sub-score__bar">
-                    <span className="sub-score__fill" style={{ width: "88%" }} />
-                  </span>
-                </li>
-                <li className="sub-score">
-                  <span className="sub-score__label">PE Ratio</span>
-                  <span className="mono sub-score__value">79</span>
-                  <span className="sub-score__bar">
-                    <span className="sub-score__fill" style={{ width: "79%" }} />
-                  </span>
-                </li>
-                <li className="sub-score">
-                  <span className="sub-score__label">Forward PE Ratio</span>
-                  <span className="mono sub-score__value">84</span>
-                  <span className="sub-score__bar">
-                    <span className="sub-score__fill" style={{ width: "84%" }} />
-                  </span>
-                </li>
-                <li className="sub-score">
-                  <span className="sub-score__label">Famous Investor Overlap</span>
-                  <span className="mono sub-score__value">91</span>
-                  <span className="sub-score__bar">
-                    <span className="sub-score__fill" style={{ width: "91%" }} />
-                  </span>
-                </li>
-                <li className="sub-score">
-                  <span className="sub-score__label">Sector Momentum</span>
-                  <span className="mono sub-score__value">86</span>
-                  <span className="sub-score__bar">
-                    <span className="sub-score__fill" style={{ width: "86%" }} />
-                  </span>
-                </li>
-              </ul>
-            </aside>
-            <ol className="explained__metrics">
-              <li className="metric fade-in">
-                <span className="metric__num mono">01</span>
-                <div>
-                  <h3 className="metric__title">Institutional 13F Data</h3>
-                  <p className="metric__desc">
-                    We parse quarterly SEC 13F filings to measure net institutional accumulation,
-                    position concentration, and quarter-over-quarter changes across the top 500
-                    holders.
-                  </p>
-                </div>
-              </li>
-              <li className="metric fade-in">
-                <span className="metric__num mono">02</span>
-                <div>
-                  <h3 className="metric__title">Insider Buying vs Selling</h3>
-                  <p className="metric__desc">
-                    Form 4 insider transactions are weighted by recency and dollar size — net
-                    buying boosts the score; clustered selling or option exercises reduce it.
-                  </p>
-                </div>
-              </li>
-              <li className="metric fade-in">
-                <span className="metric__num mono">03</span>
-                <div>
-                  <h3 className="metric__title">PE Ratio Analysis</h3>
-                  <p className="metric__desc">
-                    Trailing PE is benchmarked against sector medians and historical ranges for each
-                    issuer, rewarding stocks trading below fair value on earnings.
-                  </p>
-                </div>
-              </li>
-              <li className="metric fade-in">
-                <span className="metric__num mono">04</span>
-                <div>
-                  <h3 className="metric__title">Forward PE Projection</h3>
-                  <p className="metric__desc">
-                    Consensus forward PE captures analyst expectations — we score stocks where
-                    forward multiples imply upside relative to peers and gold price scenarios.
-                  </p>
-                </div>
-              </li>
-              <li className="metric fade-in">
-                <span className="metric__num mono">05</span>
-                <div>
-                  <h3 className="metric__title">Famous Investor Portfolio Tracking</h3>
-                  <p className="metric__desc">
-                    Overlap with disclosed holdings of Eric Sprott, Peter Schiff, Rick Rule, John
-                    Hathaway, and other tracked precious-metals specialists adds a conviction layer
-                    to every rank.
-                  </p>
-                </div>
-              </li>
-            </ol>
-          </div>
-        </section>
-
-        {/* 6. Free Portfolio Review */}
         <section className="portfolio-review" id="portfolio-review">
           <header className="section-header section-header--center">
             <h2 className="section-header__title">Free Portfolio Review</h2>
@@ -344,18 +237,7 @@ export default function HomePage() {
         <GoldSignalClient />
       </main>
 
-      {/* 7. Footer */}
-      <footer className="footer">
-        <a href="#" className="footer__logo">
-          Gold<span className="nav__logo-accent">Signal</span>.ai
-        </a>
-        <p className="footer__source">
-          Data sourced from SEC EDGAR 13F/Form 4 filings, exchange feeds, and consensus estimates.
-          Not investment advice.
-        </p>
-        <p className="footer__copy mono">&copy; 2026 GoldSignal.ai. All rights reserved.</p>
-      </footer>
-
+      <SiteFooter />
     </>
   );
 }

@@ -7,6 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "stocks:sync": "npx tsx scripts/sync-stocks-from-excel.ts",
+    "prebuild": "npm run stocks:sync",
     "sync-investors-data": "npx tsx scripts/sync-investors-data.ts",
     "sync:investors": "npx tsx scripts/sync-investors-data.ts",
     "test:stocks": "npx tsx scripts/test-stock-quotes.ts",
@@ -43,6 +45,7 @@
     "supabase": "^2.98.0",
     "tailwindcss": "^4",
     "@tailwindcss/postcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "xlsx": "^0.18.5"
   }
 }

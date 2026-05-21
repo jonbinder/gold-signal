@@ -3,7 +3,14 @@ import Link from "next/link";
 import GoldSignalClient from "./components/GoldSignalClient";
 import { SiteNav } from "@/components/goldsignal/SiteNav";
 import { SiteFooter } from "@/components/goldsignal/SiteFooter";
-import { InvestorAvatar } from "@/components/InvestorAvatar";
+import { FeaturedInvestorsCarousel } from "@/components/home/FeaturedInvestorsCarousel";
+import {
+  IconBarChart,
+  IconCrosshair,
+  IconGauge,
+  IconLayers,
+  IconUsers,
+} from "@/components/home/HubIcons";
 import { getInvestors, getStocks } from "@/lib/goldsignal/data";
 import { ScoreBadge } from "@/components/goldsignal/ScoreBadge";
 
@@ -35,33 +42,35 @@ export const metadata: Metadata = {
   },
 };
 
+const HUB_ICONS = [IconUsers, IconBarChart, IconCrosshair] as const;
+
 function hubLinks(investorCount: number) {
   return [
-  {
-    href: "/investors",
-    title: "Investors",
-    description: `${investorCount} famous gold & silver investors — portfolios synced from your Excel workbook.`,
-    cta: "Browse investors",
-  },
-  {
-    href: "/stocks",
-    title: "Stocks",
-    description: "Full SignalScore rankings for every precious metals stock you track.",
-    cta: "View rankings",
-  },
-  {
-    href: "/signalscore",
-    title: "SignalScore",
-    description: "How we calculate the 0–100 composite rating across filings, insiders, and valuation.",
-    cta: "Read methodology",
-  },
-] as const;
+    {
+      href: "/investors",
+      title: "Investors",
+      description: `${investorCount} famous gold & silver investors — portfolios synced from your Excel workbook.`,
+      cta: "Browse investors",
+    },
+    {
+      href: "/stocks",
+      title: "Stocks",
+      description: "Full SignalScore rankings for every precious metals stock you track.",
+      cta: "View rankings",
+    },
+    {
+      href: "/signalscore",
+      title: "SignalScore",
+      description: "How we calculate the 0–100 composite rating across filings, insiders, and valuation.",
+      cta: "Read methodology",
+    },
+  ] as const;
 }
 
 export default function HomePage() {
   const investors = getInvestors();
   const topStocks = getStocks().slice(0, 6);
-  const featuredInvestors = investors.slice(0, 4);
+  const featuredInvestors = investors.slice(0, 8);
   const HUB_LINKS = hubLinks(investors.length);
 
   return (
@@ -73,7 +82,7 @@ export default function HomePage() {
 
       <SiteNav />
 
-      <main>
+      <main className="home-page">
         <section className="hero" id="about">
           <div className="hero__inner">
             <div className="hero__content">
@@ -87,21 +96,30 @@ export default function HomePage() {
               </p>
               <div className="hero__stats">
                 <div className="hero__stat">
+                  <span className="hero__stat-icon" aria-hidden="true">
+                    <IconLayers />
+                  </span>
                   <span className="hero__stat-value mono">{getStocks().length}+</span>
                   <span className="hero__stat-label">Stocks ranked</span>
                 </div>
                 <div className="hero__stat">
+                  <span className="hero__stat-icon" aria-hidden="true">
+                    <IconUsers />
+                  </span>
                   <span className="hero__stat-value mono">{investors.length}</span>
                   <span className="hero__stat-label">Investors tracked</span>
                 </div>
                 <div className="hero__stat">
+                  <span className="hero__stat-icon" aria-hidden="true">
+                    <IconGauge />
+                  </span>
                   <span className="hero__stat-value mono">0–100</span>
                   <span className="hero__stat-label">SignalScore scale</span>
                 </div>
               </div>
             </div>
-            <div className="hero__visual" aria-hidden="true">
-              <div className="hero__wave">
+            <div className="hero__visual">
+              <div className="hero__wave" aria-hidden="true">
                 <svg
                   className="hero__wave-svg"
                   viewBox="0 0 520 420"
@@ -134,7 +152,7 @@ export default function HomePage() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/images/gs-phone.png"
-                alt="GoldSignal mobile app showing SignalScore rankings"
+                alt="GoldSignal.ai app showing SignalScore rankings for precious metals stocks"
                 className="hero__phone"
                 width={420}
                 height={840}
@@ -145,49 +163,35 @@ export default function HomePage() {
         </section>
 
         <section className="hub" aria-label="Explore GoldSignal">
-          <header className="section-header">
+          <header className="section-header section-header--hub">
             <h2 className="section-header__title">Explore GoldSignal</h2>
             <p className="section-header__sub">
               Three views into the same dataset — updated when you push changes to GitHub.
             </p>
           </header>
           <div className="hub__grid">
-            {HUB_LINKS.map((item) => (
-              <Link key={item.href} href={item.href} className="hub-card">
-                <h3 className="hub-card__title">{item.title}</h3>
-                <p className="hub-card__text">{item.description}</p>
-                <span className="hub-card__cta">{item.cta} →</span>
-              </Link>
-            ))}
+            {HUB_LINKS.map((item, index) => {
+              const Icon = HUB_ICONS[index];
+              return (
+                <Link key={item.href} href={item.href} className="hub-card">
+                  <span className="hub-card__icon" aria-hidden="true">
+                    <Icon />
+                  </span>
+                  <div className="hub-card__body">
+                    <h3 className="hub-card__title">{item.title}</h3>
+                    <p className="hub-card__text">{item.description}</p>
+                  </div>
+                  <span className="hub-card__cta">{item.cta} →</span>
+                  <span className="hub-card__chevron" aria-hidden="true">
+                    ›
+                  </span>
+                </Link>
+              );
+            })}
           </div>
         </section>
 
-        <section className="investors investors--preview" id="investors-preview">
-          <header className="section-header">
-            <h2 className="section-header__title">Featured investors</h2>
-            <p className="section-header__sub">
-              <Link href="/investors">View all {investors.length} investors →</Link>
-            </p>
-          </header>
-          <div className="investors__grid">
-            {featuredInvestors.map((investor) => (
-              <article key={investor.slug} className="investor-card fade-in visible">
-                <InvestorAvatar slug={investor.slug} name={investor.name} size={48} className="investor-card__avatar" />
-                <h3 className="investor-card__name">
-                  <Link href={`/investors/${investor.slug}`}>{investor.name}</Link>
-                </h3>
-                <p className="investor-card__role">{investor.role}</p>
-                <div className="investor-card__tickers">
-                  {investor.tickers.slice(0, 4).map((ticker) => (
-                    <span key={ticker} className="pill mono">
-                      {ticker}
-                    </span>
-                  ))}
-                </div>
-              </article>
-            ))}
-          </div>
-        </section>
+        <FeaturedInvestorsCarousel investors={featuredInvestors} totalCount={investors.length} />
 
         <section className="rankings rankings--preview" id="rankings-preview">
           <header className="section-header section-header--dark">
@@ -196,7 +200,13 @@ export default function HomePage() {
               <Link href="/stocks">Full stock rankings →</Link>
             </p>
           </header>
-          <div className="rankings__table-wrap">
+          <div className="rankings__mobile-columns" aria-hidden="true">
+            <span>Rank</span>
+            <span>Ticker</span>
+            <span>Company</span>
+            <span>SignalScore</span>
+          </div>
+          <div className="rankings__table-wrap rankings__table-wrap--desktop">
             <table className="rankings-table">
               <thead>
                 <tr>
@@ -222,7 +232,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="portfolio-review" id="portfolio-review">
+        <section className="portfolio-review portfolio-review--home" id="portfolio-review">
           <header className="section-header section-header--center">
             <h2 className="section-header__title">Free Portfolio Review</h2>
             <p className="section-header__sub">

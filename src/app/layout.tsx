@@ -1,4 +1,5 @@
 import "./globals.css";
+import "./mobile.css";
 
 import type { Metadata } from "next";
 import { DM_Mono, DM_Sans, Playfair_Display } from "next/font/google";

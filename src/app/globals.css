@@ -567,6 +567,34 @@ h1, h2, h3 {
   margin-left: 16px;
 }
 
+.nav__menu-btn {
+  display: none;
+}
+
+.nav__overlay {
+  display: none;
+}
+
+.hub-card__icon,
+.hub-card__chevron {
+  display: none;
+}
+
+.hub-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  flex: 1;
+}
+
+.rankings__mobile-columns {
+  display: none;
+}
+
+.hero__stat-icon {
+  display: none;
+}
+
 .nav--scrolled {
   box-shadow: 0 4px 20px rgba(17, 16, 9, 0.08);
   border-bottom-color: rgba(17, 16, 9, 0.12);
@@ -1325,52 +1353,7 @@ h1, h2, h3 {
 
 /* Tablet / mobile (â‰¤768px) */
 @media (max-width: 768px) {
-  /* --- Nav: logo + inline links (always visible) --- */
-  .nav {
-    padding: 14px 16px;
-    gap: 8px;
-  }
-
-  .nav__logo {
-    font-size: 1.125rem;
-  }
-
-  .nav__links {
-    gap: 24px;
-  }
-
-  .nav__links a {
-    font-size: 0.8125rem;
-  }
-
-  /* --- Section padding: 64px â†’ 32px --- */
-  .hero {
-    padding: 32px;
-  }
-
-  .hero__inner {
-    grid-template-columns: 1fr;
-    gap: 32px;
-  }
-
-  .hero__visual {
-    order: 2;
-    justify-content: center;
-    margin-top: 8px;
-  }
-
-  .hero__phone {
-    max-width: min(280px, 85vw);
-    margin-right: 0;
-    margin-bottom: 0;
-  }
-
-  .hero__wave {
-    top: -5%;
-    right: -5%;
-    left: -10%;
-    opacity: 0.1;
-  }
+  /* Nav + hero mobile: see mobile.css */
 
   .investors {
     padding: 32px;
@@ -1566,10 +1549,6 @@ h1, h2, h3 {
 
   .hero__stats {
     grid-template-columns: 1fr;
-  }
-
-  .hero__visual {
-    display: none;
   }
 
   .hero__actions {

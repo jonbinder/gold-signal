@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getInvestors, investorInitials } from "@/lib/goldsignal/data";
+import { InvestorAvatar } from "@/components/InvestorAvatar";
+import { getInvestors } from "@/lib/goldsignal/data";
 
 export const metadata: Metadata = {
   title: "Investors — GoldSignal.ai",
@@ -25,9 +26,7 @@ export default function InvestorsPage() {
         <div className="investors__grid">
           {investors.map((investor) => (
             <article key={investor.slug} className="investor-card fade-in visible">
-              <div className="investor-card__avatar mono" aria-hidden="true">
-                {investorInitials(investor.name)}
-              </div>
+              <InvestorAvatar slug={investor.slug} name={investor.name} size={48} className="investor-card__avatar" />
               <h2 className="investor-card__name">
                 <Link href={`/investors/${investor.slug}`}>{investor.name}</Link>
               </h2>

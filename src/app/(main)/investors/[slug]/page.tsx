@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getInvestorBySlug, getInvestors, investorInitials } from "@/lib/goldsignal/data";
+import { InvestorAvatar } from "@/components/InvestorAvatar";
+import { getInvestorBySlug, getInvestors } from "@/lib/goldsignal/data";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -32,9 +33,12 @@ export default async function InvestorDetailPage({ params }: Props) {
             <Link href="/investors">← All investors</Link>
           </p>
           <div className="investor-detail__header">
-            <div className="investor-card__avatar investor-card__avatar--lg mono" aria-hidden="true">
-              {investorInitials(investor.name)}
-            </div>
+            <InvestorAvatar
+              slug={investor.slug}
+              name={investor.name}
+              size={72}
+              className="investor-card__avatar investor-card__avatar--lg"
+            />
             <div>
               <h1 className="section-header__title">{investor.name}</h1>
               <p className="investor-card__role">{investor.role}</p>

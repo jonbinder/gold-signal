@@ -76,9 +76,4 @@ export function formatMonthlyChange(value: number): { text: string; className: s
   return { text: "— 0.0%", className: "change change--flat" };
 }
 
-export function investorInitials(name: string): string {
-  const parts = name.replace(/[^a-zA-Z\s]/g, " ").trim().split(/\s+/);
-  if (parts.length === 0) return "??";
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-  return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
-}
+export { investorInitials } from "@/lib/investor-initials";

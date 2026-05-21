@@ -3,7 +3,8 @@ import Link from "next/link";
 import GoldSignalClient from "./components/GoldSignalClient";
 import { SiteNav } from "@/components/goldsignal/SiteNav";
 import { SiteFooter } from "@/components/goldsignal/SiteFooter";
-import { getInvestors, getStocks, investorInitials } from "@/lib/goldsignal/data";
+import { InvestorAvatar } from "@/components/InvestorAvatar";
+import { getInvestors, getStocks } from "@/lib/goldsignal/data";
 import { ScoreBadge } from "@/components/goldsignal/ScoreBadge";
 
 const structuredData = {
@@ -128,9 +129,7 @@ export default function HomePage() {
           <div className="investors__grid">
             {featuredInvestors.map((investor) => (
               <article key={investor.slug} className="investor-card fade-in visible">
-                <div className="investor-card__avatar mono" aria-hidden="true">
-                  {investorInitials(investor.name)}
-                </div>
+                <InvestorAvatar slug={investor.slug} name={investor.name} size={48} className="investor-card__avatar" />
                 <h3 className="investor-card__name">
                   <Link href={`/investors/${investor.slug}`}>{investor.name}</Link>
                 </h3>

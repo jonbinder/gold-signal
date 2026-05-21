@@ -10,7 +10,9 @@ export function SiteNav() {
   return (
     <nav className="nav" id="nav" aria-label="Main">
       <Link href="/" className="nav__logo">
-        Gold<span className="nav__logo-accent">Signal</span>.ai
+        <span className="nav__logo-ink">Gold</span>
+        <span className="nav__logo-accent">Signal</span>
+        <span className="nav__logo-ink">.ai</span>
       </Link>
       <ul className="nav__links">
         {NAV_LINKS.map((link) => (

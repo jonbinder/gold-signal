@@ -75,28 +75,71 @@ export default function HomePage() {
 
       <main>
         <section className="hero" id="about">
-          <div className="hero__content">
-            <p className="hero__eyebrow">Powered by 13F · Insider · PE · Forward PE</p>
-            <h1 className="hero__title">
-              Rank <em>gold &amp; silver</em> stocks with institutional-grade intelligence
-            </h1>
-            <p className="hero__sub">
-              GoldSignal.ai scores precious metals equities from 0–100 using SignalScore — and tracks
-              where the world&apos;s top mining investors are positioned.
-            </p>
-            <div className="hero__stats">
-              <div className="hero__stat">
-                <span className="hero__stat-value mono">{getStocks().length}+</span>
-                <span className="hero__stat-label">Stocks ranked</span>
+          <div className="hero__inner">
+            <div className="hero__content">
+              <p className="hero__eyebrow">Powered by 13F · Insider · PE · Forward PE</p>
+              <h1 className="hero__title">
+                Rank <em>gold &amp; silver</em> stocks with institutional-grade intelligence
+              </h1>
+              <p className="hero__sub">
+                GoldSignal.ai scores precious metals equities from 0–100 using SignalScore — and tracks
+                where the world&apos;s top mining investors are positioned.
+              </p>
+              <div className="hero__stats">
+                <div className="hero__stat">
+                  <span className="hero__stat-value mono">{getStocks().length}+</span>
+                  <span className="hero__stat-label">Stocks ranked</span>
+                </div>
+                <div className="hero__stat">
+                  <span className="hero__stat-value mono">{investors.length}</span>
+                  <span className="hero__stat-label">Investors tracked</span>
+                </div>
+                <div className="hero__stat">
+                  <span className="hero__stat-value mono">0–100</span>
+                  <span className="hero__stat-label">SignalScore scale</span>
+                </div>
               </div>
-              <div className="hero__stat">
-                <span className="hero__stat-value mono">{investors.length}</span>
-                <span className="hero__stat-label">Investors tracked</span>
+            </div>
+            <div className="hero__visual" aria-hidden="true">
+              <div className="hero__wave">
+                <svg
+                  className="hero__wave-svg"
+                  viewBox="0 0 520 420"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  preserveAspectRatio="none"
+                >
+                  <path
+                    d="M40 320 C120 180 200 140 320 200 S480 120 520 80"
+                    stroke="#B8860B"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                  />
+                  <path
+                    d="M0 360 C100 240 220 200 340 260 S460 160 520 140"
+                    stroke="#C9971C"
+                    strokeWidth="1"
+                    strokeLinecap="round"
+                    opacity="0.75"
+                  />
+                  <path
+                    d="M80 380 C160 280 280 240 400 300 S500 220 520 200"
+                    stroke="#D4A84B"
+                    strokeWidth="0.75"
+                    strokeLinecap="round"
+                    opacity="0.5"
+                  />
+                </svg>
               </div>
-              <div className="hero__stat">
-                <span className="hero__stat-value mono">0–100</span>
-                <span className="hero__stat-label">SignalScore scale</span>
-              </div>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/images/gs-phone.png"
+                alt="GoldSignal mobile app showing SignalScore rankings"
+                className="hero__phone"
+                width={420}
+                height={840}
+                fetchPriority="high"
+              />
             </div>
           </div>
         </section>

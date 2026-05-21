@@ -505,46 +505,66 @@ h1, h2, h3 {
   z-index: 100;
   display: flex;
   align-items: center;
-  gap: 32px;
-  height: var(--nav-height);
-  padding: 0 48px;
-  background: rgba(253, 250, 242, 0.94);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--border-gold);
+  justify-content: space-between;
+  gap: 12px;
+  min-height: var(--nav-height);
+  padding: 14px 16px;
+  background: #fafaf7;
+  border-bottom: 1px solid #e5e5e5;
 }
 
 .nav__logo {
   font-family: var(--font-display);
-  font-size: 20px;
+  font-size: 1.125rem;
   font-weight: 700;
   flex-shrink: 0;
+  line-height: 1.2;
+  text-decoration: none;
+}
+
+.nav__logo-ink {
+  color: #1a2340;
 }
 
 .nav__logo-accent {
-  color: var(--gold);
+  color: #b8860b;
 }
 
 .nav__links {
   display: flex;
-  gap: 32px;
-  flex: 1;
+  align-items: center;
+  gap: 26px;
+  margin-left: auto;
+  flex-shrink: 0;
+  flex-wrap: nowrap;
+  list-style: none;
+  margin-top: 0;
+  margin-bottom: 0;
+  padding: 0;
+}
+
+.nav__links li {
+  flex-shrink: 0;
 }
 
 .nav__links a {
   font-family: var(--font-body);
-  font-size: 13px;
-  font-weight: 500;
-  opacity: 0.85;
-  transition: color 0.2s, opacity 0.2s;
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: #1a2340;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 0.2s;
 }
 
 .nav__links a:hover {
-  opacity: 1;
-  color: var(--gold);
+  color: #b8860b;
 }
 
 .nav__cta {
-  margin-left: auto;
+  display: none;
+  flex-shrink: 0;
+  margin-left: 16px;
 }
 
 .nav--scrolled {
@@ -556,13 +576,61 @@ h1, h2, h3 {
    2. HERO
    ========================================================================== */
 .hero {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 48px;
-  align-items: start;
+  position: relative;
   max-width: var(--max-hero);
   margin: 0 auto;
-  padding: 64px 48px 80px;
+  padding: 48px 48px 64px;
+  overflow: hidden;
+}
+
+.hero__inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 24px 40px;
+  align-items: start;
+}
+
+.hero__content {
+  position: relative;
+  z-index: 2;
+  min-width: 0;
+}
+
+.hero__visual {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  align-self: stretch;
+  min-height: 0;
+  z-index: 1;
+}
+
+.hero__wave {
+  position: absolute;
+  top: -8%;
+  right: -12%;
+  bottom: 5%;
+  left: -25%;
+  pointer-events: none;
+  opacity: 0.13;
+}
+
+.hero__wave-svg {
+  width: 100%;
+  height: 100%;
+}
+
+.hero__phone {
+  position: relative;
+  display: block;
+  width: 100%;
+  max-width: min(480px, 100%);
+  height: auto;
+  margin-top: 0;
+  margin-right: -32px;
+  margin-bottom: -24px;
+  align-self: flex-end;
 }
 
 .hero__eyebrow {
@@ -1257,27 +1325,51 @@ h1, h2, h3 {
 
 /* Tablet / mobile (â‰¤768px) */
 @media (max-width: 768px) {
-  /* --- Nav: logo + CTA only --- */
+  /* --- Nav: logo + inline links (always visible) --- */
   .nav {
-    padding: 0 32px;
-    gap: 16px;
+    padding: 14px 16px;
+    gap: 8px;
+  }
+
+  .nav__logo {
+    font-size: 1.125rem;
   }
 
   .nav__links {
-    display: none;
+    gap: 24px;
   }
 
-  .nav__cta {
-    margin-left: auto;
-    font-size: 12px;
-    padding: 8px 14px;
+  .nav__links a {
+    font-size: 0.8125rem;
   }
 
   /* --- Section padding: 64px â†’ 32px --- */
   .hero {
+    padding: 32px;
+  }
+
+  .hero__inner {
     grid-template-columns: 1fr;
     gap: 32px;
-    padding: 32px;
+  }
+
+  .hero__visual {
+    order: 2;
+    justify-content: center;
+    margin-top: 8px;
+  }
+
+  .hero__phone {
+    max-width: min(280px, 85vw);
+    margin-right: 0;
+    margin-bottom: 0;
+  }
+
+  .hero__wave {
+    top: -5%;
+    right: -5%;
+    left: -10%;
+    opacity: 0.1;
   }
 
   .investors {
@@ -1424,9 +1516,41 @@ h1, h2, h3 {
 }
 
 /* Small mobile (â‰¤480px) */
+@media (min-width: 1024px) {
+  .nav {
+    padding: 14px 48px;
+    gap: 32px;
+  }
+
+  .nav__logo {
+    font-size: 1.25rem;
+  }
+
+  .nav__links {
+    gap: 32px;
+  }
+
+  .nav__links a {
+    font-size: 0.8125rem;
+  }
+
+  .nav__cta {
+    display: inline-flex;
+  }
+}
+
 @media (max-width: 480px) {
   .nav {
-    padding: 0 20px;
+    padding: 14px 16px;
+    gap: 6px;
+  }
+
+  .nav__links {
+    gap: 18px;
+  }
+
+  .nav__links a {
+    font-size: 0.75rem;
   }
 
   .hero,
@@ -1442,6 +1566,10 @@ h1, h2, h3 {
 
   .hero__stats {
     grid-template-columns: 1fr;
+  }
+
+  .hero__visual {
+    display: none;
   }
 
   .hero__actions {

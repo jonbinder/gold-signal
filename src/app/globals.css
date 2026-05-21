@@ -1589,3 +1589,245 @@ h1, h2, h3 {
   padding: var(--space-xl) var(--space-lg) var(--space-2xl);
 }
 
+/* ==========================================================================
+   STOCKS PAGE (mockup table)
+   ========================================================================== */
+.stocks-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 40px 24px 64px;
+}
+
+.stocks-page__header {
+  margin-bottom: 28px;
+}
+
+.stocks-page__count {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 700;
+  margin: 0 0 6px;
+  color: var(--ink);
+}
+
+.stocks-page__sub {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #666;
+  line-height: 1.5;
+}
+
+.stocks-page__table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.stocks-table {
+  width: 100%;
+  min-width: 820px;
+  border-collapse: collapse;
+  background: #fff;
+}
+
+.stocks-table__th {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #888;
+  padding: 10px 16px;
+  border-bottom: 1px solid #e5e5e5;
+  text-align: right;
+  white-space: nowrap;
+  vertical-align: bottom;
+}
+
+.stocks-table__th--logo {
+  width: 56px;
+  padding-left: 0;
+}
+
+.stocks-table__th--name {
+  text-align: left;
+}
+
+.stocks-table__th--spark {
+  text-align: left;
+}
+
+.stocks-table__th--sort {
+  cursor: default;
+}
+
+.stocks-table__th--active,
+.stocks-table__th--active .stocks-table__sort-btn {
+  color: #c9a84c;
+}
+
+.stocks-table__th--signal {
+  text-align: center;
+  padding: 10px 20px;
+  font-weight: 600;
+  color: #333;
+  border: 2px solid #c9a84c;
+  border-bottom: none;
+  background: #fffdf5;
+  border-radius: 6px 6px 0 0;
+  vertical-align: bottom;
+}
+
+.stocks-table__th--signal-active,
+.stocks-table__th--signal-active .stocks-table__sort-btn {
+  color: #c9a84c;
+}
+
+.stocks-table__sort-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  text-align: inherit;
+  white-space: nowrap;
+  line-height: 1.35;
+}
+
+.stocks-table__sort-btn:hover {
+  color: #c9a84c;
+}
+
+.stocks-table__row {
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.stocks-table__td {
+  padding: 14px 16px;
+  vertical-align: middle;
+  font-size: 0.9375rem;
+  color: #222;
+}
+
+.stocks-table__td--logo {
+  width: 56px;
+  padding: 14px 8px 14px 0;
+}
+
+.stocks-table__td--name {
+  text-align: left;
+  min-width: 180px;
+}
+
+.stocks-table__td--num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.stocks-table__td--spark {
+  padding: 10px 16px;
+}
+
+.stocks-table__td--signal {
+  text-align: center;
+  font-weight: 700;
+  font-size: 1.125rem;
+  color: #111;
+  border-left: 2px solid #c9a84c;
+  border-right: 2px solid #c9a84c;
+  background: #fffdf5;
+}
+
+.stocks-table__td--signal-last {
+  border-bottom: 2px solid #c9a84c;
+  border-radius: 0 0 6px 6px;
+}
+
+.stocks-table__signal-foot {
+  border-left: 2px solid #c9a84c;
+  border-right: 2px solid #c9a84c;
+  border-bottom: 2px solid #c9a84c;
+  background: #fffdf5;
+  border-radius: 0 0 6px 6px;
+  height: 0;
+  padding: 0;
+  line-height: 0;
+}
+
+.stocks-table__ticker {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: #aaa;
+  margin-bottom: 2px;
+}
+
+.stocks-table__company {
+  display: block;
+  font-weight: 500;
+  font-size: 0.9375rem;
+  color: #111;
+}
+
+.stocks-table__name-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.stocks-table__name-link:hover .stocks-table__company {
+  color: #c9a84c;
+}
+
+.stocks-table__na {
+  color: #bbb;
+}
+
+.stocks-table__change--up {
+  font-weight: 500;
+  color: #16a34a;
+}
+
+.stocks-table__change--down {
+  font-weight: 500;
+  color: #dc2626;
+}
+
+.stocks-logo {
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: #f5f5f5;
+}
+
+.stocks-logo--fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #1a1a1a;
+  color: #c9a84c;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 0.6875rem;
+  letter-spacing: 0.04em;
+}
+
+.stocks-sparkline {
+  width: 120px;
+  height: 40px;
+}
+
+.stocks-page__back {
+  text-align: center;
+  margin-top: 40px;
+}
+
+@media (max-width: 768px) {
+  .stocks-page {
+    padding: 28px 16px 48px;
+  }
+
+  .stocks-page__table-wrap {
+    margin: 0 -16px;
+    padding: 0 16px;
+  }
+}
+

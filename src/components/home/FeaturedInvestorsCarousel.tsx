@@ -4,12 +4,7 @@ import { useCallback, useRef, useState } from "react";
 import Link from "next/link";
 import { InvestorAvatar } from "@/components/InvestorAvatar";
 import type { Investor } from "@/lib/goldsignal/data";
-
-function displayName(name: string, sheetName: string): string {
-  const dash = name.indexOf(" – ");
-  if (dash > 0) return name.slice(0, dash).trim();
-  return sheetName.trim() || name;
-}
+import { investorDisplayName } from "@/lib/investor-display-name";
 
 interface FeaturedInvestorsCarouselProps {
   investors: Investor[];
@@ -44,7 +39,7 @@ export function FeaturedInvestorsCarousel({ investors, totalCount }: FeaturedInv
             <article key={investor.slug} className="investor-card investor-card--carousel fade-in visible">
               <InvestorAvatar slug={investor.slug} name={investor.name} size={48} className="investor-card__avatar" />
               <h3 className="investor-card__name">
-                <Link href={`/investors/${investor.slug}`}>{displayName(investor.name, investor.sheetName)}</Link>
+                <Link href={`/investors/${investor.slug}`}>{investorDisplayName(investor.name, investor.sheetName)}</Link>
               </h3>
               <p className="investor-card__role">{investor.role}</p>
               <div className="investor-card__tickers">

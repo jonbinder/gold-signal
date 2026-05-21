@@ -87,3 +87,33 @@ export function enrichStock(raw: Stock): EnrichedStock {
 export function getEnrichedStocks(): EnrichedStock[] {
   return getStocks().map(enrichStock);
 }
+
+const stocksByTicker = () => {
+  const map = new Map<string, EnrichedStock>();
+  for (const s of getEnrichedStocks()) map.set(s.ticker, s);
+  return map;
+};
+
+/** Lookup enrichment for a holding ticker (rankings sheet or stocks.json). */
+export function getEnrichmentForTicker(rawTicker: string): Partial<EnrichedStock> | null {
+  const ticker = rawTicker.trim().toUpperCase();
+  if (!ticker) return null;
+
+  const baseTicker = ticker.split(".")[0];
+  const fromRankings = stocksByTicker().get(baseTicker);
+  if (fromRankings) return fromRankings;
+
+  const cap = marketCapBillions.get(baseTicker) ?? marketCapBillions.get(ticker);
+  const history = buildPriceHistory(baseTicker, 0);
+  const marketCap =
+    cap && cap > 0 ? cap : Math.max(0.05, (hashSeed(baseTicker) % 50) / 10);
+
+  return {
+    ticker: baseTicker,
+    marketCap,
+    peRatio: PE_BY_TICKER[baseTicker] ?? null,
+    priceHistory: history,
+    signalScore: undefined,
+    logoUrl: stockLogoUrl(baseTicker),
+  };
+}

@@ -13,6 +13,12 @@ export const STOCK_LOGO_DOMAINS: Record<string, string> = {
   HL: "hecla.com",
   MUX: "mcewenmining.com",
   NEM: "newmont.com",
+  SA: "seabridgegold.com",
+  OR: "osiskogr.com",
+  SII: "sprott.com",
+  TFPM: "tripleflagpm.com",
+  EQX: "equinoxgold.com",
+  LODE: "comstockmining.com",
 };
 
 export function stockLogoUrl(ticker: string): string {

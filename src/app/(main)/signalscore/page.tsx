@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { MetricIcon } from "@/components/signalscore/MetricIcon";
 import { ScoreReferenceGuide } from "@/components/signalscore/ScoreReferenceGuide";
+import { ScoresInContrast } from "@/components/signalscore/ScoresInContrast";
+import { SignalScoreSupplement } from "@/components/signalscore/SignalScoreSupplement";
 
 export const metadata: Metadata = {
   title: "SignalScore, GoldSignal.ai",
@@ -11,6 +14,7 @@ export const metadata: Metadata = {
 const METRICS = [
   {
     num: "01",
+    icon: "ti-building-bank",
     title: "Institutional 13F Data",
     tags: ["SEC filings", "Quarterly data"],
     desc: (
@@ -26,6 +30,7 @@ const METRICS = [
   },
   {
     num: "02",
+    icon: "ti-user-dollar",
     title: "Insider Buying vs Selling",
     tags: ["Form 4 filings", "Recency weighted"],
     desc: (
@@ -41,6 +46,7 @@ const METRICS = [
   },
   {
     num: "03",
+    icon: "ti-chart-bar",
     title: "PE Ratio Analysis",
     tags: ["Valuation", "Sector benchmarked"],
     desc: (
@@ -56,6 +62,7 @@ const METRICS = [
   },
   {
     num: "04",
+    icon: "ti-trending-up",
     title: "Forward PE Projection",
     tags: ["Analyst estimates", "Forward looking"],
     desc: (
@@ -73,6 +80,7 @@ const METRICS = [
   },
   {
     num: "05",
+    icon: "ti-star",
     title: "Famous Investor Portfolio Tracking",
     tags: ["Smart money", "Conviction layer"],
     desc: (
@@ -90,6 +98,7 @@ const METRICS = [
   },
   {
     num: "06",
+    icon: "ti-chart-line",
     title: "52-Week Support Level",
     tags: ["Price structure", "Downside protection"],
     desc: (
@@ -107,6 +116,7 @@ const METRICS = [
   },
   {
     num: "07",
+    icon: "ti-coins",
     title: "Gold Price Correlation",
     tags: ["Price leverage", 'Upside "Torque"'],
     desc: (
@@ -125,6 +135,7 @@ const METRICS = [
   },
   {
     num: "08",
+    icon: "ti-target",
     title: "Analyst Price Target Upside",
     tags: ["Analyst consensus", "Forward looking"],
     desc: (
@@ -141,6 +152,7 @@ const METRICS = [
   },
   {
     num: "09",
+    icon: "ti-microphone",
     title: "Executive Commentary Signal",
     tags: ["Earnings calls", "Proprietary analysis"],
     desc: (
@@ -160,22 +172,6 @@ const METRICS = [
   },
 ] as const;
 
-const SUB_SCORES = [
-  { label: "13F Institutional Conviction", value: 92 },
-  { label: "Insider Buying vs Selling", value: 88 },
-  { label: "PE Ratio", value: 79 },
-  { label: "Forward PE Ratio", value: 84 },
-  { label: "Famous Investor Overlap", value: 91 },
-  { label: "52-Week Support Level", value: 86 },
-  { label: "Gold Price Correlation", value: 88 },
-  { label: "Analyst Price Target Upside", value: 83 },
-  { label: "Executive Commentary Signal", value: 85 },
-] as const;
-
-const SAMPLE_COMPOSITE = Math.round(
-  SUB_SCORES.reduce((sum, item) => sum + item.value, 0) / SUB_SCORES.length,
-);
-
 export default function SignalScorePage() {
   return (
     <main>
@@ -187,32 +183,21 @@ export default function SignalScorePage() {
             in precious metals is doing and whether a stock looks attractively valued right now. Nine
             data-driven inputs, one clear verdict.
           </p>
+          <p className="explained__stat-line">
+            Across the stocks we track, fewer than 8% score above 80. The average SignalScore sits
+            near 54.
+          </p>
         </header>
-        <div className="explained__grid">
-          <aside className="explained__score-panel">
-            <p className="explained__score-label">Sample composite</p>
-            <div className="explained__score-header">
-              <p className="explained__score-value">{SAMPLE_COMPOSITE}</p>
-              <span className="explained__rating-badge">Strong Conviction</span>
-            </div>
-            <ul className="sub-scores">
-              {SUB_SCORES.map((item) => (
-                <li key={item.label} className="sub-score">
-                  <span className="sub-score__label">{item.label}</span>
-                  <span className="mono sub-score__value">{item.value}</span>
-                  <span className="sub-score__bar">
-                    <span className="sub-score__fill" style={{ width: `${item.value}%` }} />
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </aside>
-          <div className="explained__main-col">
-            <ScoreReferenceGuide />
-            <ol className="explained__metrics">
+        <div className="explained__content">
+          <ScoreReferenceGuide />
+          <SignalScoreSupplement />
+          <ol className="explained__metrics">
             {METRICS.map((metric) => (
               <li key={metric.num} className="metric fade-in visible">
-                <span className="metric__num mono">{metric.num}</span>
+                <div className="metric__lead">
+                  <MetricIcon name={metric.icon} className="metric__icon" />
+                  <span className="metric__num mono">{metric.num}</span>
+                </div>
                 <div>
                   <h2 className="metric__title">{metric.title}</h2>
                   <div className="metric__tags">
@@ -226,8 +211,18 @@ export default function SignalScorePage() {
                 </div>
               </li>
             ))}
-            </ol>
-          </div>
+          </ol>
+        </div>
+        <ScoresInContrast />
+        <div className="ss-sources" aria-label="Data sources">
+          <p className="ss-sources__label">Data sourced from</p>
+          <ul className="ss-sources__list">
+            <li>SEC EDGAR</li>
+            <li>Form 4 Filings</li>
+            <li>Consensus Analyst Estimates</li>
+            <li>Exchange Price Feeds</li>
+            <li>Earnings Call Transcripts</li>
+          </ul>
         </div>
         <p className="explained__back">
           <Link href="/stocks" className="btn btn--primary">

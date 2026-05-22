@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { DataRefreshSection } from "@/components/signalscore/DataRefreshSection";
 import { MetricIcon } from "@/components/signalscore/MetricIcon";
 import { ScoreReferenceGuide } from "@/components/signalscore/ScoreReferenceGuide";
 import { ScoresInContrast } from "@/components/signalscore/ScoresInContrast";
+import { SignalScoreHero } from "@/components/signalscore/SignalScoreHero";
 import { SignalScoreSupplement } from "@/components/signalscore/SignalScoreSupplement";
 
 export const metadata: Metadata = {
@@ -176,18 +178,7 @@ export default function SignalScorePage() {
   return (
     <main>
       <section className="explained" id="signalscore">
-        <header className="section-header">
-          <h1 className="section-header__title">SignalScore Explained</h1>
-          <p className="section-header__sub">
-            The SignalScore is a single number from 0 to 100 that summarizes what the smartest money
-            in precious metals is doing and whether a stock looks attractively valued right now. Nine
-            data-driven inputs, one clear verdict.
-          </p>
-          <p className="explained__stat-line">
-            Across the stocks we track, fewer than 8% score above 80. The average SignalScore sits
-            near 54.
-          </p>
-        </header>
+        <SignalScoreHero />
         <div className="explained__content">
           <ScoreReferenceGuide />
           <SignalScoreSupplement />
@@ -214,6 +205,7 @@ export default function SignalScorePage() {
           </ol>
         </div>
         <ScoresInContrast />
+        <DataRefreshSection />
         <div className="ss-sources" aria-label="Data sources">
           <p className="ss-sources__label">Data sourced from</p>
           <ul className="ss-sources__list">

@@ -1,15 +1,3 @@
-const REFRESH_ROWS = [
-  { component: "Institutional 13F Data", cadence: "Quarterly, within 2 days of SEC filing deadline" },
-  { component: "Insider Buying vs Selling", cadence: "Within 48 hours of Form 4 SEC filing" },
-  { component: "PE Ratio Analysis", cadence: "Weekly, based on latest reported earnings" },
-  { component: "Forward PE Projection", cadence: "Weekly, synced to analyst estimate revisions" },
-  { component: "Famous Investor Portfolio Tracking", cadence: "Quarterly, upon 13F publication" },
-  { component: "52-Week Support Level", cadence: "Daily, based on closing price" },
-  { component: "Gold Price Correlation", cadence: "Daily, recalculates on market close" },
-  { component: "Analyst Price Target Upside", cadence: "Weekly, as price targets are revised" },
-  { component: "Executive Commentary Signal", cadence: "Within 72 hours of earnings call or investor day transcript" },
-] as const;
-
 const WEIGHT_TIERS = [
   {
     label: "Primary signals",
@@ -25,54 +13,6 @@ const WEIGHT_TIERS = [
     label: "Confirming signals",
     detail: "52-Week Support Level, Gold Price Correlation",
     width: "42%",
-  },
-] as const;
-
-const CASE_STUDY_ROWS = [
-  {
-    factor: "Institutional 13F Data",
-    score: 91,
-    note: "Three of the top 20 gold-focused funds added to positions last quarter",
-  },
-  {
-    factor: "Insider Buying vs Selling",
-    score: 88,
-    note: "CEO and two board members made open-market purchases in the past 45 days",
-  },
-  {
-    factor: "PE Ratio Analysis",
-    score: 64,
-    note: "Trailing PE sits modestly above sector median, a small drag on the score",
-  },
-  {
-    factor: "Forward PE Projection",
-    score: 79,
-    note: "Forward multiple implies meaningful upside if gold holds above current levels",
-  },
-  {
-    factor: "Famous Investor Portfolio Tracking",
-    score: 90,
-    note: "Appears in the disclosed holdings of four tracked precious-metals specialists",
-  },
-  {
-    factor: "52-Week Support Level",
-    score: 77,
-    note: "Trading 12% above its 52-week low, near a historically well-defended price level",
-  },
-  {
-    factor: "Gold Price Correlation",
-    score: 85,
-    note: "Strong historical correlation, meaning shareholders get real leverage when gold moves",
-  },
-  {
-    factor: "Analyst Price Target Upside",
-    score: 82,
-    note: "Consensus target implies 31% upside from current price across six covering analysts",
-  },
-  {
-    factor: "Executive Commentary Signal",
-    score: 74,
-    note: "Recent earnings call flagged improved drill results but guidance language was cautious",
   },
 ] as const;
 
@@ -102,20 +42,6 @@ const FAQ_ITEMS = [
 export function SignalScoreSupplement() {
   return (
     <div className="ss-supplement">
-      <section className="ss-block" aria-labelledby="ss-refresh-title">
-        <h2 id="ss-refresh-title" className="ss-block__title">
-          How often data refreshes
-        </h2>
-        <dl className="ss-refresh">
-          {REFRESH_ROWS.map((row) => (
-            <div key={row.component} className="ss-refresh__row">
-              <dt className="ss-refresh__component">{row.component}</dt>
-              <dd className="ss-refresh__cadence">{row.cadence}</dd>
-            </div>
-          ))}
-        </dl>
-      </section>
-
       <section className="ss-block" aria-labelledby="ss-weighting-title">
         <h2 id="ss-weighting-title" className="ss-block__title">
           Not all signals are weighted equally
@@ -143,37 +69,6 @@ export function SignalScoreSupplement() {
             </div>
           ))}
         </div>
-      </section>
-
-      <section className="ss-block" aria-labelledby="ss-example-title">
-        <h2 id="ss-example-title" className="ss-block__title">
-          Seeing the score in action
-        </h2>
-        <article className="ss-case-study">
-          <header className="ss-case-study__header">
-            <p className="ss-case-study__company">Ridgeline Gold Corp</p>
-            <p className="ss-case-study__meta">Illustrative example</p>
-            <p className="ss-case-study__score">
-              <span className="ss-case-study__score-value mono">83</span>
-              <span className="ss-case-study__score-label">Strong conviction</span>
-            </p>
-          </header>
-          <ul className="ss-case-study__breakdown">
-            {CASE_STUDY_ROWS.map((row) => (
-              <li key={row.factor} className="ss-case-study__row">
-                <div className="ss-case-study__row-head">
-                  <span className="ss-case-study__factor">{row.factor}</span>
-                  <span className="ss-case-study__row-score mono">{row.score}</span>
-                </div>
-                <p className="ss-case-study__note">{row.note}</p>
-              </li>
-            ))}
-          </ul>
-        </article>
-        <p className="ss-case-study__disclaimer">
-          Ridgeline Gold Corp is a fictional company used for illustration only. All figures are
-          hypothetical.
-        </p>
       </section>
 
       <section className="ss-block" aria-labelledby="ss-conflict-title">

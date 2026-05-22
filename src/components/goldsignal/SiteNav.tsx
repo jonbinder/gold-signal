@@ -2,12 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-
-const NAV_LINKS = [
-  { href: "/investors", label: "Investors" },
-  { href: "/stocks", label: "Stocks" },
-  { href: "/signalscore", label: "SignalScore" },
-] as const;
+import { SITE_NAV_LINKS } from "@/lib/goldsignal/nav-links";
 
 export function SiteNav() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -39,7 +34,7 @@ export function SiteNav() {
           <span className="nav__logo-ink">.ai</span>
         </Link>
         <ul className="nav__links">
-          {NAV_LINKS.map((link) => (
+          {SITE_NAV_LINKS.map((link) => (
             <li key={link.href}>
               <Link href={link.href}>{link.label}</Link>
             </li>
@@ -76,7 +71,7 @@ export function SiteNav() {
           ✕
         </button>
         <ul className="nav__overlay-links">
-          {NAV_LINKS.map((link) => (
+          {SITE_NAV_LINKS.map((link) => (
             <li key={link.href}>
               <Link href={link.href} onClick={closeMenu}>
                 {link.label}

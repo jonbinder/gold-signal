@@ -104,7 +104,56 @@ const METRICS = [
       </>
     ),
   },
+  {
+    num: "07",
+    title: "Gold Price Correlation",
+    tags: ["Price leverage", 'Upside "Torque"'],
+    desc: (
+      <>
+        Not all gold stocks respond the same to a rising gold price environment. Some miners are
+        poorly hedged, badly managed, or structured in ways that cause them to barely move when the
+        price of gold rallies. Gold Price Correlation measures how closely a stock actually tracks
+        the price of gold over time. A high correlation means investors are getting more leverage
+        to gold when they buy the stock, which is the whole point of owning gold equities over the
+        physical metal. A low correlation is a red flag that something structural is muting the
+        relationship. We reward stocks that move with gold the way they should. For example Agnico
+        Eagle Mines has a long-standing policy of no forward gold sales or hedging to maintain full
+        exposure to the gold price.
+      </>
+    ),
+  },
+  {
+    num: "08",
+    title: "Analyst Price Target Upside",
+    tags: ["Analyst consensus", "Forward looking"],
+    desc: (
+      <>
+        Independent analysts who cover gold and silver stocks publish price targets based on their
+        own financial models, site visits, and management meetings. We take the average of these
+        targets and compare it to where the stock trades today. The gap between the two is the
+        implied upside. A stock trading well below where analysts collectively think it should be
+        priced is worth paying attention to, especially when that view is shared across multiple
+        firms rather than driven by a single outlier. This component adds an independent outside
+        perspective that is distinct from our own valuation metrics.
+      </>
+    ),
+  },
 ] as const;
+
+const SUB_SCORES = [
+  { label: "13F Institutional Conviction", value: 92 },
+  { label: "Insider Buying vs Selling", value: 88 },
+  { label: "PE Ratio", value: 79 },
+  { label: "Forward PE Ratio", value: 84 },
+  { label: "Famous Investor Overlap", value: 91 },
+  { label: "52-Week Support Level", value: 86 },
+  { label: "Gold Price Correlation", value: 88 },
+  { label: "Analyst Price Target Upside", value: 83 },
+] as const;
+
+const SAMPLE_COMPOSITE = Math.round(
+  SUB_SCORES.reduce((sum, item) => sum + item.value, 0) / SUB_SCORES.length,
+);
 
 export default function SignalScorePage() {
   return (
@@ -114,7 +163,7 @@ export default function SignalScorePage() {
           <h1 className="section-header__title">SignalScore Explained</h1>
           <p className="section-header__sub">
             The SignalScore is a single number from 0 to 100 that summarizes what the smartest money
-            in precious metals is doing and whether a stock looks attractively valued right now. Six
+            in precious metals is doing and whether a stock looks attractively valued right now. Eight
             data-driven inputs, one clear verdict.
           </p>
         </header>
@@ -122,52 +171,19 @@ export default function SignalScorePage() {
           <aside className="explained__score-panel">
             <p className="explained__score-label">Sample composite</p>
             <div className="explained__score-header">
-              <p className="explained__score-value">87</p>
+              <p className="explained__score-value">{SAMPLE_COMPOSITE}</p>
               <span className="explained__rating-badge">Strong Conviction</span>
             </div>
             <ul className="sub-scores">
-              <li className="sub-score">
-                <span className="sub-score__label">13F Institutional Conviction</span>
-                <span className="mono sub-score__value">92</span>
-                <span className="sub-score__bar">
-                  <span className="sub-score__fill" style={{ width: "92%" }} />
-                </span>
-              </li>
-              <li className="sub-score">
-                <span className="sub-score__label">Insider Buying vs Selling</span>
-                <span className="mono sub-score__value">88</span>
-                <span className="sub-score__bar">
-                  <span className="sub-score__fill" style={{ width: "88%" }} />
-                </span>
-              </li>
-              <li className="sub-score">
-                <span className="sub-score__label">PE Ratio</span>
-                <span className="mono sub-score__value">79</span>
-                <span className="sub-score__bar">
-                  <span className="sub-score__fill" style={{ width: "79%" }} />
-                </span>
-              </li>
-              <li className="sub-score">
-                <span className="sub-score__label">Forward PE Ratio</span>
-                <span className="mono sub-score__value">84</span>
-                <span className="sub-score__bar">
-                  <span className="sub-score__fill" style={{ width: "84%" }} />
-                </span>
-              </li>
-              <li className="sub-score">
-                <span className="sub-score__label">Famous Investor Overlap</span>
-                <span className="mono sub-score__value">91</span>
-                <span className="sub-score__bar">
-                  <span className="sub-score__fill" style={{ width: "91%" }} />
-                </span>
-              </li>
-              <li className="sub-score">
-                <span className="sub-score__label">52-Week Support Level</span>
-                <span className="mono sub-score__value">86</span>
-                <span className="sub-score__bar">
-                  <span className="sub-score__fill" style={{ width: "86%" }} />
-                </span>
-              </li>
+              {SUB_SCORES.map((item) => (
+                <li key={item.label} className="sub-score">
+                  <span className="sub-score__label">{item.label}</span>
+                  <span className="mono sub-score__value">{item.value}</span>
+                  <span className="sub-score__bar">
+                    <span className="sub-score__fill" style={{ width: `${item.value}%` }} />
+                  </span>
+                </li>
+              ))}
             </ul>
           </aside>
           <ol className="explained__metrics">

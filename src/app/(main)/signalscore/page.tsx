@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ScoreReferenceGuide } from "@/components/signalscore/ScoreReferenceGuide";
 
 export const metadata: Metadata = {
   title: "SignalScore, GoldSignal.ai",
@@ -206,7 +207,9 @@ export default function SignalScorePage() {
               ))}
             </ul>
           </aside>
-          <ol className="explained__metrics">
+          <div className="explained__main-col">
+            <ScoreReferenceGuide />
+            <ol className="explained__metrics">
             {METRICS.map((metric) => (
               <li key={metric.num} className="metric fade-in visible">
                 <span className="metric__num mono">{metric.num}</span>
@@ -223,7 +226,8 @@ export default function SignalScorePage() {
                 </div>
               </li>
             ))}
-          </ol>
+            </ol>
+          </div>
         </div>
         <p className="explained__back">
           <Link href="/stocks" className="btn btn--primary">

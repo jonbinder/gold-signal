@@ -138,6 +138,25 @@ const METRICS = [
       </>
     ),
   },
+  {
+    num: "09",
+    title: "Executive Commentary Signal",
+    tags: ["Earnings calls", "Proprietary analysis"],
+    desc: (
+      <>
+        Every quarter, company executives host earnings calls and investor presentations where they
+        discuss operations, exploration results, production guidance, and their outlook on gold
+        prices. Most investors never read these transcripts. Our system reads through executive
+        commentary from CEOs, CFOs, and operations leads and flags language that suggests something
+        meaningful is developing that the market has not yet priced in. This might be early signals
+        of a new discovery, a shift in production guidance, an operational issue, or an unexpected
+        change in costs. We score stocks higher when recent commentary contains substantive new
+        information, and lower when executives are vague, repetitive, or walking back prior
+        guidance. The goal is to understand executive sentimate and surface what is being said
+        before the market fully reacts to it.
+      </>
+    ),
+  },
 ] as const;
 
 const SUB_SCORES = [
@@ -149,6 +168,7 @@ const SUB_SCORES = [
   { label: "52-Week Support Level", value: 86 },
   { label: "Gold Price Correlation", value: 88 },
   { label: "Analyst Price Target Upside", value: 83 },
+  { label: "Executive Commentary Signal", value: 85 },
 ] as const;
 
 const SAMPLE_COMPOSITE = Math.round(
@@ -163,7 +183,7 @@ export default function SignalScorePage() {
           <h1 className="section-header__title">SignalScore Explained</h1>
           <p className="section-header__sub">
             The SignalScore is a single number from 0 to 100 that summarizes what the smartest money
-            in precious metals is doing and whether a stock looks attractively valued right now. Eight
+            in precious metals is doing and whether a stock looks attractively valued right now. Nine
             data-driven inputs, one clear verdict.
           </p>
         </header>

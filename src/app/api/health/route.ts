@@ -15,5 +15,8 @@ export async function GET() {
     env: process.env.VERCEL_ENV ?? null,
     hasProcessSecret: Boolean(process.env.PROCESS_SECRET?.trim()),
     hasCronSecret: Boolean(process.env.CRON_SECRET?.trim()),
+    hasSupabaseUrl: Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL?.trim()),
+    hasSupabaseServiceRole: Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()),
+    hasSupabaseAnon: Boolean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim()),
   });
 }

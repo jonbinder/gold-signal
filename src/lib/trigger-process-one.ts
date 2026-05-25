@@ -49,3 +49,34 @@ export function isValidProcessSecret(request: Request): boolean {
   if (!expected) return false;
   return request.headers.get("x-process-secret") === expected;
 }
+
+/**
+ * Fire-and-forget trigger for /api/refresh-stocks batch chain.
+ */
+export function triggerRefreshStocks(batch: number, origin: string): void {
+  const secret = process.env.PROCESS_SECRET?.trim();
+  if (!secret) {
+    console.warn("[trigger] PROCESS_SECRET not set; skipping refresh-stocks", { batch });
+    return;
+  }
+
+  try {
+    const url = new URL("/api/refresh-stocks", origin);
+    url.searchParams.set("batch", String(batch));
+
+    fetch(url.toString(), {
+      method: "GET",
+      headers: { "x-process-secret": secret },
+    }).catch((err) => {
+      console.warn("[trigger] refresh-stocks fetch failed", {
+        batch,
+        message: err instanceof Error ? err.message : String(err),
+      });
+    });
+  } catch (err) {
+    console.warn("[trigger] refresh-stocks setup failed", {
+      batch,
+      message: err instanceof Error ? err.message : String(err),
+    });
+  }
+}

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServiceClient } from "@/lib/supabase";
-import { getDeploymentOrigin, triggerProcessOne } from "@/lib/trigger-process-one";
+import { getDeploymentOrigin, triggerProcessOne, triggerRefreshStocks } from "@/lib/trigger-process-one";
 
 export const maxDuration = 60;
 export const dynamic = "force-dynamic";
@@ -70,9 +70,13 @@ export async function GET(req: Request) {
     ids: [...ids],
   });
 
+  triggerRefreshStocks(0, origin);
+  console.info("[cron/cleanup] Triggered stock universe refresh batch 0");
+
   return NextResponse.json({
     ok: true,
     triggered: ids.size,
     submissionIds: [...ids],
+    stockRefreshStarted: true,
   });
 }

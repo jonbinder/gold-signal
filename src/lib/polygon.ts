@@ -484,3 +484,82 @@ export async function getInsiderTransactions(
 
   return ok(null);
 }
+
+export type ReferenceTickerRow = {
+  ticker: string;
+  name: string;
+  marketCap: number | null;
+  exchange: string | null;
+  homepageUrl: string | null;
+  sicCode: string | null;
+};
+
+/**
+ * Lists active US-listed tickers matching a SIC code (paginated).
+ */
+export async function searchReferenceTickersBySic(
+  sicCode: string,
+  options?: { marketCapMin?: number; limit?: number },
+): Promise<ApiResult<ReferenceTickerRow[]>> {
+  const marketCapMin = options?.marketCapMin ?? 50_000_000;
+  const maxResults = options?.limit ?? 500;
+  const allowedExchanges = new Set(["XNYS", "XNAS", "ARCX", "NYSE", "NASDAQ", "NYSEARCA"]);
+
+  type ListResponse = {
+    results?: Record<string, unknown>[];
+    next_url?: string;
+  };
+
+  const rows: ReferenceTickerRow[] = [];
+  let fetchPath = "/v3/reference/tickers";
+  let params: Record<string, string> = {
+    sic_code: sicCode,
+    market_cap_gte: String(marketCapMin),
+    active: "true",
+    limit: "1000",
+  };
+
+  for (let page = 0; page < 20 && rows.length < maxResults; page++) {
+    const res: ApiResult<ListResponse> = await polygonFetch<ListResponse>(fetchPath, params);
+    if (!res.ok) return res;
+
+    for (const r of res.data.results ?? []) {
+      const ticker = typeof r.ticker === "string" ? normalizeTicker(r.ticker) : "";
+      if (!ticker) continue;
+      const exchange =
+        typeof r.primary_exchange === "string"
+          ? r.primary_exchange
+          : typeof r.locale === "string"
+            ? r.locale
+            : null;
+      const exNorm = exchange?.toUpperCase() ?? "";
+      if (exchange && !allowedExchanges.has(exNorm) && !["NYSE", "NASDAQ", "NYSEARCA"].includes(exNorm)) {
+        continue;
+      }
+      rows.push({
+        ticker,
+        name: typeof r.name === "string" ? r.name : ticker,
+        marketCap: typeof r.market_cap === "number" ? r.market_cap : null,
+        exchange: exchange ?? "NYSE",
+        homepageUrl: typeof r.homepage_url === "string" ? r.homepage_url : null,
+        sicCode,
+      });
+      if (rows.length >= maxResults) break;
+    }
+
+    const nextUrlRaw = res.data.next_url;
+    if (!nextUrlRaw || typeof nextUrlRaw !== "string") break;
+    try {
+      const parsed = new URL(
+        nextUrlRaw.startsWith("http") ? nextUrlRaw : `${polygonBaseUrl()}${nextUrlRaw}`,
+      );
+      fetchPath = parsed.pathname;
+      params = Object.fromEntries(parsed.searchParams.entries());
+      delete params.apiKey;
+    } catch {
+      break;
+    }
+  }
+
+  return ok(rows);
+}

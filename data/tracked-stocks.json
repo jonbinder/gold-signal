@@ -1,0 +1,120 @@
+{
+  "generated_at": "2026-05-25T16:27:27.008Z",
+  "source_counts": {
+    "royalty": 14
+  },
+  "stocks": [
+    {
+      "ticker": "ABRA",
+      "name": "AbraSilver Resource Corp.",
+      "category": "royalty",
+      "sub_category": "diversified",
+      "exchange": "NYSE",
+      "logo_url": null
+    },
+    {
+      "ticker": "ELE",
+      "name": "Elemental Royalty Corporation",
+      "category": "royalty",
+      "sub_category": "diversified",
+      "exchange": "NYSE",
+      "logo_url": null
+    },
+    {
+      "ticker": "EMX",
+      "name": "EMX Royalty Corporation",
+      "category": "royalty",
+      "sub_category": "diversified",
+      "exchange": "NYSE",
+      "logo_url": null
+    },
+    {
+      "ticker": "FNV",
+      "name": "Franco-Nevada Corporation",
+      "category": "royalty",
+      "sub_category": "diversified",
+      "exchange": "NYSE",
+      "logo_url": "https://logo.clearbit.com/franco-nevada.com"
+    },
+    {
+      "ticker": "GROY",
+      "name": "Gold Royalty Corp.",
+      "category": "royalty",
+      "sub_category": "diversified",
+      "exchange": "NYSE",
+      "logo_url": null
+    },
+    {
+      "ticker": "MMX",
+      "name": "Metallic Minerals Corp.",
+      "category": "royalty",
+      "sub_category": "diversified",
+      "exchange": "NYSE",
+      "logo_url": null
+    },
+    {
+      "ticker": "MTA",
+      "name": "Metalla Royalty & Streaming Ltd.",
+      "category": "royalty",
+      "sub_category": "diversified",
+      "exchange": "NYSE",
+      "logo_url": null
+    },
+    {
+      "ticker": "NSR",
+      "name": "Nomad Royalty Company Ltd.",
+      "category": "royalty",
+      "sub_category": "diversified",
+      "exchange": "NYSE",
+      "logo_url": null
+    },
+    {
+      "ticker": "OR",
+      "name": "Osisko Gold Royalties Ltd",
+      "category": "royalty",
+      "sub_category": "diversified",
+      "exchange": "NYSE",
+      "logo_url": null
+    },
+    {
+      "ticker": "RGLD",
+      "name": "Royal Gold, Inc.",
+      "category": "royalty",
+      "sub_category": "diversified",
+      "exchange": "NYSE",
+      "logo_url": "https://logo.clearbit.com/royalgold.com"
+    },
+    {
+      "ticker": "SAND",
+      "name": "Sandstorm Gold Ltd.",
+      "category": "royalty",
+      "sub_category": "diversified",
+      "exchange": "NYSE",
+      "logo_url": null
+    },
+    {
+      "ticker": "TFPM",
+      "name": "Triple Flag Precious Metals Corp.",
+      "category": "royalty",
+      "sub_category": "diversified",
+      "exchange": "NYSE",
+      "logo_url": null
+    },
+    {
+      "ticker": "VOXR",
+      "name": "Vox Royalty Corp.",
+      "category": "royalty",
+      "sub_category": "diversified",
+      "exchange": "NYSE",
+      "logo_url": null
+    },
+    {
+      "ticker": "WPM",
+      "name": "Wheaton Precious Metals Corp.",
+      "category": "royalty",
+      "sub_category": "diversified",
+      "exchange": "NYSE",
+      "logo_url": "https://logo.clearbit.com/wheatonpm.com"
+    }
+  ]
+}

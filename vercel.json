@@ -9,6 +9,9 @@
     "src/app/api/process-one/route.ts": {
       "maxDuration": 60
     },
+    "src/app/api/refresh-stocks/route.ts": {
+      "maxDuration": 60
+    },
     "src/app/api/cron/cleanup/route.ts": {
       "maxDuration": 60
     }

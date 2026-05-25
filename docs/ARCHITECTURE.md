@@ -18,6 +18,11 @@ Homepage form
 Daily safety net (06:00 UTC, Hobby cron limit):
     → GET /api/cron/cleanup (CRON_SECRET)
     → pending/processing stuck > 30 min → fire-and-forget /api/process-one for each
+    → fire-and-forget /api/refresh-stocks?batch=0 (chains ~25 tickers per invocation)
+
+/stocks page:
+    → reads stock_data_cache (public RLS)
+    → master list in data/tracked-stocks.json (npm run build:universe)
 ```
 
 ## Key modules

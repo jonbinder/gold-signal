@@ -41,7 +41,8 @@ End-to-end pipeline: homepage form → instant fire-and-forget processing → da
 1. Add all environment variables above (Production + Preview as needed).
 2. Deploy — `vercel.json` registers one daily cron: **`0 6 * * *`** (06:00 UTC) on `/api/cron/cleanup`.
 3. On submit, `/api/submissions` immediately fire-and-forgets `/api/process-one` (no cron wait).
-4. **Function timeout:** `maxDuration: 60` on `process-one` and `cleanup` (Hobby max). Prefer ≤3 tickers per submission.
+4. **Function timeout:** `maxDuration: 60` on `process-one`, `refresh-stocks`, and `cleanup` (Hobby max). Prefer ≤3 tickers per submission.
+5. **Stock universe:** Run migration `008_stock_data_cache.sql`. Build list with `npm run build:universe`. Daily cleanup cron chains `/api/refresh-stocks` batches.
 
 ## End-to-end test checklist
 

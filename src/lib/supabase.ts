@@ -1,4 +1,9 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import {
+  readServiceRoleKey,
+  readSupabaseAnonKey,
+  readSupabaseUrl,
+} from "@/lib/submission-supabase";
 
 let publicClient: SupabaseClient | null = null;
 let serviceClient: SupabaseClient | null = null;
@@ -8,8 +13,8 @@ let serviceClient: SupabaseClient | null = null;
  */
 export function createSupabasePublicClient(): SupabaseClient | null {
   if (publicClient) return publicClient;
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim();
+  const url = readSupabaseUrl();
+  const key = readSupabaseAnonKey();
   if (!url || !key) return null;
   publicClient = createClient(url, key, {
     auth: { persistSession: true, autoRefreshToken: true },
@@ -23,8 +28,8 @@ export function createSupabasePublicClient(): SupabaseClient | null {
  */
 export function createSupabaseServiceClient(): SupabaseClient | null {
   if (serviceClient) return serviceClient;
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
+  const url = readSupabaseUrl();
+  const key = readServiceRoleKey();
   if (!url || !key) return null;
   serviceClient = createClient(url, key, {
     auth: { persistSession: false, autoRefreshToken: false },

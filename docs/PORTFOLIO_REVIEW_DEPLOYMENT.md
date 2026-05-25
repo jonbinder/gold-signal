@@ -22,6 +22,7 @@ End-to-end pipeline: homepage form → instant fire-and-forget processing → da
    - `005_portfolio_review_submissions.sql`
    - `006_reports_storage_bucket.sql`
    - `007_submission_queue_hardening.sql`
+   - `009_submissions_anon_insert.sql` (required if server uses anon fallback for form insert)
 2. Confirm Storage bucket **reports** exists (private, PDF only).
 3. Seed famous investors (optional but improves scores):
    ```bash
@@ -72,6 +73,7 @@ End-to-end pipeline: homepage form → instant fire-and-forget processing → da
 
 | Symptom | Check |
 |---------|--------|
+| “Submission service is not configured” (503) | `GET /api/health` → `canSubmitPortfolio: true`. If false, add Supabase vars under **Production**, then **Redeploy** (do not “Redeploy” an old deployment). Run migration `009` if using anon fallback. |
 | Form saves but stays `pending` | `PROCESS_SECRET` in Vercel; Vercel logs `[trigger]` / `[process-one]` |
 | Stuck `pending`/`processing` > 30 min | Daily cleanup at 06:00 UTC, or manual `process-one` curl |
 | `failed` with Polygon error | `POLYGON_API_KEY`, plan limits, ticker validity |

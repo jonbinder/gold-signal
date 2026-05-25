@@ -5,7 +5,7 @@ import {
   logSubmissionEnvConfigOnLoad,
   logSubmissionServiceConfigFailure,
 } from "@/lib/submission-env";
-import { createSupabaseServiceClient } from "@/lib/supabase";
+import { getSubmissionSupabaseClient } from "@/lib/submission-supabase";
 import { getDeploymentOrigin, triggerProcessOne } from "@/lib/trigger-process-one";
 
 logSubmissionEnvConfigOnLoad("submissions");
@@ -29,8 +29,8 @@ export async function POST(req: Request) {
     );
   }
 
-  const supabase = createSupabaseServiceClient();
-  if (!supabase) {
+  const resolved = getSubmissionSupabaseClient();
+  if (!resolved) {
     logSubmissionServiceConfigFailure("submissions");
     return NextResponse.json(
       { error: "Submission service is not configured. Please try again later." },
@@ -38,9 +38,10 @@ export async function POST(req: Request) {
     );
   }
 
+  const { client: supabase, mode } = resolved;
   const { name, email, tickers } = validated.data;
 
-  const rateLimit = await checkSubmissionRateLimit(email);
+  const rateLimit = await checkSubmissionRateLimit(email, resolved);
   if (!rateLimit.allowed) {
     return NextResponse.json({ error: rateLimit.message, field: "email" }, { status: 429 });
   }
@@ -57,12 +58,20 @@ export async function POST(req: Request) {
     .single();
 
   if (error) {
-    console.error("[submissions] Insert failed:", error.message, error.code);
+    console.error("[submissions] Insert failed:", error.message, error.code, { mode });
+    const hint =
+      mode === "anon" && error.code === "42501"
+        ? " Run migration 009_submissions_anon_insert.sql in Supabase."
+        : "";
     return NextResponse.json(
-      { error: "Could not save your submission. Please try again." },
+      {
+        error: `Could not save your submission. Please try again.${hint}`,
+      },
       { status: 500 }
     );
   }
+
+  console.info("[submissions] Insert ok", { submissionId: data.id, mode });
 
   try {
     triggerProcessOne(data.id, getDeploymentOrigin(req));

@@ -20,6 +20,7 @@
     "test:ranking": "npx tsx --test src/lib/ranking.test.ts",
     "test:ranking:live": "npx tsx scripts/test-ranking-phase3.ts",
     "seed:famous-investors": "npx tsx scripts/seed-famous-investors.ts",
+    "deploy:status": "node -e \"require('child_process').execSync(process.platform==='win32'?'powershell -NoProfile -ExecutionPolicy Bypass -File scripts/check-deploy-status.ps1':'bash scripts/check-deploy-status.sh',{stdio:'inherit'})\"",
     "db:generate-stocks-seed": "npx tsx scripts/generate-stocks-seed-sql.ts",
     "db:generate": "supabase gen types typescript --project-id $SUPABASE_PROJECT_ID > src/types/supabase.ts"
   },

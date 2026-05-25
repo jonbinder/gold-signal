@@ -19,6 +19,9 @@ npm run dev
 | `npm run test:ranking` | Ranking engine unit tests (40 tests) |
 | `npm run test:polygon` | Polygon + SEC fetch smoke test |
 | `npm run seed:famous-investors` | Load `famous_investors` table from JSON |
+| `npm run deploy:status` | Check git sync + HEAD hash vs Vercel (after push) |
+
+After every push, run `npm run deploy:status` and follow **[docs/deploy-checklist.md](docs/deploy-checklist.md)**.
 
 ## Legacy static site
 

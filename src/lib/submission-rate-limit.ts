@@ -1,3 +1,4 @@
+import { logSubmissionServiceConfigFailure } from "@/lib/submission-env";
 import { createSupabaseServiceClient } from "@/lib/supabase";
 
 /** Max portfolio review requests per email address per rolling hour. */
@@ -11,6 +12,7 @@ export async function checkSubmissionRateLimit(
 ): Promise<{ allowed: true } | { allowed: false; message: string }> {
   const supabase = createSupabaseServiceClient();
   if (!supabase) {
+    logSubmissionServiceConfigFailure("submissions/rate-limit");
     return {
       allowed: false,
       message: "Submission service is temporarily unavailable. Please try again later.",

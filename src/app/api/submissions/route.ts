@@ -1,8 +1,14 @@
 import { NextResponse } from "next/server";
 import { validateSubmissionPayload } from "@/lib/portfolio-submission";
 import { checkSubmissionRateLimit } from "@/lib/submission-rate-limit";
+import {
+  logSubmissionEnvConfigOnLoad,
+  logSubmissionServiceConfigFailure,
+} from "@/lib/submission-env";
 import { createSupabaseServiceClient } from "@/lib/supabase";
 import { getDeploymentOrigin, triggerProcessOne } from "@/lib/trigger-process-one";
+
+logSubmissionEnvConfigOnLoad("submissions");
 
 /**
  * POST /api/submissions — create a pending portfolio review submission.
@@ -25,7 +31,7 @@ export async function POST(req: Request) {
 
   const supabase = createSupabaseServiceClient();
   if (!supabase) {
-    console.error("[submissions] Missing Supabase env (URL or SUPABASE_SERVICE_ROLE_KEY)");
+    logSubmissionServiceConfigFailure("submissions");
     return NextResponse.json(
       { error: "Submission service is not configured. Please try again later." },
       { status: 503 }

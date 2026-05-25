@@ -1,12 +1,12 @@
 const WEIGHT_TIERS = [
   {
     label: "Primary signals",
-    detail: "Institutional 13F Data, Insider Buying vs Selling, Famous Investor Portfolio Tracking, Executive Commentary Signal",
+    detail: "Institutional 13F Data, Insider Buying vs Selling, Famous Investor Portfolio Tracking",
     width: "100%",
   },
   {
     label: "Valuation signals",
-    detail: "PE Ratio, Forward PE Projection, Analyst Price Target Upside",
+    detail: "PE Ratio, Free Cash Flow Yield",
     width: "68%",
   },
   {
@@ -25,7 +25,7 @@ const FAQ_ITEMS = [
   {
     question: "How is this different from a stock screener?",
     answer:
-      "Most screeners let you filter stocks by individual metrics like PE ratio or insider buying. The SignalScore combines nine factors into a single weighted number so you can compare stocks at a glance without having to interpret each data point yourself. It is designed specifically for the gold and silver mining sector, which means the benchmarks and thresholds are calibrated for this industry rather than applied generically across all stocks.",
+      "Most screeners let you filter stocks by individual metrics like PE ratio or insider buying. The SignalScore combines seven factors into a single weighted number so you can compare stocks at a glance without having to interpret each data point yourself. It is designed specifically for the gold and silver mining sector, which means the benchmarks and thresholds are calibrated for this industry rather than applied generically across all stocks.",
   },
   {
     question: "What happens when the model is updated?",
@@ -47,14 +47,16 @@ export function SignalScoreSupplement() {
           Not all signals are weighted equally
         </h2>
         <p className="ss-block__copy">
-          The nine components that make up the SignalScore are not averaged equally. Institutional
-          accumulation and insider activity carry the most weight in our model, reflecting the view
-          that what large funds and company insiders actually do with real money is more predictive
-          than any valuation metric alone. Valuation factors like PE ratio and forward PE carry
-          moderate weight. Price-based inputs like 52-week support and gold price correlation serve
-          as confirming or disconfirming signals rather than primary drivers. The exact weighting
-          formula is proprietary, but the hierarchy is intentional and has been calibrated against
-          historical price performance across the gold and silver mining sector.
+          The seven components that make up the SignalScore are not averaged equally. Institutional
+          accumulation, insider activity, and famous investor holdings carry the most weight in our
+          model, reflecting the view that what large funds, company insiders, and proven precious
+          metals investors actually do with real money is more predictive than any valuation metric
+          alone. Valuation factors like PE ratio and free cash flow yield carry moderate weight,
+          capturing both accounting profitability and genuine cash generation. Price-based inputs
+          like 52-week support and gold price correlation serve as confirming or disconfirming
+          signals rather than primary drivers. The exact weighting formula is proprietary, but the
+          hierarchy is intentional and has been calibrated against historical price performance
+          across the gold and silver mining sector.
         </p>
         <div className="ss-weights" aria-label="Relative signal weight tiers">
           {WEIGHT_TIERS.map((tier) => (
@@ -77,7 +79,7 @@ export function SignalScoreSupplement() {
         </h2>
         <p className="ss-block__copy">
           Not every stock sends a clean signal. Sometimes institutions are quietly accumulating
-          while insiders are selling, or valuation looks cheap but analyst targets are falling.
+          while insiders are selling, or valuation looks cheap but free cash flow is deteriorating.
           When signals conflict, the SignalScore reflects that tension rather than hiding it. A
           stock where three factors score above 85 and two score below 50 will land in the
           mid-range, not at the top. This is intentional. We think a score that papers over

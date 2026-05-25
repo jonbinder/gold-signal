@@ -1,22 +1,9 @@
 'use client';
 
 import { useEffect } from 'react';
-
-const FORMSPREE_PORTFOLIO_URL = 'https://formspree.io/f/xlgvdzyq';
+import { MAX_PORTFOLIO_TICKERS, parseTickerInput, sanitizeTickers } from '@/lib/portfolio-submission';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-async function submitToFormspree(
-  url: string,
-  body: Record<string, string>
-): Promise<boolean> {
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  });
-  return response.ok;
-}
 
 function showFormError(form: HTMLFormElement, message: string, className: string) {
   let el = form.querySelector<HTMLElement>(`.${className}`);
@@ -40,6 +27,14 @@ function isValidEmail(email: string) {
   return EMAIL_RE.test(String(email).trim());
 }
 
+function escapeHtml(text: string) {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
 export default function GoldSignalClient() {
   useEffect(() => {
     const nav = document.querySelector('.nav');
@@ -58,18 +53,38 @@ export default function GoldSignalClient() {
         (form.querySelector('#review-name') as HTMLInputElement | null)?.value.trim() ?? '';
       const email =
         (form.querySelector('#review-email') as HTMLInputElement | null)?.value.trim() ?? '';
-      const tickers =
+      const tickersRaw =
         (form.querySelector('#review-tickers') as HTMLTextAreaElement | null)?.value.trim() ?? '';
 
-      if (!name || !email || !tickers) {
+      const emailEl = form.querySelector('#review-email') as HTMLInputElement | null;
+      emailEl?.setCustomValidity('');
+
+      if (!name || !email || !tickersRaw) {
         form.reportValidity();
         return;
       }
 
       if (!isValidEmail(email)) {
-        const emailEl = form.querySelector('#review-email') as HTMLInputElement | null;
         emailEl?.setCustomValidity('Please enter a valid email address.');
         emailEl?.reportValidity();
+        return;
+      }
+
+      const tickers = sanitizeTickers(parseTickerInput(tickersRaw));
+      if (tickers.length === 0) {
+        showFormError(
+          form,
+          'Enter at least one valid ticker (letters and dots only, e.g. NEM or BRK.A).',
+          'portfolio-form__error'
+        );
+        return;
+      }
+      if (tickers.length > MAX_PORTFOLIO_TICKERS) {
+        showFormError(
+          form,
+          `You can submit at most ${MAX_PORTFOLIO_TICKERS} tickers.`,
+          'portfolio-form__error'
+        );
         return;
       }
 
@@ -82,14 +97,47 @@ export default function GoldSignalClient() {
         btn.textContent = 'Submitting...';
       }
 
-      const ok = await submitToFormspree(FORMSPREE_PORTFOLIO_URL, {
-        name,
-        email,
-        tickers,
-        source: 'GoldSignal.ai Portfolio Review Form',
-      });
+      try {
+        const response = await fetch('/api/submissions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, tickers: tickersRaw }),
+        });
 
-      if (!ok) {
+        const payload = (await response.json().catch(() => ({}))) as {
+          error?: string;
+          message?: string;
+        };
+
+        if (!response.ok) {
+          showFormError(
+            form,
+            payload.error ?? 'Something went wrong. Please try again in a moment.',
+            'portfolio-form__error'
+          );
+          if (btn) {
+            btn.disabled = false;
+            btn.textContent = originalLabel;
+          }
+          return;
+        }
+
+        const successText =
+          payload.message ??
+          `Thanks, ${name}! Your SignalScore report is being generated and will arrive at ${email} within the next few minutes.`;
+
+        card.innerHTML = `
+        <div class="portfolio-form__success" role="status">
+          <svg class="portfolio-form__check" width="48" height="48" viewBox="0 0 48 48" aria-hidden="true">
+            <circle cx="24" cy="24" r="22" fill="#EAF4EE" stroke="#2D6A4F" stroke-width="2"/>
+            <path d="M14 24l7 7 13-14" fill="none" stroke="#2D6A4F" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <p class="portfolio-form__success-text">
+            ${escapeHtml(successText)}
+          </p>
+        </div>
+      `;
+      } catch {
         showFormError(
           form,
           'Something went wrong. Please try again in a moment.',
@@ -99,21 +147,7 @@ export default function GoldSignalClient() {
           btn.disabled = false;
           btn.textContent = originalLabel;
         }
-        return;
       }
-
-      card.innerHTML = `
-        <div class="portfolio-form__success" role="status">
-          <svg class="portfolio-form__check" width="48" height="48" viewBox="0 0 48 48" aria-hidden="true">
-            <circle cx="24" cy="24" r="22" fill="#EAF4EE" stroke="#2D6A4F" stroke-width="2"/>
-            <path d="M14 24l7 7 13-14" fill="none" stroke="#2D6A4F" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-          <p class="portfolio-form__success-text">
-            Your portfolio has been received. Check your inbox within 24 hours
-            for your full SignalScore report.
-          </p>
-        </div>
-      `;
     };
 
     onScroll();

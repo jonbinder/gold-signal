@@ -16,6 +16,10 @@
     "investors:images:download": "node scripts/download-investor-images.mjs",
     "investors:images:process": "node scripts/process-investor-images.js",
     "test:stocks": "npx tsx scripts/test-stock-quotes.ts",
+    "test:polygon": "npx tsx scripts/test-polygon-phase2.ts",
+    "test:ranking": "npx tsx --test src/lib/ranking.test.ts",
+    "test:ranking:live": "npx tsx scripts/test-ranking-phase3.ts",
+    "seed:famous-investors": "npx tsx scripts/seed-famous-investors.ts",
     "db:generate-stocks-seed": "npx tsx scripts/generate-stocks-seed-sql.ts",
     "db:generate": "supabase gen types typescript --project-id $SUPABASE_PROJECT_ID > src/types/supabase.ts"
   },
@@ -26,6 +30,7 @@
     "@radix-ui/react-separator": "^1.1.2",
     "@radix-ui/react-slot": "^1.2.0",
     "@radix-ui/react-tooltip": "^1.1.8",
+    "@react-pdf/renderer": "^4.5.1",
     "@supabase/ssr": "^0.10.2",
     "@supabase/supabase-js": "^2.105.1",
     "@tabler/icons-react": "^3.44.0",
@@ -37,6 +42,7 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "recharts": "^3.8.1",
+    "resend": "^6.12.3",
     "tailwind-merge": "^3.2.0"
   },
   "devDependencies": {

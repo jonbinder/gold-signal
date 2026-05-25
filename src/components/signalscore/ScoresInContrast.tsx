@@ -40,11 +40,6 @@ const HIGH_CARD: ContrastCard = {
       note: "Trailing PE sits 11% below sector median, offering a modest valuation discount",
     },
     {
-      name: "Forward PE Projection",
-      score: 82,
-      note: "Forward multiple implies 28% earnings growth if gold holds at current levels",
-    },
-    {
       name: "Famous Investor Portfolio Tracking",
       score: 93,
       note: "Held by five of the precious-metals specialists tracked on our Investors page",
@@ -61,18 +56,13 @@ const HIGH_CARD: ContrastCard = {
       note: "Moves closely with gold, giving investors real leverage when the metal rallies",
     },
     {
-      name: "Analyst Price Target Upside",
-      score: 85,
-      note: "Consensus target across eight analysts implies 34% upside from today's price",
-    },
-    {
-      name: "Executive Commentary Signal",
-      score: 83,
-      note: "CEO flagged a new high-grade discovery zone on the last earnings call, language was notably more confident than prior quarters",
+      name: "Free Cash Flow Yield",
+      score: 87,
+      note: "Generates 11% free cash flow yield on current market cap, well above sector average of 6%",
     },
   ],
   summary:
-    "Hartwell Mining Co is showing alignment across nearly every factor we track. Institutions are adding, insiders are putting personal capital in, valuation is reasonable, and the executives are signaling something new is developing. A score of 86 is not common. It reflects a stock where the weight of evidence is pointing in the same direction.",
+    "Hartwell Mining Co is showing alignment across nearly every factor we track. Institutions are adding, insiders are putting personal capital in, valuation is reasonable, the company is generating strong free cash flow, and the stock moves in step with gold. A score of 86 is not common. It reflects a stock where the weight of evidence is pointing in the same direction.",
 };
 
 const LOW_CARD: ContrastCard = {
@@ -98,11 +88,6 @@ const LOW_CARD: ContrastCard = {
       note: "Trailing PE is elevated relative to peers, suggesting the stock may still be priced for growth that has not arrived",
     },
     {
-      name: "Forward PE Projection",
-      score: 30,
-      note: "Analyst estimates have been revised down twice in the past six months, forward multiple offers little margin of safety",
-    },
-    {
       name: "Famous Investor Portfolio Tracking",
       score: 24,
       note: "Not held by any of the precious-metals specialists we track",
@@ -118,18 +103,13 @@ const LOW_CARD: ContrastCard = {
       note: "Correlation with gold has weakened, likely due to company-specific operational issues muting the relationship",
     },
     {
-      name: "Analyst Price Target Upside",
-      score: 29,
-      note: "Two analysts have recently cut their price targets, consensus implies minimal upside from current levels",
-    },
-    {
-      name: "Executive Commentary Signal",
-      score: 20,
-      note: "Most recent earnings call contained hedged language around production guidance and an unexpected write-down was disclosed",
+      name: "Free Cash Flow Yield",
+      score: 26,
+      note: "Free cash flow has turned negative over the last two reporting periods, offering no margin of safety on a cash basis",
     },
   ],
   summary:
-    "Caldera Resources Inc is showing warning signs across almost every dimension. Institutions are leaving, insiders are not buying their own stock, valuation is not cheap enough to compensate for the risks, and the executives are not projecting confidence. A score of 28 is a signal to wait for conditions to improve before considering this name.",
+    "Caldera Resources Inc is showing warning signs across almost every dimension. Institutions are leaving, insiders are not buying their own stock, valuation is not cheap enough to compensate for the risks, and the company is burning cash rather than generating it. A score of 28 is a signal to wait for conditions to improve before considering this name.",
 };
 
 function scoreTone(score: number): "high" | "mid" | "low" {
@@ -206,7 +186,7 @@ export function ScoresInContrast() {
         Two stocks, two very different stories
       </h2>
       <p className="ss-contrast__intro">
-        The same nine factors. Completely different conclusions. Here is what the SignalScore looks
+        The same seven factors. Completely different conclusions. Here is what the SignalScore looks
         like when the data is strong versus when it is sending warnings.
       </p>
       <div className="ss-contrast__grid">

@@ -1,13 +1,11 @@
 import type { TablerIcon } from "@tabler/icons-react";
 import {
   IconBuildingBank,
+  IconCash,
   IconChartBar,
   IconChartLine,
   IconCoins,
-  IconMicrophone,
   IconStar,
-  IconTarget,
-  IconTrendingUp,
   IconUserDollar,
 } from "@tabler/icons-react";
 
@@ -15,12 +13,10 @@ const ICONS: Record<string, TablerIcon> = {
   "ti-building-bank": IconBuildingBank,
   "ti-user-dollar": IconUserDollar,
   "ti-chart-bar": IconChartBar,
-  "ti-trending-up": IconTrendingUp,
   "ti-star": IconStar,
   "ti-chart-line": IconChartLine,
   "ti-coins": IconCoins,
-  "ti-target": IconTarget,
-  "ti-microphone": IconMicrophone,
+  "ti-cash": IconCash,
 };
 
 interface MetricIconProps {

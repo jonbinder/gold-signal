@@ -1,0 +1,27 @@
+[
+  {
+    "investor_name": "Rick Rule",
+    "ticker": "NEM",
+    "position_size_usd": null
+  },
+  {
+    "investor_name": "Frank Holmes",
+    "ticker": "WPM",
+    "position_size_usd": null
+  },
+  {
+    "investor_name": "Eric Sprott",
+    "ticker": "AG",
+    "position_size_usd": null
+  },
+  {
+    "investor_name": "John Hathaway",
+    "ticker": "GOLD",
+    "position_size_usd": null
+  },
+  {
+    "investor_name": "Pierre Lassonde",
+    "ticker": "FNV",
+    "position_size_usd": null
+  }
+]

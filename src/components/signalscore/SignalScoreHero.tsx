@@ -4,28 +4,26 @@ const SIGNAL_PILLS = [
   { icon: "ti-building-bank", label: "Institutional 13F Data" },
   { icon: "ti-user-dollar", label: "Insider Buying vs Selling" },
   { icon: "ti-chart-bar", label: "PE Ratio Analysis" },
-  { icon: "ti-trending-up", label: "Forward PE Projection" },
   { icon: "ti-star", label: "Famous Investor Tracking" },
   { icon: "ti-chart-line", label: "52-Week Support Level" },
   { icon: "ti-coins", label: "Gold Price Correlation" },
-  { icon: "ti-target", label: "Analyst Price Target Upside" },
-  { icon: "ti-microphone", label: "Executive Commentary Signal" },
+  { icon: "ti-cash", label: "Free Cash Flow Yield" },
 ] as const;
 
 const WEIGHT_BARS = [
   {
     label: "Primary signals",
-    note: "(institutional, insider, famous investor, executive commentary)",
+    note: "(Institutional 13F, Insider Buying, Famous Investor Tracking) — highest weight",
     width: "100%",
   },
   {
     label: "Valuation signals",
-    note: "(PE ratio, forward PE, analyst targets)",
+    note: "(PE Ratio, Free Cash Flow Yield) — moderate weight",
     width: "68%",
   },
   {
     label: "Confirming signals",
-    note: "(52-week support, gold correlation)",
+    note: "(52-Week Support, Gold Price Correlation) — confirming layer",
     width: "42%",
   },
 ] as const;
@@ -61,17 +59,17 @@ export function SignalScoreHero() {
         gold market has in a stock right now.
       </p>
       <p className="ss-hero__body">
-        We track nine separate data sources for every stock we cover, from what major institutions
-        are buying to what company executives are saying on earnings calls. Each one is scored
+        We track seven separate data sources for every stock we cover, from what major institutions
+        are buying to how much free cash flow a miner generates. Each one is scored
         individually, then combined using a weighted formula that reflects how predictive each
         signal has historically been. The result is the SignalScore: one number that does the work
-        of nine.
+        of seven.
       </p>
 
-      <div className="ss-hero__diagram" aria-label="From 9 signals to 1 score">
+      <div className="ss-hero__diagram" aria-label="From 7 signals to 1 score">
         <div className="ss-hero__diagram-flow">
           <div className="ss-hero__col">
-            <p className="ss-hero__col-label">The 9 signals</p>
+            <p className="ss-hero__col-label">The 7 signals</p>
             <ul className="ss-hero__pills">
               {SIGNAL_PILLS.map((pill) => (
                 <li key={pill.label} className="ss-hero__pill">
@@ -120,7 +118,7 @@ export function SignalScoreHero() {
           </div>
         </div>
         <p className="ss-hero__diagram-footnote">
-          Every score updates on a rolling basis as new filings, price data, and transcripts become
+          Every score updates on a rolling basis as new filings, price data, and financials become
           available.
         </p>
       </div>

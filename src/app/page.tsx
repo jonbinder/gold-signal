@@ -280,7 +280,7 @@ export default function HomePage() {
                 Submit for Review
               </button>
               <p className="portfolio-form__note">
-                You will receive your SignalScore report by email within 24 hours
+                You will receive your SignalScore report by email within a few minutes
               </p>
             </div>
           </form>

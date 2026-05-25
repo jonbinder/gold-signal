@@ -7,10 +7,18 @@ import { ScoresInContrast } from "@/components/signalscore/ScoresInContrast";
 import { SignalScoreHero } from "@/components/signalscore/SignalScoreHero";
 import { SignalScoreSupplement } from "@/components/signalscore/SignalScoreSupplement";
 
+const pageDescription =
+  "How GoldSignal.ai calculates the 0–100 SignalScore for gold and silver stocks using 13F filings, insider trades, free cash flow, and more.";
+
 export const metadata: Metadata = {
   title: "SignalScore, GoldSignal.ai",
-  description:
-    "How GoldSignal.ai calculates the 0–100 SignalScore for gold and silver stocks using 13F, insider, and valuation data.",
+  description: pageDescription,
+  openGraph: {
+    title: "SignalScore, GoldSignal.ai",
+    description: pageDescription,
+    type: "website",
+    url: "https://goldsignal.ai/signalscore",
+  },
 };
 
 const METRICS = [
@@ -64,24 +72,6 @@ const METRICS = [
   },
   {
     num: "04",
-    icon: "ti-trending-up",
-    title: "Forward PE Projection",
-    tags: ["Analyst estimates", "Forward looking"],
-    desc: (
-      <>
-        While trailing PE looks at past earnings, the Forward PE uses analyst consensus estimates
-        of what a company is expected to earn over the next 12 months. This is especially
-        important in mining, where rising gold prices or changing costs can dramatically improve
-        near-term profitability. We score stocks where the forward multiple implies meaningful
-        upside, particularly when those earnings forecasts factor in favorable gold price
-        scenarios. A stock trading cheap on forward earnings is often one the market has not yet
-        fully re-rated. It is common for the market to not fully consider a stock&apos;s earnings
-        until after they materialize and are reported.
-      </>
-    ),
-  },
-  {
-    num: "05",
     icon: "ti-star",
     title: "Famous Investor Portfolio Tracking",
     tags: ["Smart money", "Conviction layer"],
@@ -99,7 +89,7 @@ const METRICS = [
     ),
   },
   {
-    num: "06",
+    num: "05",
     icon: "ti-chart-line",
     title: "52-Week Support Level",
     tags: ["Price structure", "Downside protection"],
@@ -117,7 +107,7 @@ const METRICS = [
     ),
   },
   {
-    num: "07",
+    num: "06",
     icon: "ti-coins",
     title: "Gold Price Correlation",
     tags: ["Price leverage", 'Upside "Torque"'],
@@ -136,39 +126,21 @@ const METRICS = [
     ),
   },
   {
-    num: "08",
-    icon: "ti-target",
-    title: "Analyst Price Target Upside",
-    tags: ["Analyst consensus", "Forward looking"],
+    num: "07",
+    icon: "ti-cash",
+    title: "Free Cash Flow Yield",
+    tags: ["Cash generation", "Value benchmarked"],
     desc: (
       <>
-        Independent analysts who cover gold and silver stocks publish price targets based on their
-        own financial models, site visits, and management meetings. We take the average of these
-        targets and compare it to where the stock trades today. The gap between the two is the
-        implied upside. A stock trading well below where analysts collectively think it should be
-        priced is worth paying attention to, especially when that view is shared across multiple
-        firms rather than driven by a single outlier. This component adds an independent outside
-        perspective that is distinct from our own valuation metrics.
-      </>
-    ),
-  },
-  {
-    num: "09",
-    icon: "ti-microphone",
-    title: "Executive Commentary Signal",
-    tags: ["Earnings calls", "Proprietary analysis"],
-    desc: (
-      <>
-        Every quarter, company executives host earnings calls and investor presentations where they
-        discuss operations, exploration results, production guidance, and their outlook on gold
-        prices. Most investors never read these transcripts. Our system reads through executive
-        commentary from CEOs, CFOs, and operations leads and flags language that suggests something
-        meaningful is developing that the market has not yet priced in. This might be early signals
-        of a new discovery, a shift in production guidance, an operational issue, or an unexpected
-        change in costs. We score stocks higher when recent commentary contains substantive new
-        information, and lower when executives are vague, repetitive, or walking back prior
-        guidance. The goal is to understand executive sentimate and surface what is being said
-        before the market fully reacts to it.
+        Free Cash Flow Yield measures how much actual cash a company generates each year relative to
+        its market value. While earnings can be manipulated by accounting decisions, cash flow is
+        harder to fake. We calculate free cash flow per dollar of market cap and compare it to peers
+        in the gold and silver mining sector. A high free cash flow yield means you are buying real,
+        durable cash generation cheaply — exactly what respected value-oriented mining analysts look
+        for. This signal is especially powerful in the mining sector, where capital intensity,
+        exploration spending, and acquisition costs can make accounting profits look very different
+        from actual cash production. A miner trading at a low price relative to its cash generation
+        often represents genuine value the market has not fully recognized.
       </>
     ),
   },
@@ -211,9 +183,8 @@ export default function SignalScorePage() {
           <ul className="ss-sources__list">
             <li>SEC EDGAR</li>
             <li>Form 4 Filings</li>
-            <li>Consensus Analyst Estimates</li>
             <li>Exchange Price Feeds</li>
-            <li>Earnings Call Transcripts</li>
+            <li>Polygon.io Fundamentals</li>
           </ul>
         </div>
         <p className="explained__back">

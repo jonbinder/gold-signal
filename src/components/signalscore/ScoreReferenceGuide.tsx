@@ -19,7 +19,7 @@ const SCORE_TIERS: ScoreTier[] = [
     label: "Exceptional",
     color: "green",
     description:
-      "Near-perfect alignment across all nine factors. Rare. Institutions are loading up, insiders are buying heavily, valuation is compelling, and famous investors are already in. Worth serious attention.",
+      "Near-perfect alignment across all seven factors. Rare. Institutions are loading up, insiders are buying heavily, valuation is compelling, and famous investors are already in. Worth serious attention.",
   },
   {
     min: 80,

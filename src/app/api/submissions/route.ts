@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { validateSubmissionPayload } from "@/lib/portfolio-submission";
 import { checkSubmissionRateLimit } from "@/lib/submission-rate-limit";
 import { createSupabaseServiceClient } from "@/lib/supabase";
+import { getDeploymentOrigin, triggerProcessOne } from "@/lib/trigger-process-one";
 
 /**
  * POST /api/submissions — create a pending portfolio review submission.
@@ -55,6 +56,15 @@ export async function POST(req: Request) {
       { error: "Could not save your submission. Please try again." },
       { status: 500 }
     );
+  }
+
+  try {
+    triggerProcessOne(data.id, getDeploymentOrigin(req));
+  } catch (err) {
+    console.warn("[submissions] Failed to trigger process-one", {
+      submissionId: data.id,
+      message: err instanceof Error ? err.message : String(err),
+    });
   }
 
   return NextResponse.json(

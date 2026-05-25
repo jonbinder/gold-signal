@@ -77,6 +77,107 @@ export async function resetStaleProcessingSubmissions(): Promise<number> {
 }
 
 /**
+ * Loads a submission row by id.
+ */
+export async function loadSubmissionById(id: string): Promise<SubmissionRow | null> {
+  const supabase = createSupabaseServiceClient();
+  if (!supabase) {
+    throw new Error("Supabase service client is not configured.");
+  }
+
+  const { data, error } = await supabase
+    .from("submissions")
+    .select("id, name, email, tickers, status")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(`Failed to load submission: ${error.message}`);
+  }
+
+  return data as SubmissionRow | null;
+}
+
+/**
+ * Atomically claims one pending submission by id.
+ */
+export async function claimSubmissionById(id: string): Promise<SubmissionRow | null> {
+  const supabase = createSupabaseServiceClient();
+  if (!supabase) {
+    throw new Error("Supabase service client is not configured.");
+  }
+
+  const { data: row, error: claimError } = await supabase
+    .from("submissions")
+    .update({
+      status: "processing",
+      error_message: null,
+      processing_started_at: new Date().toISOString(),
+    })
+    .eq("id", id)
+    .eq("status", "pending")
+    .select("id, name, email, tickers, status")
+    .maybeSingle();
+
+  if (claimError) {
+    throw new Error(`Failed to claim submission: ${claimError.message}`);
+  }
+
+  return row as SubmissionRow | null;
+}
+
+/**
+ * Runs the full pipeline for one submission id (claim if pending, then process).
+ */
+export async function processSubmissionById(submissionId: string): Promise<{
+  outcome: "completed" | "failed" | "skipped";
+  reason?: string;
+}> {
+  const row = await loadSubmissionById(submissionId);
+  if (!row) {
+    return { outcome: "skipped", reason: "not_found" };
+  }
+
+  if (row.status === "completed") {
+    return { outcome: "skipped", reason: "already_completed" };
+  }
+
+  if (row.status === "failed") {
+    return { outcome: "skipped", reason: "already_failed" };
+  }
+
+  let toProcess = row;
+
+  if (row.status === "pending") {
+    const claimed = await claimSubmissionById(submissionId);
+    if (!claimed) {
+      const latest = await loadSubmissionById(submissionId);
+      if (latest?.status === "completed") {
+        return { outcome: "skipped", reason: "already_completed" };
+      }
+      if (latest?.status === "processing") {
+        toProcess = latest;
+      } else {
+        return { outcome: "skipped", reason: "claim_lost" };
+      }
+    } else {
+      toProcess = claimed;
+    }
+  }
+
+  if (toProcess.status !== "processing") {
+    return { outcome: "skipped", reason: `unexpected_status_${toProcess.status}` };
+  }
+
+  try {
+    await processSubmission(toProcess);
+    return { outcome: "completed" };
+  } catch {
+    return { outcome: "failed" };
+  }
+}
+
+/**
  * Atomically claims pending submissions by updating status only when still pending.
  */
 export async function claimPendingSubmissions(limit: number): Promise<SubmissionRow[]> {

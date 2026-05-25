@@ -1,12 +1,15 @@
 {
   "crons": [
     {
-      "path": "/api/cron/process-submissions",
-      "schedule": "0 14 * * *"
+      "path": "/api/cron/cleanup",
+      "schedule": "0 6 * * *"
     }
   ],
   "functions": {
-    "src/app/api/cron/process-submissions/route.ts": {
+    "src/app/api/process-one/route.ts": {
+      "maxDuration": 60
+    },
+    "src/app/api/cron/cleanup/route.ts": {
       "maxDuration": 60
     }
   }

@@ -1,6 +1,6 @@
 # SignalScore Portfolio Review — Deployment Guide
 
-End-to-end pipeline: homepage form → Supabase → Vercel cron → rankings → PDF → Resend email.
+End-to-end pipeline: homepage form → instant fire-and-forget processing → daily cleanup safety net.
 
 ## Environment variables (Vercel + `.env.local`)
 
@@ -11,7 +11,8 @@ End-to-end pipeline: homepage form → Supabase → Vercel cron → rankings →
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase → Project Settings → API | **Secret** — server only |
 | `POLYGON_API_KEY` | [Polygon.io](https://polygon.io) or Massive dashboard | **Secret** — server only |
 | `RESEND_API_KEY` | [Resend](https://resend.com) → API Keys | **Secret** |
-| `CRON_SECRET` | Generate: `openssl rand -hex 32` | Same value in Vercel; cron sends `Authorization: Bearer <value>` |
+| `PROCESS_SECRET` | Generate: `openssl rand -hex 32` | **Secret** — `x-process-secret` for `/api/process-one` (submissions + cleanup triggers) |
+| `CRON_SECRET` | Generate: `openssl rand -hex 32` | **Secret** — `Authorization: Bearer` for `/api/cron/cleanup` |
 | `SEC_EDGAR_USER_AGENT` | Optional | Default: `GoldSignal.ai reports@goldsignal.ai` |
 | `POLYGON_REST_BASE_URL` | Optional | Default: `https://api.polygon.io` |
 
@@ -35,20 +36,20 @@ End-to-end pipeline: homepage form → Supabase → Vercel cron → rankings →
 4. Sender used by the app: `reports@goldsignal.ai`
 5. Create an API key with **Sending access** and set `RESEND_API_KEY` in Vercel
 
-## Vercel
+## Vercel (Hobby)
 
-1. Add all environment variables above (Production + Preview as needed)
-2. Deploy — `vercel.json` registers cron **`0 14 * * *`** (once daily at 14:00 UTC) on `/api/cron/process-submissions` (Hobby plan limit). For faster processing, trigger manually (below) or upgrade to Pro and use `*/2 * * * *`.
-3. **Function timeout:** cron route uses `maxDuration: 60` (Hobby max). Use ≤3 tickers per submission or upgrade to Pro for `maxDuration: 300`.
-4. **Memory:** 1024 MB recommended for PDF + multi-ticker Polygon fetches
+1. Add all environment variables above (Production + Preview as needed).
+2. Deploy — `vercel.json` registers one daily cron: **`0 6 * * *`** (06:00 UTC) on `/api/cron/cleanup`.
+3. On submit, `/api/submissions` immediately fire-and-forgets `/api/process-one` (no cron wait).
+4. **Function timeout:** `maxDuration: 60` on `process-one` and `cleanup` (Hobby max). Prefer ≤3 tickers per submission.
 
 ## End-to-end test checklist
 
 - [ ] Submit test portfolio at `https://goldsignal.ai/#portfolio-review` (or local)
-- [ ] Row appears in Supabase `submissions` with `status = pending`
-- [ ] Trigger processing manually (required on Hobby between daily cron runs):
+- [ ] Row appears in Supabase `submissions` with `status = pending`, then moves to `processing` → `completed` within a few minutes
+- [ ] Or trigger manually:
   ```bash
-  curl -H "Authorization: Bearer YOUR_CRON_SECRET" https://goldsignal.ai/api/cron/process-submissions
+  curl -H "x-process-secret: YOUR_PROCESS_SECRET" "https://goldsignal.ai/api/process-one?submissionId=SUBMISSION_UUID"
   ```
 - [ ] `submissions.status` → `completed`, `portfolio_score` and `portfolio_grade` set
 - [ ] `stock_rankings` has one row per ticker with sub-scores
@@ -70,7 +71,8 @@ End-to-end pipeline: homepage form → Supabase → Vercel cron → rankings →
 
 | Symptom | Check |
 |---------|--------|
-| Form saves but nothing processes | `CRON_SECRET`, Vercel cron logs, submission `status` |
+| Form saves but stays `pending` | `PROCESS_SECRET` in Vercel; Vercel logs `[trigger]` / `[process-one]` |
+| Stuck `pending`/`processing` > 30 min | Daily cleanup at 06:00 UTC, or manual `process-one` curl |
 | `failed` with Polygon error | `POLYGON_API_KEY`, plan limits, ticker validity |
 | PDF upload error | Migration `006`, bucket `reports`, service role key |
 | Email not sent | Resend domain verified, `reports@goldsignal.ai`, `RESEND_API_KEY` |

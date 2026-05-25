@@ -7,7 +7,7 @@ Users submit a portfolio on the homepage (`/#portfolio-review`). A background wo
 ```
 Homepage form
     → POST /api/submissions (pending row in Supabase)
-    → Vercel cron every 2 min: GET /api/cron/process-submissions
+    → Vercel cron daily (14:00 UTC on Hobby): GET /api/cron/process-submissions — or manual trigger
     → rank tickers (Polygon + SEC + famous_investors)
     → stock_rankings rows + portfolio grade
     → PDF → Supabase Storage (reports bucket)

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { processPendingSubmissions } from "@/lib/submission-processor";
 
-export const maxDuration = 300;
+export const maxDuration = 60;
 export const dynamic = "force-dynamic";
 
 /**

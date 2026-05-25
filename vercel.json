@@ -2,12 +2,12 @@
   "crons": [
     {
       "path": "/api/cron/process-submissions",
-      "schedule": "*/2 * * * *"
+      "schedule": "0 14 * * *"
     }
   ],
   "functions": {
     "src/app/api/cron/process-submissions/route.ts": {
-      "maxDuration": 300
+      "maxDuration": 60
     }
   }
 }

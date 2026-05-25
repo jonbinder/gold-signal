@@ -38,15 +38,15 @@ End-to-end pipeline: homepage form → Supabase → Vercel cron → rankings →
 ## Vercel
 
 1. Add all environment variables above (Production + Preview as needed)
-2. Deploy — `vercel.json` registers cron `*/2 * * * *` on `/api/cron/process-submissions`
-3. **Function timeout:** cron route uses `maxDuration: 300` (requires Pro plan for 300s; Hobby max is 60s — reduce tickers per submission or upgrade if timeouts occur)
+2. Deploy — `vercel.json` registers cron **`0 14 * * *`** (once daily at 14:00 UTC) on `/api/cron/process-submissions` (Hobby plan limit). For faster processing, trigger manually (below) or upgrade to Pro and use `*/2 * * * *`.
+3. **Function timeout:** cron route uses `maxDuration: 60` (Hobby max). Use ≤3 tickers per submission or upgrade to Pro for `maxDuration: 300`.
 4. **Memory:** 1024 MB recommended for PDF + multi-ticker Polygon fetches
 
 ## End-to-end test checklist
 
 - [ ] Submit test portfolio at `https://goldsignal.ai/#portfolio-review` (or local)
 - [ ] Row appears in Supabase `submissions` with `status = pending`
-- [ ] Wait up to 2 minutes (cron) or trigger manually:
+- [ ] Trigger processing manually (required on Hobby between daily cron runs):
   ```bash
   curl -H "Authorization: Bearer YOUR_CRON_SECRET" https://goldsignal.ai/api/cron/process-submissions
   ```

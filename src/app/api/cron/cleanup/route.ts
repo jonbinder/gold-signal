@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServiceClient } from "@/lib/supabase";
-import { getDeploymentOrigin, triggerProcessOne, triggerRefreshStocks } from "@/lib/trigger-process-one";
+import {
+  getDeploymentOrigin,
+  invokeProcessOne,
+  invokeRefreshStocks,
+} from "@/lib/trigger-process-one";
 
 export const maxDuration = 60;
 export const dynamic = "force-dynamic";
@@ -61,17 +65,16 @@ export async function GET(req: Request) {
     if (row.id) ids.add(row.id);
   }
 
-  for (const id of ids) {
-    triggerProcessOne(id, origin);
-  }
+  const idList = [...ids];
+  await Promise.allSettled(idList.map((id) => invokeProcessOne(id, origin)));
 
-  console.info("[cron/cleanup] Triggered process-one for stuck submissions", {
-    count: ids.size,
-    ids: [...ids],
+  console.info("[cron/cleanup] Invoked process-one for stuck submissions", {
+    count: idList.length,
+    ids: idList,
   });
 
-  triggerRefreshStocks(0, origin);
-  console.info("[cron/cleanup] Triggered stock universe refresh batch 0");
+  await invokeRefreshStocks(0, origin);
+  console.info("[cron/cleanup] Invoked stock universe refresh batch 0");
 
   return NextResponse.json({
     ok: true,

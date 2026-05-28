@@ -74,7 +74,7 @@ End-to-end pipeline: homepage form → instant fire-and-forget processing → da
 | Symptom | Check |
 |---------|--------|
 | “Submission service is not configured” (503) | `GET /api/health` → `canSubmitPortfolio: true`. If false, add Supabase vars under **Production**, then **Redeploy** (do not “Redeploy” an old deployment). Run migration `009` if using anon fallback. |
-| Form saves but stays `pending` | `PROCESS_SECRET` in Vercel; Vercel logs `[trigger]` / `[process-one]` |
+| Form saves but stays `pending` | `PROCESS_SECRET` in Vercel; Vercel logs should show `POST /api/submissions` **and** `GET /api/process-one`. If only submissions, the trigger was dropped (fixed via `after()` in `trigger-process-one.ts`). Manually re-run: `curl -H "x-process-secret: $PROCESS_SECRET" "https://goldsignal.ai/api/process-one?submissionId=UUID"` |
 | Stuck `pending`/`processing` > 30 min | Daily cleanup at 06:00 UTC, or manual `process-one` curl |
 | `failed` with Polygon error | `POLYGON_API_KEY`, plan limits, ticker validity |
 | PDF upload error | Migration `006`, bucket `reports`, service role key |

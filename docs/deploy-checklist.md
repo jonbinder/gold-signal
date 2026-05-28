@@ -107,6 +107,65 @@ Run from repo root: `C:\Users\jonjo\gold-signal`
 
 ---
 
+## Vercel CLI — env vars + production deploy
+
+One-time setup (Windows PowerShell):
+
+```powershell
+npm i -g vercel
+vercel login
+cd C:\Users\jonjo\gold-signal
+vercel link -y --project gold-signal
+```
+
+Generate secrets (no OpenSSL on Windows):
+
+```powershell
+node -e "const c=require('crypto'); console.log('PROCESS_SECRET='+c.randomBytes(32).toString('hex')); console.log('CRON_SECRET='+c.randomBytes(32).toString('hex'));"
+```
+
+Add each variable (CLI prompts for value; choose **Production**):
+
+```powershell
+vercel env add NEXT_PUBLIC_SUPABASE_URL production
+vercel env add NEXT_PUBLIC_SUPABASE_ANON_KEY production
+vercel env add SUPABASE_SERVICE_ROLE_KEY production
+vercel env add POLYGON_API_KEY production
+vercel env add RESEND_API_KEY production
+vercel env add PROCESS_SECRET production
+vercel env add CRON_SECRET production
+```
+
+Redeploy so Production picks up values:
+
+```powershell
+vercel --prod
+```
+
+**Verify values are not empty** (common mistake: vars exist in dashboard but value is blank):
+
+```powershell
+vercel env pull .env.vercel.production --environment=production --yes
+node scripts/check-env-pull.mjs .env.vercel.production
+```
+
+Each line should say `set (NN chars)` with **NN ≫ 2**. If you see `EMPTY` or `set (2 chars)`, remove and re-add:
+
+```powershell
+vercel env rm NEXT_PUBLIC_SUPABASE_URL production -y
+vercel env add NEXT_PUBLIC_SUPABASE_URL production
+```
+
+Then `vercel --prod` and confirm:
+
+```powershell
+(Invoke-WebRequest https://goldsignal.ai/api/health -UseBasicParsing).Content
+```
+
+Expect `canSubmitPortfolio: true` and `hasProcessSecret: true`.
+
+---
+
 ## Diagnostic script
 
 From repo root (recommended):

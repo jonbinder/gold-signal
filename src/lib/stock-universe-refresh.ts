@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import {
   rankStockFromMarketData,
+  isSignalAvailable,
   type SubScoreKey,
   SIGNAL_WEIGHTS,
   type StockRankingResult,
@@ -53,7 +54,7 @@ export function buildCacheMetricsFromRanking(ranking: StockRankingResult): {
 
   for (const key of SUB_SCORE_KEYS) {
     const sub = ranking.subScores[key];
-    if (sub.missing) {
+    if (!isSignalAvailable(sub)) {
       rawMetrics[`${key}_source`] = "defaulted";
       subScoreColumns[columnMap[key]] = null;
     } else {

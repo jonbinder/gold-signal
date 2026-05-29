@@ -165,16 +165,20 @@ export function SignalScoreReport({
             </Text>
           </View>
 
-          {SUB_SCORE_ORDER.map((key) => (
+          {SUB_SCORE_ORDER.map((key) => {
+            const sub = stock.subScores[key];
+            const unavailable = sub.availability === "UNAVAILABLE" || sub.score == null;
+            return (
             <View key={key} style={styles.signalRow}>
               <Text style={styles.signalLabel}>
-                {subScoreLabel(key)} — {stock.subScores[key].score}
-                {stock.subScores[key].missing ? " (estimated)" : ""}
+                {subScoreLabel(key)} — {unavailable ? "N/A" : sub.score}
+                {unavailable ? " (no data)" : ""}
               </Text>
-              <ScoreBar score={stock.subScores[key].score} />
+              {!unavailable && sub.score != null && <ScoreBar score={sub.score} />}
               <Text style={styles.signalNote}>{subScoreExplanation(stock, key)}</Text>
             </View>
-          ))}
+            );
+          })}
         </Page>
       ))}
 

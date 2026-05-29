@@ -39,8 +39,11 @@ export function topPickAndWatchOut(rankings: StockRankingResult[]): {
   const top = sorted[0];
   const bottom = sorted[sorted.length - 1];
 
-  const bestSub = Object.values(top.subScores).sort((a, b) => b.score - a.score)[0];
-  const worstSub = Object.values(bottom.subScores).sort((a, b) => a.score - b.score)[0];
+  const availableSubs = (r: StockRankingResult) =>
+    Object.values(r.subScores).filter((s) => s.availability === "AVAILABLE" && s.score != null);
+
+  const bestSub = availableSubs(top).sort((a, b) => (b.score ?? 0) - (a.score ?? 0))[0];
+  const worstSub = availableSubs(bottom).sort((a, b) => (a.score ?? 0) - (b.score ?? 0))[0];
 
   return {
     top: {

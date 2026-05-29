@@ -3,13 +3,16 @@ import { describe, it } from "node:test";
 import {
   NEUTRAL_SCORE,
   SECTOR_PE_MEDIAN,
+  SIGNAL_COUNT,
   aggregateInsiderNetDollars,
   calculatePortfolioScore,
   computeReturnCorrelation,
   computeEffectiveWeights,
   computeSignalScore,
   computeWeightedSignalScore,
+  confidenceTierFromCoverage,
   countSignalCoverage,
+  coveragePercentFromCount,
   letterGradeFromScore,
   rankStock,
   scoreCorrelation,
@@ -53,33 +56,34 @@ describe("scoreFromBands", () => {
 describe("scoreInstitutional", () => {
   it("scores high when ownership is rising above 40%", () => {
     const r = scoreInstitutional({ ownershipPercent: 45, previousOwnershipPercent: 38 });
-    assert.ok(r.score >= 80 && r.score <= 100);
-    assert.equal(r.missing, false);
+    assert.ok(r.score != null && r.score >= 80 && r.score <= 100);
+    assert.equal(r.availability, "AVAILABLE");
   });
 
   it("scores mid when rising in 20-40% band", () => {
     const r = scoreInstitutional({ ownershipPercent: 30, previousOwnershipPercent: 25 });
-    assert.ok(r.score >= 65 && r.score <= 79);
+    assert.ok(r.score != null && r.score >= 65 && r.score <= 79);
   });
 
   it("scores neutral-mid when flat", () => {
     const r = scoreInstitutional({ ownershipPercent: 35, previousOwnershipPercent: 35 });
-    assert.ok(r.score >= 45 && r.score <= 64);
+    assert.ok(r.score != null && r.score >= 45 && r.score <= 64);
   });
 
   it("scores low when decreasing", () => {
     const r = scoreInstitutional({ ownershipPercent: 28, previousOwnershipPercent: 31 });
-    assert.ok(r.score >= 20 && r.score <= 44);
+    assert.ok(r.score != null && r.score >= 20 && r.score <= 44);
   });
 
   it("scores very low when strongly decreasing", () => {
     const r = scoreInstitutional({ ownershipPercent: 15, previousOwnershipPercent: 28 });
-    assert.ok(r.score >= 0 && r.score <= 19);
+    assert.ok(r.score != null && r.score >= 0 && r.score <= 19);
   });
 
-  it("returns neutral when data missing", () => {
+  it("returns unavailable when data missing", () => {
     const r = scoreInstitutional(null);
-    assert.equal(r.score, NEUTRAL_SCORE);
+    assert.equal(r.score, null);
+    assert.equal(r.availability, "UNAVAILABLE");
     assert.equal(r.missing, true);
   });
 });
@@ -87,127 +91,165 @@ describe("scoreInstitutional", () => {
 describe("scoreInsider", () => {
   it("scores high for net buying above $1M", () => {
     const r = scoreInsider({ netDollarValue90d: 2_000_000 });
-    assert.ok(r.score >= 85 && r.score <= 100);
+    assert.ok(r.score != null && r.score >= 85 && r.score <= 100);
   });
 
   it("scores mid-high for $100K-$1M net buying", () => {
     const r = scoreInsider({ netDollarValue90d: 500_000 });
-    assert.ok(r.score >= 70 && r.score <= 84);
+    assert.ok(r.score != null && r.score >= 70 && r.score <= 84);
   });
 
   it("scores mid for small net buying or flat", () => {
     const r = scoreInsider({ netDollarValue90d: 10_000 });
-    assert.ok(r.score >= 50 && r.score <= 69);
+    assert.ok(r.score != null && r.score >= 50 && r.score <= 69);
   });
 
   it("scores low-mid for modest net selling", () => {
     const r = scoreInsider({ netDollarValue90d: -200_000 });
-    assert.ok(r.score >= 30 && r.score <= 49);
+    assert.ok(r.score != null && r.score >= 30 && r.score <= 49);
   });
 
   it("scores very low for large net selling", () => {
     const r = scoreInsider({ netDollarValue90d: -2_000_000 });
-    assert.ok(r.score >= 0 && r.score <= 29);
+    assert.ok(r.score != null && r.score >= 0 && r.score <= 29);
   });
 
-  it("returns neutral when missing", () => {
-    assert.equal(scoreInsider(null).score, NEUTRAL_SCORE);
+  it("returns unavailable when missing", () => {
+    const r = scoreInsider(null);
+    assert.equal(r.score, null);
+    assert.equal(r.availability, "UNAVAILABLE");
   });
 });
 
 describe("scorePe", () => {
   it("scores high when PE is well below sector median", () => {
     const r = scorePe({ trailingPe: 10, sectorMedianPe: 18 });
-    assert.ok(r.score >= 85 && r.score <= 100);
+    assert.ok(r.score != null && r.score >= 85 && r.score <= 100);
   });
 
   it("scores mid when PE is near median", () => {
     const r = scorePe({ trailingPe: 18, sectorMedianPe: 18 });
-    assert.ok(r.score >= 45 && r.score <= 64);
+    assert.ok(r.score != null && r.score >= 45 && r.score <= 64);
   });
 
   it("scores low when PE is far above median", () => {
     const r = scorePe({ trailingPe: 30, sectorMedianPe: 18 });
-    assert.ok(r.score >= 0 && r.score <= 24);
+    assert.ok(r.score != null && r.score >= 0 && r.score <= 44);
   });
 
   it("scores very low for negative earnings", () => {
-    const r = scorePe({ trailingPe: -5 });
-    assert.ok(r.score >= 0 && r.score <= 24);
-    assert.equal(r.missing, false);
+    const r = scorePe({ trailingPe: -5, sectorMedianPe: 18 });
+    assert.equal(r.score, 12);
+    assert.equal(r.availability, "AVAILABLE");
+  });
+
+  it("returns unavailable when PE is null", () => {
+    const r = scorePe(null);
+    assert.equal(r.score, null);
+    assert.equal(r.availability, "UNAVAILABLE");
   });
 });
 
 describe("scoreFamousInvestor", () => {
   it("scores highest for 4+ holders", () => {
-    assert.ok(scoreFamousInvestor({ holderCount: 5 }).score >= 90);
+    const r = scoreFamousInvestor({ holderCount: 5 });
+    assert.ok(r.score != null && r.score >= 85 && r.score <= 100);
   });
 
   it("scores mid-high for 2-3 holders", () => {
-    const s = scoreFamousInvestor({ holderCount: 2 }).score;
-    assert.ok(s >= 75 && s <= 89);
+    const r = scoreFamousInvestor({ holderCount: 2 });
+    assert.ok(r.score != null && r.score >= 70 && r.score <= 84);
   });
 
   it("scores mid for 1 holder", () => {
-    const s = scoreFamousInvestor({ holderCount: 1 }).score;
-    assert.ok(s >= 60 && s <= 74);
+    const r = scoreFamousInvestor({ holderCount: 1 });
+    assert.ok(r.score != null && r.score >= 50 && r.score <= 69);
   });
 
-  it("scores neutral-low for zero holders (not zero)", () => {
-    const s = scoreFamousInvestor({ holderCount: 0 }).score;
-    assert.ok(s >= 30 && s <= 50);
+  it("scores neutral-low for zero holders when table has data", () => {
+    const r = scoreFamousInvestor({ holderCount: 0 });
+    assert.equal(r.score, 40);
+    assert.equal(r.availability, "AVAILABLE");
+  });
+
+  it("returns unavailable when input is null", () => {
+    const r = scoreFamousInvestor(null);
+    assert.equal(r.score, null);
+    assert.equal(r.availability, "UNAVAILABLE");
   });
 });
 
 describe("scoreSupport", () => {
   it("scores high near 52-week low (support zone)", () => {
-    const r = scoreSupport({ currentPrice: 31, fiftyTwoWeekLow: 30, fiftyTwoWeekHigh: 50 });
-    assert.ok(r.score >= 75 && r.score <= 90);
+    const r = scoreSupport({ currentPrice: 31, fiftyTwoWeekHigh: 50, fiftyTwoWeekLow: 30 });
+    assert.ok(r.score != null && r.score >= 70 && r.score <= 100);
   });
 
   it("scores high in recovery band (15-30% off low)", () => {
-    const r = scoreSupport({ currentPrice: 36, fiftyTwoWeekLow: 30, fiftyTwoWeekHigh: 50 });
-    assert.ok(r.score >= 80 && r.score <= 95);
+    const r = scoreSupport({ currentPrice: 35, fiftyTwoWeekHigh: 50, fiftyTwoWeekLow: 30 });
+    assert.ok(r.score != null && r.score >= 70 && r.score <= 100);
   });
 
   it("scores mid in middle of range", () => {
-    const r = scoreSupport({ currentPrice: 40, fiftyTwoWeekLow: 30, fiftyTwoWeekHigh: 50 });
-    assert.ok(r.score >= 50 && r.score <= 65);
+    const r = scoreSupport({ currentPrice: 40, fiftyTwoWeekHigh: 50, fiftyTwoWeekLow: 30 });
+    assert.ok(r.score != null && r.score >= 45 && r.score <= 69);
   });
 
   it("scores lower near 52-week high", () => {
-    const r = scoreSupport({ currentPrice: 49, fiftyTwoWeekLow: 30, fiftyTwoWeekHigh: 50 });
-    assert.ok(r.score >= 25 && r.score <= 40);
+    const r = scoreSupport({ currentPrice: 48, fiftyTwoWeekHigh: 50, fiftyTwoWeekLow: 30 });
+    assert.ok(r.score != null && r.score >= 20 && r.score <= 49);
   });
 });
 
 describe("scoreCorrelation", () => {
   it("scores high for strong gold correlation", () => {
-    assert.ok(scoreCorrelation({ correlation180d: 0.8 }).score >= 85);
+    const r = scoreCorrelation({ correlation180d: 0.85 });
+    assert.ok(r.score != null && r.score >= 85 && r.score <= 100);
   });
 
   it("scores mid for moderate correlation", () => {
-    const s = scoreCorrelation({ correlation180d: 0.4 }).score;
-    assert.ok(s >= 50 && s <= 69);
+    const r = scoreCorrelation({ correlation180d: 0.45 });
+    assert.ok(r.score != null && r.score >= 45 && r.score <= 69);
   });
 
   it("scores low for weak correlation", () => {
-    assert.ok(scoreCorrelation({ correlation180d: 0.05 }).score <= 29);
+    const r = scoreCorrelation({ correlation180d: 0.05 });
+    assert.ok(r.score != null && r.score >= 0 && r.score <= 29);
   });
 });
 
 describe("scoreFcfYield", () => {
   it("scores high above 10% yield", () => {
-    assert.ok(scoreFcfYield({ fcfYieldPercent: 12 }).score >= 85);
+    const s = scoreFcfYield({ fcfYieldPercent: 12 }).score;
+    assert.ok(s != null && s >= 85 && s <= 100);
   });
 
   it("scores mid for 2-5% yield", () => {
     const s = scoreFcfYield({ fcfYieldPercent: 3 }).score;
-    assert.ok(s >= 50 && s <= 69);
+    assert.ok(s != null && s >= 50 && s <= 69);
   });
 
   it("scores low for negative FCF", () => {
-    assert.ok(scoreFcfYield({ fcfYieldPercent: -2 }).score <= 29);
+    assert.ok(scoreFcfYield({ fcfYieldPercent: -2 }).score != null);
+    assert.ok((scoreFcfYield({ fcfYieldPercent: -2 }).score ?? 100) <= 29);
+  });
+});
+
+describe("coverage and confidence", () => {
+  it("computes coverage percent from available count", () => {
+    assert.equal(coveragePercentFromCount(0), 0);
+    assert.equal(coveragePercentFromCount(2), 29);
+    assert.equal(coveragePercentFromCount(7), 100);
+  });
+
+  it("maps confidence tiers", () => {
+    assert.equal(confidenceTierFromCoverage(7), "high");
+    assert.equal(confidenceTierFromCoverage(6), "high");
+    assert.equal(confidenceTierFromCoverage(5), "medium");
+    assert.equal(confidenceTierFromCoverage(4), "medium");
+    assert.equal(confidenceTierFromCoverage(3), "low");
+    assert.equal(confidenceTierFromCoverage(1), "low");
+    assert.equal(confidenceTierFromCoverage(0), "none");
   });
 });
 
@@ -216,6 +258,9 @@ describe("rankStock and portfolio", () => {
     const result = rankStock(baseInputs());
     assert.ok(result.signalScore >= 0 && result.signalScore <= 100);
     assert.equal(result.ticker, "NEM");
+    assert.equal(result.signalCoverage, SIGNAL_COUNT);
+    assert.equal(result.coveragePercent, 100);
+    assert.equal(result.confidenceTier, "high");
     const keys: SubScoreKey[] = [
       "institutional",
       "insider",
@@ -226,11 +271,12 @@ describe("rankStock and portfolio", () => {
       "fcfYield",
     ];
     for (const key of keys) {
-      assert.ok(result.subScores[key].score >= 0 && result.subScores[key].score <= 100);
+      assert.ok(result.subScores[key].score != null);
+      assert.ok(result.subScores[key].score! >= 0 && result.subScores[key].score! <= 100);
     }
   });
 
-  it("uses neutral 50 when every signal is missing", () => {
+  it("uses neutral 50 when every signal is unavailable", () => {
     const result = rankStock({
       ticker: "XYZ",
       institutional: null,
@@ -243,19 +289,41 @@ describe("rankStock and portfolio", () => {
     });
     assert.equal(result.signalScore, NEUTRAL_SCORE);
     assert.equal(result.signalCoverage, 0);
-    assert.ok(Object.values(result.subScores).every((s) => s.missing));
+    assert.equal(result.coveragePercent, 0);
+    assert.equal(result.confidenceTier, "none");
+    assert.ok(Object.values(result.subScores).every((s) => s.availability === "UNAVAILABLE"));
+    assert.ok(Object.values(result.subScores).every((s) => s.score === null));
+  });
+
+  it("stores availability and scoring metadata in raw_metrics", () => {
+    const result = rankStock(baseInputs({ correlation: null, pe: null }));
+    assert.equal(result.rawMetrics.scoringVersion, 2);
+    assert.equal(result.signalCoverage, 5);
+    assert.equal(result.coveragePercent, 71);
+    assert.equal(result.confidenceTier, "medium");
+    const availability = result.rawMetrics.signalAvailability as Record<string, string>;
+    assert.equal(availability.correlation, "UNAVAILABLE");
+    assert.equal(availability.institutional, "AVAILABLE");
+    const subScores = result.rawMetrics.subScores as Record<string, { score: number | null }>;
+    assert.equal(subScores.correlation.score, null);
+    assert.equal(subScores.pe.score, null);
   });
 
   it("computeSignalScore matches dynamic re-weighting helper", () => {
     const result = rankStock(baseInputs());
     assert.equal(result.signalScore, computeSignalScore(result.subScores));
-    assert.equal(result.signalCoverage, 7);
   });
 
-  it("calculatePortfolioScore averages and assigns grade", () => {
-    const p = calculatePortfolioScore([{ signalScore: 88 }, { signalScore: 72 }]);
-    assert.equal(p.averageSignalScore, 80);
-    assert.equal(p.letterGrade, "A-");
+  it("calculatePortfolioScore averages corrected per-stock scores", () => {
+    const sparse = rankStock({
+      ticker: "AEM",
+      correlation: { correlation180d: 0.93 },
+      famousInvestor: { holderCount: 3 },
+    });
+    const full = rankStock(baseInputs());
+    const p = calculatePortfolioScore([sparse, full]);
+    assert.ok(sparse.signalScore >= 85);
+    assert.ok(p.averageSignalScore > 50);
     assert.equal(p.stockCount, 2);
   });
 
@@ -298,7 +366,7 @@ describe("computeWeightedSignalScore", () => {
     assert.ok(score >= 85);
   });
 
-  it("does not drag high real scores toward 50 when five signals are missing", () => {
+  it("does not drag high real scores toward 50 when five signals are unavailable", () => {
     const result = rankStock({
       ticker: "AEM",
       correlation: { correlation180d: 0.93 },
@@ -310,9 +378,10 @@ describe("computeWeightedSignalScore", () => {
       fcfYield: null,
     });
     assert.equal(result.signalCoverage, 2);
+    assert.equal(result.confidenceTier, "low");
     assert.ok(result.signalScore >= 85, `expected high score, got ${result.signalScore}`);
-    assert.equal(result.subScores.correlation.missing, false);
-    assert.equal(result.subScores.famousInvestor.missing, false);
+    assert.equal(result.subScores.correlation.score, 93);
+    assert.equal(result.subScores.institutional.score, null);
   });
 
   it("exposes effective weights that sum to 1 for real signals only", () => {

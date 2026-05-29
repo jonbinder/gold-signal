@@ -27,13 +27,20 @@ export const SIGNAL_WEIGHTS = {
 } as const;
 
 export const NEUTRAL_SCORE = 50;
+export const SIGNAL_COUNT = 7;
+export const SCORING_VERSION = 2;
+
+export type SignalAvailability = "AVAILABLE" | "UNAVAILABLE";
+export type ConfidenceTier = "high" | "medium" | "low" | "none";
 
 export type SubScoreKey = keyof typeof SIGNAL_WEIGHTS;
 
 export type SubScoreResult = {
-  score: number;
+  score: number | null;
   weight: number;
   weightedContribution: number;
+  availability: SignalAvailability;
+  /** True when availability is UNAVAILABLE (legacy alias). */
   missing: boolean;
   note: string;
 };
@@ -72,8 +79,10 @@ export type StockRankingResult = {
   ticker: string;
   companyName: string | null;
   signalScore: number;
-  /** Count of sub-scores computed from real data (0–7). */
+  /** Count of AVAILABLE signals (0–7). */
   signalCoverage: number;
+  coveragePercent: number;
+  confidenceTier: ConfidenceTier;
   subScores: Record<SubScoreKey, SubScoreResult>;
   rawMetrics: Record<string, unknown>;
 };
@@ -93,6 +102,55 @@ export type PortfolioRankingResult = {
 
 function clampScore(n: number): number {
   return Math.max(0, Math.min(100, Math.round(n)));
+}
+
+function unavailableSubScore(weight: number, note: string): SubScoreResult {
+  return {
+    score: null,
+    weight,
+    weightedContribution: 0,
+    availability: "UNAVAILABLE",
+    missing: true,
+    note,
+  };
+}
+
+function availableSubScore(score: number, weight: number, note: string): SubScoreResult {
+  const clamped = clampScore(score);
+  return {
+    score: clamped,
+    weight,
+    weightedContribution: clamped * weight,
+    availability: "AVAILABLE",
+    missing: false,
+    note,
+  };
+}
+
+/** True when a sub-score has real data and participates in the composite. */
+export function isSignalAvailable(sub: SubScoreResult): boolean {
+  return sub.availability === "AVAILABLE" && sub.score != null;
+}
+
+export function coveragePercentFromCount(availableCount: number): number {
+  return Math.round((availableCount / SIGNAL_COUNT) * 100);
+}
+
+export function confidenceTierFromCoverage(availableCount: number): ConfidenceTier {
+  if (availableCount >= 6) return "high";
+  if (availableCount >= 4) return "medium";
+  if (availableCount >= 1) return "low";
+  return "none";
+}
+
+export function buildSignalAvailabilityMap(
+  subScores: Record<SubScoreKey, SubScoreResult>,
+): Record<SubScoreKey, SignalAvailability> {
+  const map = {} as Record<SubScoreKey, SignalAvailability>;
+  for (const key of Object.keys(SIGNAL_WEIGHTS) as SubScoreKey[]) {
+    map[key] = subScores[key].availability;
+  }
+  return map;
 }
 
 /**
@@ -118,13 +176,7 @@ export function scoreFromBands(
 export function scoreInstitutional(input: RankingInputs["institutional"]): SubScoreResult {
   const weight = SIGNAL_WEIGHTS.institutional;
   if (!input || input.ownershipPercent == null) {
-    return {
-      score: NEUTRAL_SCORE,
-      weight,
-      weightedContribution: NEUTRAL_SCORE * weight,
-      missing: true,
-      note: "Institutional ownership data unavailable",
-    };
+    return unavailableSubScore(weight, "Institutional ownership data unavailable");
   }
 
   const current = input.ownershipPercent;
@@ -143,13 +195,11 @@ export function scoreInstitutional(input: RankingInputs["institutional"]): SubSc
   }
 
   score = clampScore(score);
-  return {
+  return availableSubScore(
     score,
     weight,
-    weightedContribution: score * weight,
-    missing: false,
-    note: `Institutional ownership ${current.toFixed(1)}% (${delta >= 0 ? "+" : ""}${delta.toFixed(1)}% QoQ)`,
-  };
+    `Institutional ownership ${current.toFixed(1)}% (${delta >= 0 ? "+" : ""}${delta.toFixed(1)}% QoQ)`,
+  );
 }
 
 /** Routine option exercises / grants to exclude from insider net flow. */
@@ -161,13 +211,7 @@ const INSIDER_EXCLUDE_CODES = new Set(["M", "A", "G", "C", "F", "J", "L"]);
 export function scoreInsider(input: RankingInputs["insider"]): SubScoreResult {
   const weight = SIGNAL_WEIGHTS.insider;
   if (!input || input.netDollarValue90d == null) {
-    return {
-      score: NEUTRAL_SCORE,
-      weight,
-      weightedContribution: NEUTRAL_SCORE * weight,
-      missing: true,
-      note: "Insider transaction data unavailable",
-    };
+    return unavailableSubScore(weight, "Insider transaction data unavailable");
   }
 
   const net = input.netDollarValue90d;
@@ -179,13 +223,7 @@ export function scoreInsider(input: RankingInputs["insider"]): SubScoreResult {
   else score = 15;
 
   score = clampScore(score);
-  return {
-    score,
-    weight,
-    weightedContribution: score * weight,
-    missing: false,
-    note: `Net insider flow (90d): $${(net / 1000).toFixed(0)}K`,
-  };
+  return availableSubScore(score, weight, `Net insider flow (90d): $${(net / 1000).toFixed(0)}K`);
 }
 
 /**
@@ -195,17 +233,12 @@ export function scorePe(input: RankingInputs["pe"]): SubScoreResult {
   const weight = SIGNAL_WEIGHTS.pe;
   const median = input?.sectorMedianPe ?? SECTOR_PE_MEDIAN;
 
-  if (!input || input.trailingPe == null || input.trailingPe <= 0) {
-    return {
-      score: input?.trailingPe != null && input.trailingPe <= 0 ? 12 : NEUTRAL_SCORE,
-      weight,
-      weightedContribution: (input?.trailingPe != null && input.trailingPe <= 0 ? 12 : NEUTRAL_SCORE) * weight,
-      missing: input?.trailingPe == null,
-      note:
-        input?.trailingPe != null && input.trailingPe <= 0
-          ? "Negative or zero trailing earnings"
-          : "Trailing PE unavailable",
-    };
+  if (!input || input.trailingPe == null) {
+    return unavailableSubScore(weight, "Trailing PE unavailable");
+  }
+
+  if (input.trailingPe <= 0) {
+    return availableSubScore(12, weight, "Negative or zero trailing earnings");
   }
 
   const ratio = input.trailingPe / median;
@@ -219,13 +252,11 @@ export function scorePe(input: RankingInputs["pe"]): SubScoreResult {
     ]),
   );
 
-  return {
+  return availableSubScore(
     score,
     weight,
-    weightedContribution: score * weight,
-    missing: false,
-    note: `Trailing PE ${input.trailingPe.toFixed(1)} vs sector median ${median}`,
-  };
+    `Trailing PE ${input.trailingPe.toFixed(1)} vs sector median ${median}`,
+  );
 }
 
 /**
@@ -234,13 +265,7 @@ export function scorePe(input: RankingInputs["pe"]): SubScoreResult {
 export function scoreFamousInvestor(input: RankingInputs["famousInvestor"]): SubScoreResult {
   const weight = SIGNAL_WEIGHTS.famousInvestor;
   if (!input) {
-    return {
-      score: NEUTRAL_SCORE,
-      weight,
-      weightedContribution: NEUTRAL_SCORE * weight,
-      missing: true,
-      note: "Famous investor data unavailable",
-    };
+    return unavailableSubScore(weight, "Famous investor data unavailable");
   }
 
   const count = input.holderCount;
@@ -251,13 +276,11 @@ export function scoreFamousInvestor(input: RankingInputs["famousInvestor"]): Sub
   else score = 40;
 
   score = clampScore(score);
-  return {
+  return availableSubScore(
     score,
     weight,
-    weightedContribution: score * weight,
-    missing: false,
-    note: `Held by ${count} tracked precious-metals specialist(s)`,
-  };
+    `Held by ${count} tracked precious-metals specialist(s)`,
+  );
 }
 
 /**
@@ -266,13 +289,7 @@ export function scoreFamousInvestor(input: RankingInputs["famousInvestor"]): Sub
 export function scoreSupport(input: RankingInputs["support"]): SubScoreResult {
   const weight = SIGNAL_WEIGHTS.support;
   if (!input || input.fiftyTwoWeekHigh <= input.fiftyTwoWeekLow) {
-    return {
-      score: NEUTRAL_SCORE,
-      weight,
-      weightedContribution: NEUTRAL_SCORE * weight,
-      missing: true,
-      note: "52-week range data unavailable",
-    };
+    return unavailableSubScore(weight, "52-week range data unavailable");
   }
 
   const position =
@@ -290,13 +307,7 @@ export function scoreSupport(input: RankingInputs["support"]): SubScoreResult {
     ]),
   );
 
-  return {
-    score,
-    weight,
-    weightedContribution: score * weight,
-    missing: false,
-    note: `Price ${pct.toFixed(0)}% above 52-week low`,
-  };
+  return availableSubScore(score, weight, `Price ${pct.toFixed(0)}% above 52-week low`);
 }
 
 /**
@@ -305,13 +316,7 @@ export function scoreSupport(input: RankingInputs["support"]): SubScoreResult {
 export function scoreCorrelation(input: RankingInputs["correlation"]): SubScoreResult {
   const weight = SIGNAL_WEIGHTS.correlation;
   if (!input || input.correlation180d == null) {
-    return {
-      score: NEUTRAL_SCORE,
-      weight,
-      weightedContribution: NEUTRAL_SCORE * weight,
-      missing: true,
-      note: "Gold correlation data unavailable",
-    };
+    return unavailableSubScore(weight, "Gold correlation data unavailable");
   }
 
   const r = input.correlation180d;
@@ -325,13 +330,7 @@ export function scoreCorrelation(input: RankingInputs["correlation"]): SubScoreR
     ]),
   );
 
-  return {
-    score,
-    weight,
-    weightedContribution: score * weight,
-    missing: false,
-    note: `180-day gold correlation ${r.toFixed(2)}`,
-  };
+  return availableSubScore(score, weight, `180-day gold correlation ${r.toFixed(2)}`);
 }
 
 /**
@@ -340,13 +339,7 @@ export function scoreCorrelation(input: RankingInputs["correlation"]): SubScoreR
 export function scoreFcfYield(input: RankingInputs["fcfYield"]): SubScoreResult {
   const weight = SIGNAL_WEIGHTS.fcfYield;
   if (!input || input.fcfYieldPercent == null) {
-    return {
-      score: NEUTRAL_SCORE,
-      weight,
-      weightedContribution: NEUTRAL_SCORE * weight,
-      missing: true,
-      note: "Free cash flow yield unavailable",
-    };
+    return unavailableSubScore(weight, "Free cash flow yield unavailable");
   }
 
   const y = input.fcfYieldPercent;
@@ -358,13 +351,7 @@ export function scoreFcfYield(input: RankingInputs["fcfYield"]): SubScoreResult 
   else score = 92;
 
   score = clampScore(score);
-  return {
-    score,
-    weight,
-    weightedContribution: score * weight,
-    missing: false,
-    note: `Free cash flow yield ${y.toFixed(1)}%`,
-  };
+  return availableSubScore(score, weight, `Free cash flow yield ${y.toFixed(1)}%`);
 }
 
 /**
@@ -391,7 +378,9 @@ export function computeWeightedSignalScore(signals: WeightedSignalInput[]): numb
 export function computeEffectiveWeights(
   subScores: Record<SubScoreKey, SubScoreResult>,
 ): Partial<Record<SubScoreKey, number>> {
-  const real = (Object.keys(SIGNAL_WEIGHTS) as SubScoreKey[]).filter((key) => !subScores[key].missing);
+  const real = (Object.keys(SIGNAL_WEIGHTS) as SubScoreKey[]).filter((key) =>
+    isSignalAvailable(subScores[key]),
+  );
   const totalRealWeight = real.reduce((sum, key) => sum + subScores[key].weight, 0);
   if (totalRealWeight <= 0) {
     return {};
@@ -399,7 +388,7 @@ export function computeEffectiveWeights(
 
   const effective: Partial<Record<SubScoreKey, number>> = {};
   for (const key of Object.keys(SIGNAL_WEIGHTS) as SubScoreKey[]) {
-    if (subScores[key].missing) {
+    if (!isSignalAvailable(subScores[key])) {
       continue;
     }
     effective[key] = subScores[key].weight / totalRealWeight;
@@ -408,7 +397,9 @@ export function computeEffectiveWeights(
 }
 
 export function countSignalCoverage(subScores: Record<SubScoreKey, SubScoreResult>): number {
-  return (Object.keys(SIGNAL_WEIGHTS) as SubScoreKey[]).filter((key) => !subScores[key].missing).length;
+  return (Object.keys(SIGNAL_WEIGHTS) as SubScoreKey[]).filter((key) =>
+    isSignalAvailable(subScores[key]),
+  ).length;
 }
 
 /**
@@ -416,9 +407,9 @@ export function countSignalCoverage(subScores: Record<SubScoreKey, SubScoreResul
  */
 export function computeSignalScore(subScores: Record<SubScoreKey, SubScoreResult>): number {
   const signals = (Object.keys(SIGNAL_WEIGHTS) as SubScoreKey[]).map((key) => ({
-    score: subScores[key].score,
+    score: subScores[key].score ?? 0,
     weight: subScores[key].weight,
-    defaulted: subScores[key].missing,
+    defaulted: !isSignalAvailable(subScores[key]),
   }));
   return computeWeightedSignalScore(signals);
 }
@@ -438,20 +429,35 @@ export function rankStock(inputs: RankingInputs): StockRankingResult {
   };
 
   for (const key of Object.keys(SIGNAL_WEIGHTS) as SubScoreKey[]) {
-    if (subScores[key].missing) {
+    if (!isSignalAvailable(subScores[key])) {
       subScores[key] = { ...subScores[key], weightedContribution: 0 };
     }
   }
 
   const signalCoverage = countSignalCoverage(subScores);
+  const coveragePercent = coveragePercentFromCount(signalCoverage);
+  const confidenceTier = confidenceTierFromCoverage(signalCoverage);
   const effectiveWeights = computeEffectiveWeights(subScores);
+  const signalAvailability = buildSignalAvailabilityMap(subScores);
 
   const rawMetrics: Record<string, unknown> = {
+    scoringVersion: SCORING_VERSION,
     inputs,
     signalCoverage,
+    coveragePercent,
+    confidenceTier,
+    signalAvailability,
     effectiveWeights,
     subScores: Object.fromEntries(
-      Object.entries(subScores).map(([k, v]) => [k, { score: v.score, missing: v.missing, note: v.note }]),
+      Object.entries(subScores).map(([k, v]) => [
+        k,
+        {
+          score: v.score,
+          availability: v.availability,
+          missing: v.missing,
+          note: v.note,
+        },
+      ]),
     ),
   };
 
@@ -460,6 +466,8 @@ export function rankStock(inputs: RankingInputs): StockRankingResult {
     companyName: inputs.companyName ?? null,
     signalScore: computeSignalScore(subScores),
     signalCoverage,
+    coveragePercent,
+    confidenceTier,
     subScores,
     rawMetrics,
   };
@@ -614,21 +622,47 @@ export function aggregateInsiderNetDollars(
 }
 
 /**
- * Counts famous_investors rows for a ticker from Supabase.
+ * Returns famous-investor input when the lookup table has data; null if empty/unavailable.
  */
-export async function countFamousInvestorsForTicker(ticker: string): Promise<number> {
+export async function getFamousInvestorRankingInput(
+  ticker: string,
+): Promise<RankingInputs["famousInvestor"]> {
   const supabase = createSupabaseServiceClient();
-  if (!supabase) return 0;
+  if (!supabase) return null;
+
+  const { count: tableCount, error: tableError } = await supabase
+    .from("famous_investors")
+    .select("id", { count: "exact", head: true });
+
+  if (tableError) {
+    console.warn("[ranking] famous_investors table check failed:", tableError.message);
+    return null;
+  }
+  if (!tableCount) {
+    return null;
+  }
+
   const sym = normalizeTicker(ticker);
   const { count, error } = await supabase
     .from("famous_investors")
     .select("id", { count: "exact", head: true })
     .eq("ticker", sym);
+
   if (error) {
     console.warn(`[ranking] famous_investors query failed for ${sym}:`, error.message);
-    return 0;
+    return null;
   }
-  return count ?? 0;
+
+  return { holderCount: count ?? 0 };
+}
+
+/**
+ * Counts famous_investors rows for a ticker from Supabase.
+ * @deprecated Prefer getFamousInvestorRankingInput for scoring.
+ */
+export async function countFamousInvestorsForTicker(ticker: string): Promise<number> {
+  const input = await getFamousInvestorRankingInput(ticker);
+  return input?.holderCount ?? 0;
 }
 
 /**
@@ -648,7 +682,7 @@ export async function rankStockFromMarketData(ticker: string): Promise<StockRank
       getInstitutionalOwnership(sym),
       getInsiderTransactions(sym),
       getEdgarInsiderFilings(sym),
-      countFamousInvestorsForTicker(sym),
+      getFamousInvestorRankingInput(sym),
     ]);
 
   rawMetrics.price = priceRes;
@@ -722,7 +756,7 @@ export async function rankStockFromMarketData(ticker: string): Promise<StockRank
     institutional,
     insider: insiderAgg.netDollarValue90d != null ? { netDollarValue90d: insiderAgg.netDollarValue90d } : null,
     pe,
-    famousInvestor: { holderCount: famousCount },
+    famousInvestor: famousCount,
     support,
     correlation,
     fcfYield,

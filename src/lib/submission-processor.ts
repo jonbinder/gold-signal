@@ -3,6 +3,7 @@ import { generateSignalScorePdf } from "@/lib/pdf/generate-report";
 import { topPickAndWatchOut } from "@/lib/pdf/report-copy";
 import {
   calculatePortfolioScore,
+  isSignalAvailable,
   rankStockFromMarketData,
   type StockRankingResult,
   type SubScoreKey,
@@ -265,7 +266,7 @@ export async function processSubmission(submission: SubmissionRow): Promise<void
         keyof StockRankingRowInsert,
       ][]) {
         const sub = ranking.subScores[key];
-        (row as Record<string, unknown>)[col] = sub.missing ? null : sub.score;
+        (row as Record<string, unknown>)[col] = isSignalAvailable(sub) ? sub.score : null;
       }
 
       const { error: insertError } = await supabase.from("stock_rankings").insert(row);

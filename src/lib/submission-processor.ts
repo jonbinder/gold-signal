@@ -301,8 +301,7 @@ export async function processSubmission(submission: SubmissionRow): Promise<void
     });
 
     console.info("[processor] Uploading PDF", { submissionId });
-    const { path, signedUrl } = await uploadReportPdf(submissionId, pdfBuffer);
-    console.info("[processor] Uploaded PDF to storage", { submissionId, path });
+    const { signedUrl } = await uploadReportPdf(submissionId, pdfBuffer);
 
     console.info("[processor] Sending email", { submissionId });
     const { emailId } = await sendReportEmail({

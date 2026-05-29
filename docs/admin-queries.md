@@ -58,7 +58,7 @@ ORDER BY processing_started_at ASC;
 
 | error_message | Fix |
 |---------------|-----|
-| `PDF upload failed: Bucket not found` | Run `supabase/migrations/006_reports_storage_bucket.sql` |
+| `PDF upload failed: Bucket not found` | Run `supabase/migrations/010_create_reports_storage_bucket.sql` (or `006`) in Supabase SQL Editor |
 | `RESEND_API_KEY is not configured` | Set `RESEND_API_KEY` in Vercel Production + redeploy |
 | `Resend send failed: ...` | Verify domain `goldsignal.ai` in Resend dashboard |
 | Processing timed out... | Retry with fewer tickers; Hobby limit is 60s |

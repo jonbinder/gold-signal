@@ -72,8 +72,17 @@ export type StockRankingResult = {
   ticker: string;
   companyName: string | null;
   signalScore: number;
+  /** Count of sub-scores computed from real data (0–7). */
+  signalCoverage: number;
   subScores: Record<SubScoreKey, SubScoreResult>;
   rawMetrics: Record<string, unknown>;
+};
+
+export type WeightedSignalInput = {
+  score: number;
+  weight: number;
+  /** True when data was unavailable and the sub-score is excluded from the composite. */
+  defaulted: boolean;
 };
 
 export type PortfolioRankingResult = {
@@ -359,11 +368,59 @@ export function scoreFcfYield(input: RankingInputs["fcfYield"]): SubScoreResult 
 }
 
 /**
+ * Composite SignalScore from sub-scores with real data only; weights renormalize to 100%.
+ */
+export function computeWeightedSignalScore(signals: WeightedSignalInput[]): number {
+  const realSignals = signals.filter((s) => !s.defaulted);
+  if (realSignals.length === 0) {
+    return NEUTRAL_SCORE;
+  }
+
+  const totalRealWeight = realSignals.reduce((sum, s) => sum + s.weight, 0);
+  if (totalRealWeight <= 0) {
+    return NEUTRAL_SCORE;
+  }
+
+  const weightedSum = realSignals.reduce((sum, s) => sum + s.score * s.weight, 0);
+  return clampScore(weightedSum / totalRealWeight);
+}
+
+/**
+ * Effective weights after excluding defaulted signals (sums to 1 when any real signal exists).
+ */
+export function computeEffectiveWeights(
+  subScores: Record<SubScoreKey, SubScoreResult>,
+): Partial<Record<SubScoreKey, number>> {
+  const real = (Object.keys(SIGNAL_WEIGHTS) as SubScoreKey[]).filter((key) => !subScores[key].missing);
+  const totalRealWeight = real.reduce((sum, key) => sum + subScores[key].weight, 0);
+  if (totalRealWeight <= 0) {
+    return {};
+  }
+
+  const effective: Partial<Record<SubScoreKey, number>> = {};
+  for (const key of Object.keys(SIGNAL_WEIGHTS) as SubScoreKey[]) {
+    if (subScores[key].missing) {
+      continue;
+    }
+    effective[key] = subScores[key].weight / totalRealWeight;
+  }
+  return effective;
+}
+
+export function countSignalCoverage(subScores: Record<SubScoreKey, SubScoreResult>): number {
+  return (Object.keys(SIGNAL_WEIGHTS) as SubScoreKey[]).filter((key) => !subScores[key].missing).length;
+}
+
+/**
  * Computes weighted SignalScore (0–100) from seven sub-scores.
  */
 export function computeSignalScore(subScores: Record<SubScoreKey, SubScoreResult>): number {
-  const total = Object.values(subScores).reduce((sum, s) => sum + s.weightedContribution, 0);
-  return clampScore(total);
+  const signals = (Object.keys(SIGNAL_WEIGHTS) as SubScoreKey[]).map((key) => ({
+    score: subScores[key].score,
+    weight: subScores[key].weight,
+    defaulted: subScores[key].missing,
+  }));
+  return computeWeightedSignalScore(signals);
 }
 
 /**
@@ -380,8 +437,19 @@ export function rankStock(inputs: RankingInputs): StockRankingResult {
     fcfYield: scoreFcfYield(inputs.fcfYield),
   };
 
+  for (const key of Object.keys(SIGNAL_WEIGHTS) as SubScoreKey[]) {
+    if (subScores[key].missing) {
+      subScores[key] = { ...subScores[key], weightedContribution: 0 };
+    }
+  }
+
+  const signalCoverage = countSignalCoverage(subScores);
+  const effectiveWeights = computeEffectiveWeights(subScores);
+
   const rawMetrics: Record<string, unknown> = {
     inputs,
+    signalCoverage,
+    effectiveWeights,
     subScores: Object.fromEntries(
       Object.entries(subScores).map(([k, v]) => [k, { score: v.score, missing: v.missing, note: v.note }]),
     ),
@@ -391,6 +459,7 @@ export function rankStock(inputs: RankingInputs): StockRankingResult {
     ticker: normalizeTicker(inputs.ticker),
     companyName: inputs.companyName ?? null,
     signalScore: computeSignalScore(subScores),
+    signalCoverage,
     subScores,
     rawMetrics,
   };

@@ -6,7 +6,10 @@ import {
   aggregateInsiderNetDollars,
   calculatePortfolioScore,
   computeReturnCorrelation,
+  computeEffectiveWeights,
   computeSignalScore,
+  computeWeightedSignalScore,
+  countSignalCoverage,
   letterGradeFromScore,
   rankStock,
   scoreCorrelation,
@@ -227,7 +230,7 @@ describe("rankStock and portfolio", () => {
     }
   });
 
-  it("uses neutral 50 for missing signals without failing", () => {
+  it("uses neutral 50 when every signal is missing", () => {
     const result = rankStock({
       ticker: "XYZ",
       institutional: null,
@@ -239,12 +242,14 @@ describe("rankStock and portfolio", () => {
       fcfYield: null,
     });
     assert.equal(result.signalScore, NEUTRAL_SCORE);
+    assert.equal(result.signalCoverage, 0);
     assert.ok(Object.values(result.subScores).every((s) => s.missing));
   });
 
-  it("computeSignalScore matches weighted sum", () => {
+  it("computeSignalScore matches dynamic re-weighting helper", () => {
     const result = rankStock(baseInputs());
     assert.equal(result.signalScore, computeSignalScore(result.subScores));
+    assert.equal(result.signalCoverage, 7);
   });
 
   it("calculatePortfolioScore averages and assigns grade", () => {
@@ -259,6 +264,72 @@ describe("rankStock and portfolio", () => {
     assert.equal(letterGradeFromScore(86), "A");
     assert.equal(letterGradeFromScore(42), "D");
     assert.equal(letterGradeFromScore(30), "F");
+  });
+});
+
+describe("computeWeightedSignalScore", () => {
+  it("returns 50 when no real signals exist", () => {
+    const score = computeWeightedSignalScore([
+      { score: 50, weight: 0.15, defaulted: true },
+      { score: 50, weight: 0.2, defaulted: true },
+    ]);
+    assert.equal(score, NEUTRAL_SCORE);
+  });
+
+  it("uses only the real signal when one is available", () => {
+    const score = computeWeightedSignalScore([
+      { score: 93, weight: 0.1, defaulted: false },
+      { score: 50, weight: 0.15, defaulted: true },
+      { score: 50, weight: 0.2, defaulted: true },
+    ]);
+    assert.equal(score, 93);
+  });
+
+  it("renormalizes weights across multiple real signals", () => {
+    const score = computeWeightedSignalScore([
+      { score: 93, weight: 0.1, defaulted: false },
+      { score: 82, weight: 0.2, defaulted: false },
+      { score: 50, weight: 0.15, defaulted: true },
+      { score: 50, weight: 0.1, defaulted: true },
+      { score: 50, weight: 0.15, defaulted: true },
+    ]);
+    const expected = Math.round((93 * 0.1 + 82 * 0.2) / (0.1 + 0.2));
+    assert.equal(score, expected);
+    assert.ok(score >= 85);
+  });
+
+  it("does not drag high real scores toward 50 when five signals are missing", () => {
+    const result = rankStock({
+      ticker: "AEM",
+      correlation: { correlation180d: 0.93 },
+      famousInvestor: { holderCount: 3 },
+      institutional: null,
+      insider: null,
+      pe: null,
+      support: null,
+      fcfYield: null,
+    });
+    assert.equal(result.signalCoverage, 2);
+    assert.ok(result.signalScore >= 85, `expected high score, got ${result.signalScore}`);
+    assert.equal(result.subScores.correlation.missing, false);
+    assert.equal(result.subScores.famousInvestor.missing, false);
+  });
+
+  it("exposes effective weights that sum to 1 for real signals only", () => {
+    const result = rankStock({
+      ticker: "TEST",
+      correlation: { correlation180d: 0.8 },
+      pe: { trailingPe: 12, sectorMedianPe: SECTOR_PE_MEDIAN },
+      institutional: null,
+      insider: null,
+      famousInvestor: null,
+      support: null,
+      fcfYield: null,
+    });
+    const effective = computeEffectiveWeights(result.subScores);
+    const sum = Object.values(effective).reduce((a, b) => a + (b ?? 0), 0);
+    assert.ok(Math.abs(sum - 1) < 0.001);
+    assert.equal(countSignalCoverage(result.subScores), 2);
   });
 });
 

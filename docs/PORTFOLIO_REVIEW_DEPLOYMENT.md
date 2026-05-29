@@ -78,5 +78,6 @@ End-to-end pipeline: homepage form → instant fire-and-forget processing → da
 | Stuck `pending`/`processing` > 30 min | Daily cleanup at 06:00 UTC, or manual `process-one` curl |
 | `failed` with Polygon error | `POLYGON_API_KEY`, plan limits, ticker validity |
 | PDF upload error | Migration `006`, bucket `reports`, service role key |
+| `PDF upload failed: Bucket not found` | Run `006_reports_storage_bucket.sql` in Supabase SQL Editor |
 | Email not sent | Resend domain verified, `reports@goldsignal.ai`, `RESEND_API_KEY` |
 | Famous investor scores always ~40 | Run `npm run seed:famous-investors` |

@@ -172,8 +172,9 @@ export async function processSubmissionById(submissionId: string): Promise<{
   try {
     await processSubmission(toProcess);
     return { outcome: "completed" };
-  } catch {
-    return { outcome: "failed" };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Unknown processing error";
+    return { outcome: "failed", reason: message };
   }
 }
 
@@ -228,7 +229,11 @@ export async function processSubmission(submission: SubmissionRow): Promise<void
   }
 
   const submissionId = submission.id;
-  console.info("[processor] Starting", { submissionId, tickers: submission.tickers });
+  console.info("[processor] Loaded submission", {
+    submissionId,
+    tickers: submission.tickers,
+    email: submission.email.replace(/(.{2}).*(@.*)/, "$1***$2"),
+  });
 
   try {
     await supabase.from("stock_rankings").delete().eq("submission_id", submissionId);
@@ -290,9 +295,14 @@ export async function processSubmission(submission: SubmissionRow): Promise<void
       portfolioGrade: portfolio.letterGrade,
       rankings,
     });
+    console.info("[processor] Generated PDF", {
+      submissionId,
+      bytes: pdfBuffer.length,
+    });
 
     console.info("[processor] Uploading PDF", { submissionId });
-    const { signedUrl } = await uploadReportPdf(submissionId, pdfBuffer);
+    const { path, signedUrl } = await uploadReportPdf(submissionId, pdfBuffer);
+    console.info("[processor] Uploaded PDF to storage", { submissionId, path });
 
     console.info("[processor] Sending email", { submissionId });
     const { emailId } = await sendReportEmail({
@@ -321,8 +331,10 @@ export async function processSubmission(submission: SubmissionRow): Promise<void
       throw new Error(`Failed to mark completed: ${completeError.message}`);
     }
 
+    console.info("[processor] Sent email via Resend", { submissionId, emailId });
+
     const picks = topPickAndWatchOut(rankings);
-    console.info("[processor] Completed", {
+    console.info("[processor] Marked submission as completed", {
       submissionId,
       emailId,
       top: picks.top?.ticker,

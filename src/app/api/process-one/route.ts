@@ -28,6 +28,14 @@ export async function GET(req: Request) {
     console.info("[process-one] Started", { submissionId });
     const result = await processSubmissionById(submissionId);
     console.info("[process-one] Finished", { submissionId, ...result });
+
+    if (result.outcome === "failed") {
+      return NextResponse.json(
+        { ok: false, submissionId, ...result },
+        { status: 500 },
+      );
+    }
+
     return NextResponse.json({ ok: true, submissionId, ...result });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Processing failed";

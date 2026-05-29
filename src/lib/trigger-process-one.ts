@@ -43,10 +43,20 @@ export async function invokeProcessOne(submissionId: string, origin: string): Pr
       headers: { "x-process-secret": secret },
     });
     const body = await res.text().catch(() => "");
-    if (!res.ok) {
+    let parsed: { outcome?: string; reason?: string } | null = null;
+    try {
+      parsed = JSON.parse(body) as { outcome?: string; reason?: string };
+    } catch {
+      parsed = null;
+    }
+
+    const pipelineFailed = parsed?.outcome === "failed";
+    if (!res.ok || pipelineFailed) {
       console.warn("[trigger] process-one returned error", {
         submissionId,
         status: res.status,
+        outcome: parsed?.outcome,
+        reason: parsed?.reason,
         body: body.slice(0, 500),
         url: url.origin + url.pathname,
       });

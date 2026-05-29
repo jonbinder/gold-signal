@@ -80,4 +80,5 @@ End-to-end pipeline: homepage form → instant fire-and-forget processing → da
 | PDF upload error | Migration `006`, bucket `reports`, service role key |
 | `PDF upload failed: Bucket not found` | Run `010_create_reports_storage_bucket.sql` in Supabase SQL Editor |
 | Email not sent | Resend domain verified, `reports@goldsignal.ai`, `RESEND_API_KEY` |
+| `b is not a function` / email render error | Install `@react-email/render` (required with Resend `react`); app renders HTML via `@react-email/render` before send |
 | Famous investor scores always ~40 | Run `npm run seed:famous-investors` |

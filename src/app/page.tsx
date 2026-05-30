@@ -7,26 +7,26 @@ import { FeaturedInvestorsCarousel } from "@/components/home/FeaturedInvestorsCa
 import {
   IconBarChart,
   IconCrosshair,
-  IconGauge,
   IconLayers,
   IconUsers,
 } from "@/components/home/HubIcons";
-import { getInvestors, getStocks } from "@/lib/goldsignal/data";
-import { ScoreBadge } from "@/components/goldsignal/ScoreBadge";
+import { getMostWidelyHeldStocks } from "@/lib/famous-holders";
+import { getInvestors } from "@/lib/goldsignal/data";
+import { getCachedDisplayStocks } from "@/lib/stock-cache";
 
 const structuredData = {
   "@context": "https://schema.org",
   "@type": "FinancialService",
   name: "GoldSignal.ai",
   description:
-    "See which gold and silver stocks the world's biggest investors are buying. SignalScore ranks every stock using 13F filings, insider trades, PE ratios, and more.",
+    "Track what famous precious-metals investors own and recent SEC Form 4 insider activity for gold and silver stocks.",
   url: "https://goldsignal.ai/",
 };
 
 export const metadata: Metadata = {
-  title: "GoldSignal.ai — Gold & Silver Stock Rankings Powered by AI",
+  title: "GoldSignal.ai — Who Owns Gold & Silver Stocks",
   description:
-    "See which gold and silver stocks the world's biggest investors are buying. SignalScore ranks every stock using 13F filings, insider trades, PE ratios, and more.",
+    "See which famous precious-metals investors hold each gold and silver stock, plus recent insider buying and selling from SEC Form 4 filings.",
   alternates: {
     canonical: "https://goldsignal.ai/",
   },
@@ -34,9 +34,9 @@ export const metadata: Metadata = {
     icon: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%23C9971C'/%3E%3C/svg%3E",
   },
   openGraph: {
-    title: "GoldSignal.ai — Gold & Silver Stock Rankings Powered by AI",
+    title: "GoldSignal.ai — Who Owns Gold & Silver Stocks",
     description:
-      "See which gold and silver stocks the world's biggest investors are buying. SignalScore ranks every stock using 13F filings, insider trades, PE ratios, and more.",
+      "Track famous investor holdings and insider Form 4 activity across gold and silver equities.",
     type: "website",
     url: "https://goldsignal.ai/",
   },
@@ -44,34 +44,36 @@ export const metadata: Metadata = {
 
 const HUB_ICONS = [IconUsers, IconBarChart, IconCrosshair] as const;
 
-function hubLinks(investorCount: number) {
+function hubLinks(investorCount: number, stockCount: number) {
   return [
     {
       href: "/investors",
       title: "Investors",
-      description: `${investorCount} famous gold & silver investors — portfolios synced from your Excel workbook.`,
+      description: `${investorCount} famous gold & silver investors — curated holdings from public disclosures.`,
       cta: "Browse investors",
     },
     {
       href: "/stocks",
       title: "Stocks",
-      description: "Full SignalScore rankings for every precious metals stock you track.",
-      cta: "View rankings",
+      description: `${stockCount}+ precious metals stocks — who holds them and what insiders are doing.`,
+      cta: "Browse stocks",
     },
     {
       href: "/signalscore",
-      title: "SignalScore",
-      description: "How we calculate the 0–100 composite rating across filings, insiders, and valuation.",
-      cta: "Read methodology",
+      title: "About",
+      description: "Where our data comes from, how often it updates, and our facts-first philosophy.",
+      cta: "How it works",
     },
   ] as const;
 }
 
-export default function HomePage() {
+export default async function HomePage() {
   const investors = getInvestors();
-  const topStocks = getStocks().slice(0, 6);
+  const widelyHeld = getMostWidelyHeldStocks(6);
+  const cachedStocks = await getCachedDisplayStocks();
+  const stockCount = cachedStocks.length > 0 ? cachedStocks.length : widelyHeld.length;
   const featuredInvestors = investors.slice(0, 8);
-  const HUB_LINKS = hubLinks(investors.length);
+  const HUB_LINKS = hubLinks(investors.length, stockCount);
 
   return (
     <>
@@ -86,21 +88,21 @@ export default function HomePage() {
         <section className="hero" id="about">
           <div className="hero__inner">
             <div className="hero__content">
-              <p className="hero__eyebrow">Powered by 13F · Insider · PE · Forward PE</p>
+              <p className="hero__eyebrow">13F disclosures · Form 4 insider filings · SEC EDGAR</p>
               <h1 className="hero__title">
-                Rank <em>gold &amp; silver</em> stocks with institutional-grade intelligence
+                Track <em>who owns</em> gold &amp; silver stocks — and what insiders are doing
               </h1>
               <p className="hero__sub">
-                GoldSignal.ai scores precious metals equities from 0–100 using SignalScore — and tracks
-                where the world&apos;s top mining investors are positioned.
+                GoldSignal.ai shows plain facts: which tracked famous investors hold each stock, and
+                recent insider buying and selling. No black-box score — you decide.
               </p>
               <div className="hero__stats">
                 <div className="hero__stat">
                   <span className="hero__stat-icon" aria-hidden="true">
                     <IconLayers />
                   </span>
-                  <span className="hero__stat-value mono">{getStocks().length}+</span>
-                  <span className="hero__stat-label">Stocks ranked</span>
+                  <span className="hero__stat-value mono">{stockCount}+</span>
+                  <span className="hero__stat-label">Stocks tracked</span>
                 </div>
                 <div className="hero__stat">
                   <span className="hero__stat-icon" aria-hidden="true">
@@ -111,10 +113,10 @@ export default function HomePage() {
                 </div>
                 <div className="hero__stat">
                   <span className="hero__stat-icon" aria-hidden="true">
-                    <IconGauge />
+                    <IconBarChart />
                   </span>
-                  <span className="hero__stat-value mono">0–100</span>
-                  <span className="hero__stat-label">SignalScore scale</span>
+                  <span className="hero__stat-value mono">Form 4</span>
+                  <span className="hero__stat-label">Insider filings</span>
                 </div>
               </div>
             </div>
@@ -152,7 +154,7 @@ export default function HomePage() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/images/gs-phone.png"
-                alt="GoldSignal.ai app showing SignalScore rankings for precious metals stocks"
+                alt="GoldSignal.ai showing investor holdings and insider activity for precious metals stocks"
                 className="hero__phone"
                 width={420}
                 height={840}
@@ -166,7 +168,7 @@ export default function HomePage() {
           <header className="section-header section-header--hub">
             <h2 className="section-header__title">Explore GoldSignal</h2>
             <p className="section-header__sub">
-              Three views into the same dataset — updated when you push changes to GitHub.
+              Three views into the same dataset — holdings, stocks, and how we source the data.
             </p>
           </header>
           <div className="hub__grid">
@@ -195,16 +197,16 @@ export default function HomePage() {
 
         <section className="rankings rankings--preview" id="rankings-preview">
           <header className="section-header section-header--dark">
-            <h2 className="section-header__title">Top SignalScores</h2>
+            <h2 className="section-header__title">Most widely held by tracked investors</h2>
             <p className="section-header__sub">
-              <Link href="/stocks">Full stock rankings →</Link>
+              <Link href="/stocks">Full stock list →</Link>
             </p>
           </header>
           <div className="rankings__mobile-columns" aria-hidden="true">
             <span>Rank</span>
             <span>Ticker</span>
             <span>Company</span>
-            <span>SignalScore</span>
+            <span>Investors</span>
           </div>
           <div className="rankings__table-wrap rankings__table-wrap--desktop">
             <table className="rankings-table">
@@ -213,18 +215,20 @@ export default function HomePage() {
                   <th scope="col">Rank</th>
                   <th scope="col">Ticker</th>
                   <th scope="col">Company</th>
-                  <th scope="col">SignalScore</th>
+                  <th scope="col">Tracked investors</th>
                 </tr>
               </thead>
               <tbody>
-                {topStocks.map((stock, index) => (
+                {widelyHeld.map((stock, index) => (
                   <tr key={stock.ticker}>
                     <td className="mono">{index + 1}</td>
-                    <td className="mono rankings-table__ticker">{stock.ticker}</td>
-                    <td>{stock.company}</td>
-                    <td>
-                      <ScoreBadge score={stock.signalScore} />
+                    <td className="mono rankings-table__ticker">
+                      <Link href={`/stocks/${stock.ticker}`} className="rankings-table__link">
+                        {stock.ticker}
+                      </Link>
                     </td>
+                    <td>{stock.company}</td>
+                    <td className="mono">{stock.holderCount}</td>
                   </tr>
                 ))}
               </tbody>
@@ -236,8 +240,8 @@ export default function HomePage() {
           <header className="section-header section-header--center">
             <h2 className="section-header__title">Free Portfolio Review</h2>
             <p className="section-header__sub">
-              Submit your holdings and receive a personalized SignalScore breakdown for each
-              position.
+              Submit your holdings and receive a facts summary by email — who holds each name and
+              recent insider activity.
             </p>
           </header>
           <form className="portfolio-form" id="portfolio-form" noValidate>
@@ -280,7 +284,7 @@ export default function HomePage() {
                 Submit for Review
               </button>
               <p className="portfolio-form__note">
-                You will receive your SignalScore report by email within a few minutes
+                You will receive your holdings facts summary by email within a few minutes
               </p>
             </div>
           </form>

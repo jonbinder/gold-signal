@@ -5,7 +5,7 @@ import { getCachedDisplayStocks } from "@/lib/stock-cache";
 export const metadata: Metadata = {
   title: "Stocks — GoldSignal.ai",
   description:
-    "Gold and silver mining and royalty stocks ranked by SignalScore with market cap, P/E, price history, and 52-week metrics.",
+    "Gold and silver mining and royalty stocks — see which tracked investors hold each name and recent insider Form 4 activity.",
 };
 
 export const dynamic = "force-dynamic";

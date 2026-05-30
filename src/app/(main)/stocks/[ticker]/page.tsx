@@ -5,14 +5,14 @@ import { notFound } from "next/navigation";
 import { ChevronLeft } from "lucide-react";
 import { isTrackedTicker } from "@/lib/portfolio-universe";
 import {
-  formatHeadquarters,
+  formatAsOfDate,
+  formatInsiderNetLabel,
   formatMarketCapDisplay,
-  getStockPageModel,
-  type InsiderEmptyReason,
-} from "@/lib/stock-profile";
+  getStockFactsModel,
+} from "@/lib/stock-facts";
+import { StockLogo } from "@/components/stocks/StockLogo";
 
-export const revalidate = 120;
-export const dynamic = "force-dynamic";
+export const revalidate = 3600;
 
 interface Props {
   params: Promise<{ ticker: string }>;
@@ -21,11 +21,26 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { ticker } = await params;
   const upper = ticker.trim().toUpperCase();
-  const model = await getStockPageModel(upper);
-  const name = model.details?.name ?? upper;
+  const model = await getStockFactsModel(upper);
+  if (!model) {
+    return { title: "Stock not found — GoldSignal.ai" };
+  }
+  const title = `${model.name} (${upper}): Who Owns It & Insider Activity — GoldSignal.ai`;
+  const description = `See which tracked precious-metals investors hold ${model.name} (${upper}) and review recent SEC Form 4 insider buying and selling.`;
   return {
-    title: `${name} (${upper})`,
-    description: model.details?.description?.slice(0, 155) ?? `${name} — tracked on GoldSignal.`,
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: "website",
+      url: `https://goldsignal.ai/stocks/${upper}`,
+    },
+    twitter: {
+      card: "summary",
+      title,
+      description,
+    },
   };
 }
 
@@ -48,58 +63,16 @@ function fmtInsiderValueUsd(n: number | null): string {
   return fmtUsd(n);
 }
 
-function insiderEmptyMessage(reason: InsiderEmptyReason): string {
-  switch (reason) {
-    case "no_api_key":
-      return "Server is missing POLYGON_API_KEY. Set it in .env.local and on Vercel (Project → Settings → Environment Variables) and redeploy.";
-    case "auth_failed":
-      return "Polygon/Massive rejected the API key (HTTP 401/403). Verify the key value on Vercel and that it matches the active plan.";
-    case "plan_required":
-      return "Your Polygon/Massive plan does not currently include Form 4 access. Upgrade or check the plan tier on the Massive dashboard.";
-    case "fetch_failed":
-      return "We couldn’t load insider filings right now. Please try again in a moment.";
-    case "no_recent_filings":
-      return "No recent Form 4 insider transactions were found for this symbol.";
-    default:
-      return "No insider transactions to display.";
-  }
-}
-
-function fmtEmployees(n: number | null): string {
-  if (n == null || !Number.isFinite(n)) return "—";
-  return new Intl.NumberFormat("en-US").format(Math.round(n));
-}
-
-function websiteLabel(url: string): string {
-  try {
-    const u = new URL(url.startsWith("http") ? url : `https://${url}`);
-    return u.hostname.replace(/^www\./, "");
-  } catch {
-    return url.replace(/^https?:\/\//, "").replace(/\/$/, "");
-  }
-}
-
 export default async function StockDetailPage({ params }: Props) {
   const { ticker } = await params;
   const sym = ticker.trim().toUpperCase();
   if (!(await isTrackedTicker(sym))) notFound();
 
-  const model = await getStockPageModel(sym);
-  const { details, snapshot, week52, pctAbove52WeekLow, insider, insiderEmptyReason, ceo, nextEarningsDate, logoUrl } = model;
+  const model = await getStockFactsModel(sym);
+  if (!model) notFound();
 
-  const displayName = details?.name ?? sym;
-  const description = details?.description ?? "";
-  const homepage = details?.homepage_url ?? null;
-  const hq = details ? formatHeadquarters(details) : "—";
-  const cap = formatMarketCapDisplay(details?.market_cap ?? null);
-  const employees = fmtEmployees(details?.total_employees ?? null);
-
-  const price = snapshot?.price ?? null;
-  const chg = snapshot?.changePct ?? null;
-  const lowStr = week52 ? fmtUsd(week52.low) : "—";
-  const highStr = week52 ? fmtUsd(week52.high) : "—";
-
-  const logoSrc = logoUrl;
+  const netLabel = formatInsiderNetLabel(model.insiderNet90dUsd);
+  const asOf = formatAsOfDate(model.insiderAsOf);
 
   return (
     <div className="bg-[var(--bg-void)]">
@@ -113,133 +86,102 @@ export default async function StockDetailPage({ params }: Props) {
             Stocks
           </Link>
 
-          <div className="mt-8 flex flex-col gap-8 lg:flex-row lg:items-start">
-            <div className="relative flex h-28 w-full max-w-[280px] shrink-0 items-center justify-center overflow-hidden rounded-sm border border-navy-200 bg-white px-4 py-3 sm:h-32">
-              {logoSrc ? (
+          <div className="mt-8 flex flex-col gap-6 sm:flex-row sm:items-start sm:gap-8">
+            <div className="relative flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-sm border border-navy-200 bg-white sm:h-24 sm:w-24">
+              {model.logoUrl ? (
                 <Image
-                  src={logoSrc}
-                  alt={`${displayName} logo`}
-                  width={280}
-                  height={112}
-                  className="h-full w-auto max-w-full object-contain object-left"
-                  priority
-                  unoptimized={logoSrc.includes(".svg")}
-                  sizes="(max-width: 1024px) 100vw, 280px"
+                  src={model.logoUrl}
+                  alt=""
+                  width={96}
+                  height={96}
+                  className="h-full w-full object-contain p-2"
+                  unoptimized={model.logoUrl.includes(".svg")}
                 />
               ) : (
-                <span className="font-mono text-2xl font-bold text-navy-400">{sym}</span>
+                <StockLogo ticker={sym} logoUrl="" size={48} />
               )}
             </div>
-
             <div className="min-w-0 flex-1">
-              <h1 className="text-3xl font-bold tracking-tight text-navy-900 sm:text-4xl">
-                {displayName}{" "}
+              <p className="font-mono text-xs font-semibold uppercase tracking-widest text-gold-700">
+                {model.exchange ?? "—"}
+              </p>
+              <h1 className="mt-1 text-3xl font-bold tracking-tight text-navy-900 sm:text-4xl">
+                {model.name}{" "}
                 <span className="font-mono text-gold-700">({sym})</span>
               </h1>
-              {homepage ? (
-                <a
-                  href={homepage}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-3 inline-block text-sm font-medium text-blue-600 underline decoration-blue-600/30 underline-offset-2 hover:text-blue-700"
-                >
-                  {websiteLabel(homepage)}
-                </a>
-              ) : null}
-              {description ? (
-                <p className="mt-4 max-w-3xl text-pretty text-sm leading-relaxed text-slate-600 sm:text-base">
-                  {description}
-                </p>
-              ) : (
-                <p className="mt-4 text-sm text-slate-500">Company description will appear when Polygon reference data is available.</p>
-              )}
             </div>
           </div>
-
-          <hr className="mt-10 border-navy-200" />
-
-          <dl className="mt-8 grid gap-8 sm:grid-cols-2 sm:gap-x-16">
-            <div className="space-y-4">
-              <div>
-                <dt className="font-mono text-[10px] font-semibold uppercase tracking-widest text-slate-500">Market cap</dt>
-                <dd className="mt-1 text-base font-semibold text-navy-900">{cap}</dd>
-              </div>
-              <div>
-                <dt className="font-mono text-[10px] font-semibold uppercase tracking-widest text-slate-500">Headquarters</dt>
-                <dd className="mt-1 text-base font-semibold text-navy-900">{hq}</dd>
-              </div>
-              <div>
-                <dt className="font-mono text-[10px] font-semibold uppercase tracking-widest text-slate-500">CEO</dt>
-                <dd className="mt-1 text-base font-semibold text-navy-900">{ceo ?? "—"}</dd>
-              </div>
-              <div>
-                <dt className="font-mono text-[10px] font-semibold uppercase tracking-widest text-slate-500">Employees</dt>
-                <dd className="mt-1 text-base font-semibold text-navy-900">{employees}</dd>
-              </div>
-            </div>
-            <div className="space-y-4">
-              <div>
-                <dt className="font-mono text-[10px] font-semibold uppercase tracking-widest text-slate-500">Price</dt>
-                <dd className="mt-1 text-base font-semibold text-navy-900">
-                  {price != null ? (
-                    <>
-                      {fmtUsd(price)}
-                      {chg != null ? (
-                        <span className={chg >= 0 ? " ml-2 text-emerald-600" : " ml-2 text-red-600"}>
-                          {chg >= 0 ? "+" : ""}
-                          {chg.toFixed(1)}%
-                        </span>
-                      ) : null}
-                    </>
-                  ) : (
-                    "—"
-                  )}
-                </dd>
-              </div>
-              <div>
-                <dt className="font-mono text-[10px] font-semibold uppercase tracking-widest text-slate-500">
-                  % Above 52 week low
-                </dt>
-                <dd className="mt-1 text-base font-semibold text-navy-900">
-                  {pctAbove52WeekLow != null ? `${pctAbove52WeekLow}%` : "—"}
-                </dd>
-              </div>
-              <div>
-                <dt className="font-mono text-[10px] font-semibold uppercase tracking-widest text-slate-500">Year range</dt>
-                <dd className="mt-1 font-mono text-base font-semibold text-navy-900">
-                  {lowStr} – {highStr}
-                </dd>
-              </div>
-              <div>
-                <dt className="font-mono text-[10px] font-semibold uppercase tracking-widest text-slate-500">Next earnings date</dt>
-                <dd className="mt-1 text-base font-semibold text-navy-900">{nextEarningsDate ?? "—"}</dd>
-              </div>
-            </div>
-          </dl>
         </div>
       </div>
 
-      <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-12">
-        <div className="overflow-hidden rounded-sm border border-navy-200 bg-white shadow-sm">
+      <div className="mx-auto max-w-6xl space-y-8 px-4 py-10 sm:px-6 sm:py-12">
+        {/* Held by smart money */}
+        <section className="overflow-hidden rounded-sm border border-navy-200 bg-white shadow-sm">
           <div className="border-b border-navy-200 bg-navy-100 px-4 py-3 sm:px-6">
-            <h2 className="text-sm font-bold uppercase tracking-wide text-navy-900">Insider buying / selling</h2>
+            <h2 className="text-sm font-bold uppercase tracking-wide text-navy-900">Held by smart money</h2>
             <p className="mt-1 text-xs text-slate-600">
-              Recent SEC Form 4 transactions (non-derivative common stock), sourced from Massive/Polygon.
+              Tracked famous precious-metals investors with this ticker in their disclosed holdings.
             </p>
           </div>
-          {insider.length === 0 ? (
+          <div className="px-4 py-6 sm:px-6">
+            {model.famousHolderCount === 0 ? (
+              <p className="text-sm text-slate-600">No tracked investors currently hold this stock.</p>
+            ) : (
+              <>
+                <p className="mb-4 text-sm font-semibold text-navy-900">
+                  Held by {model.famousHolderCount} tracked investor
+                  {model.famousHolderCount === 1 ? "" : "s"}
+                </p>
+                <ul className="space-y-2">
+                  {model.famousHolders.map((h) => (
+                    <li key={h.slug}>
+                      <Link
+                        href={`/investors/${h.slug}`}
+                        className="text-sm font-medium text-blue-600 underline decoration-blue-600/30 underline-offset-2 hover:text-blue-700"
+                      >
+                        {h.name}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
+          </div>
+        </section>
+
+        {/* Insider activity */}
+        <section className="overflow-hidden rounded-sm border border-navy-200 bg-white shadow-sm">
+          <div className="border-b border-navy-200 bg-navy-100 px-4 py-3 sm:px-6">
+            <h2 className="text-sm font-bold uppercase tracking-wide text-navy-900">Recent insider activity</h2>
+            <p className="mt-1 text-xs text-slate-600">
+              SEC Form 4 transactions (non-derivative common stock).
+              {asOf ? ` As of ${asOf}.` : null}
+            </p>
+          </div>
+          <div className="border-b border-navy-200 px-4 py-3 sm:px-6">
+            <p
+              className={`text-sm font-semibold ${
+                netLabel.tone === "buy"
+                  ? "text-emerald-700"
+                  : netLabel.tone === "sell"
+                    ? "text-red-700"
+                    : "text-slate-600"
+              }`}
+            >
+              90-day net insider activity: {netLabel.text}
+            </p>
+          </div>
+          {model.insider.length === 0 ? (
             <div className="px-6 py-12 text-center">
-              <p className="text-sm text-slate-600">
-                {insiderEmptyReason ? insiderEmptyMessage(insiderEmptyReason) : "No insider transactions to display."}
-              </p>
+              <p className="text-sm text-slate-600">No recent insider transactions on file.</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="gs-table min-w-[880px]">
+              <table className="gs-table min-w-[640px]">
                 <thead>
                   <tr>
                     <th>Type</th>
-                    <th>Title</th>
+                    <th>Role</th>
                     <th>Name</th>
                     <th className="text-right tabular-nums">Shares</th>
                     <th className="text-right tabular-nums">Value</th>
@@ -247,8 +189,8 @@ export default async function StockDetailPage({ params }: Props) {
                   </tr>
                 </thead>
                 <tbody>
-                  {insider.map((row, i) => (
-                    <tr key={`${row.dateIso}-${row.name}-${row.title}-${i}`}>
+                  {model.insider.map((row, i) => (
+                    <tr key={`${row.dateIso}-${row.name}-${i}`}>
                       <td>
                         <span
                           className={`inline-block min-w-[2.75rem] font-semibold ${
@@ -258,14 +200,16 @@ export default async function StockDetailPage({ params }: Props) {
                           {row.type}
                         </span>
                       </td>
-                      <td className="max-w-[12rem] truncate font-mono text-sm text-navy-800" title={row.title}>
-                        {row.title}
-                      </td>
-                      <td className="max-w-[14rem] truncate font-mono text-sm font-medium uppercase tracking-wide text-navy-900" title={row.name}>
+                      <td className="max-w-[10rem] truncate font-mono text-sm text-navy-800">{row.title}</td>
+                      <td className="max-w-[12rem] truncate font-mono text-sm font-medium uppercase text-navy-900">
                         {row.name}
                       </td>
-                      <td className="whitespace-nowrap text-right font-mono text-sm tabular-nums text-navy-800">{fmtShares(row.shares)}</td>
-                      <td className="whitespace-nowrap text-right font-mono text-sm tabular-nums text-navy-800">{fmtInsiderValueUsd(row.valueUsd)}</td>
+                      <td className="whitespace-nowrap text-right font-mono text-sm tabular-nums">
+                        {fmtShares(row.shares)}
+                      </td>
+                      <td className="whitespace-nowrap text-right font-mono text-sm tabular-nums">
+                        {fmtInsiderValueUsd(row.valueUsd)}
+                      </td>
                       <td className="whitespace-nowrap font-mono text-sm text-navy-700">{row.date}</td>
                     </tr>
                   ))}
@@ -273,7 +217,49 @@ export default async function StockDetailPage({ params }: Props) {
               </table>
             </div>
           )}
-        </div>
+        </section>
+
+        {/* Company facts */}
+        <section className="overflow-hidden rounded-sm border border-navy-200 bg-white shadow-sm">
+          <div className="border-b border-navy-200 bg-navy-100 px-4 py-3 sm:px-6">
+            <h2 className="text-sm font-bold uppercase tracking-wide text-navy-900">Company facts</h2>
+          </div>
+          <div className="px-4 py-6 sm:px-6">
+            <dl className="grid gap-6 sm:grid-cols-2">
+              <div>
+                <dt className="font-mono text-[10px] font-semibold uppercase tracking-widest text-slate-500">CEO</dt>
+                <dd className="mt-1 text-base font-semibold text-navy-900">{model.ceo ?? "—"}</dd>
+              </div>
+              <div>
+                <dt className="font-mono text-[10px] font-semibold uppercase tracking-widest text-slate-500">
+                  Market cap
+                </dt>
+                <dd className="mt-1 text-base font-semibold text-navy-900">
+                  {formatMarketCapDisplay(model.marketCap)}
+                </dd>
+              </div>
+              <div>
+                <dt className="font-mono text-[10px] font-semibold uppercase tracking-widest text-slate-500">
+                  Sector
+                </dt>
+                <dd className="mt-1 text-base font-semibold text-navy-900">{model.sectorLabel}</dd>
+              </div>
+              <div>
+                <dt className="font-mono text-[10px] font-semibold uppercase tracking-widest text-slate-500">
+                  Exchange
+                </dt>
+                <dd className="mt-1 text-base font-semibold text-navy-900">{model.exchange ?? "—"}</dd>
+              </div>
+            </dl>
+            {model.description ? (
+              <p className="mt-6 max-w-3xl text-pretty text-sm leading-relaxed text-slate-600 sm:text-base">
+                {model.description}
+              </p>
+            ) : (
+              <p className="mt-6 text-sm text-slate-500">Company description not on file.</p>
+            )}
+          </div>
+        </section>
       </div>
     </div>
   );

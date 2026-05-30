@@ -1,177 +1,115 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { DataRefreshSection } from "@/components/signalscore/DataRefreshSection";
-import { MetricIcon } from "@/components/signalscore/MetricIcon";
-import { ScoreReferenceGuide } from "@/components/signalscore/ScoreReferenceGuide";
-import { ScoresInContrast } from "@/components/signalscore/ScoresInContrast";
-import { SignalScoreHero } from "@/components/signalscore/SignalScoreHero";
-import { SignalScoreSupplement } from "@/components/signalscore/SignalScoreSupplement";
 
 const pageDescription =
-  "How GoldSignal.ai calculates the 0–100 SignalScore for gold and silver stocks: insider buying, institutional 13F accumulation, famous investor holdings, and a gentle gold-torque multiplier.";
+  "How GoldSignal.ai sources and displays famous-investor holdings and SEC Form 4 insider activity for gold and silver stocks — facts first, no black-box score.";
 
 export const metadata: Metadata = {
-  title: "SignalScore, GoldSignal.ai",
+  title: "About — GoldSignal.ai",
   description: pageDescription,
   openGraph: {
-    title: "SignalScore, GoldSignal.ai",
+    title: "About — GoldSignal.ai",
     description: pageDescription,
     type: "website",
     url: "https://goldsignal.ai/signalscore",
   },
   twitter: {
     card: "summary",
-    title: "SignalScore, GoldSignal.ai",
+    title: "About — GoldSignal.ai",
     description: pageDescription,
   },
 };
 
-const FOOTPRINT_METRICS = [
+const DATA_SOURCES = [
   {
-    num: "01",
-    icon: "ti-user-dollar",
-    title: "Insider Buying vs Selling",
-    tags: ["Form 4 filings", "Recency weighted"],
-    desc: (
-      <>
-        Company insiders — CEOs, board members, and major shareholders — must report their own stock
-        trades in a filing called Form 4. Insiders sell for many reasons, but they tend to buy for
-        only one: they believe the stock is going higher. We weight each transaction by how recent
-        it was and how much money was involved. A cluster of executives buying their own stock is
-        one of the most reliable footprints we track. Routine option exercises are excluded from
-        the net flow calculation.
-      </>
-    ),
+    title: "Famous investor holdings",
+    body: "We track a curated list of well-known precious-metals investors and map their disclosed holdings to individual tickers. Sources include 13F filings, public interviews, and other voluntary disclosures. When a name is not in a tracked portfolio, we say so — we do not infer ownership.",
   },
   {
-    num: "02",
-    icon: "ti-building-bank",
-    title: "Institutional 13F Data",
-    tags: ["SEC filings", "Quarterly data"],
-    desc: (
-      <>
-        Every quarter, large investment firms file a 13F — a public record of their equity holdings.
-        We measure whether institutions are accumulating, holding steady, or trimming a name, with
-        emphasis on quarter-over-quarter change. When major funds increase positions in a gold
-        stock, that is a meaningful vote of confidence. Concentrated ownership by highly regarded
-        institutions scores especially well.
-      </>
-    ),
+    title: "Insider transactions (Form 4)",
+    body: "Corporate insiders must report buys and sells of company stock on SEC Form 4. We show recent non-derivative transactions: who traded, their role, buy or sell, shares, approximate dollar value, and date. When no recent filings exist, the stock page states that honestly.",
   },
   {
-    num: "03",
-    icon: "ti-star",
-    title: "Famous Investor Portfolio Tracking",
-    tags: ["Smart money", "Conviction layer"],
-    desc: (
-      <>
-        Some of the world&apos;s most respected precious-metals investors have spent decades
-        analyzing this sector. When a stock appears in the holdings of specialists we track, it
-        carries extra weight — they have done due diligence most retail investors cannot replicate.
-        We count overlap with well-known gold-focused managers and add conviction when multiple
-        famous investors hold the same name. View the full list on our{" "}
-        <Link href="/investors">Investors</Link> page.
-      </>
-    ),
+    title: "Company reference data",
+    body: "Market cap, exchange, sector labels, and company descriptions come from exchange feeds and SEC reference data where available. Missing fields are shown as unavailable — we never fabricate fundamentals.",
   },
-] as const;
+];
 
-const TORQUE_METRIC = {
-  num: "04",
-  icon: "ti-coins",
-  title: "Gold Torque",
-  tags: ["Beta leverage", "Gentle multiplier"],
-  desc: (
-    <>
-      Gold torque measures how much a stock&apos;s daily returns move with its metal proxy — GLD for
-      gold names, SLV for silver names. High beta means more leverage: when gold rises 1%, a 2×
-      torque stock might move roughly 2%. We normalize each stock&apos;s beta against the median
-      miner in our universe (median = neutral, multiplier ×1.0), then apply a gentle adjustment
-      clamped to roughly 0.85–1.15. Torque nudges similar names apart; it does not replace strong
-      or weak footprints. If the relationship is statistically unreliable (low R²), torque defaults
-      to neutral — no bonus and no penalty. Agnico Eagle Mines, for example, has a long-standing
-      policy of no forward gold sales or hedging, maintaining full exposure to the gold price — the
-      kind of structural setup torque is designed to reflect.
-    </>
-  ),
-} as const;
-
-export default function SignalScorePage() {
+export default function AboutPage() {
   return (
     <main>
-      <section className="explained" id="signalscore">
-        <SignalScoreHero />
-        <div className="explained__content">
-          <ScoreReferenceGuide />
-          <SignalScoreSupplement />
-
-          <h2 className="ss-metrics-heading">The three footprints</h2>
-          <p className="ss-metrics-intro">
-            These smart-money signals blend into SmartMoneyBase (0–100). Weights renormalize when a
-            footprint is unavailable — missing data is excluded, not guessed.
+      <section className="explained explained--hero" id="about-intro">
+        <div className="explained__inner">
+          <p className="explained__eyebrow">About GoldSignal.ai</p>
+          <h1 className="explained__title">We show the facts. You decide.</h1>
+          <p className="explained__lead">
+            GoldSignal.ai is built for investors who want a Dataroma-style view of precious-metals
+            equities: which famous specialists hold a stock, and what insiders are buying or selling.
+            We do not publish a composite score or black-box rating on the public site.
           </p>
-          <ol className="explained__metrics">
-            {FOOTPRINT_METRICS.map((metric) => (
-              <li key={metric.num} className="metric fade-in visible">
-                <div className="metric__lead">
-                  <MetricIcon name={metric.icon} className="metric__icon" />
-                  <span className="metric__num mono">{metric.num}</span>
-                </div>
-                <div>
-                  <h3 className="metric__title">{metric.title}</h3>
-                  <div className="metric__tags">
-                    {metric.tags.map((tag) => (
-                      <span key={tag} className="pill">
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                  <p className="metric__desc">{metric.desc}</p>
-                </div>
-              </li>
+          {/* PLACEHOLDER: Replace this block with your founder/origin story. */}
+          <div className="explained__placeholder" style={{ marginTop: "1.5rem", padding: "1rem 1.25rem", border: "1px dashed var(--gold-500, #C9971C)", borderRadius: "4px", background: "rgba(201, 151, 28, 0.06)" }}>
+            <p className="explained__lead" style={{ margin: 0, fontSize: "0.9375rem" }}>
+              <strong>[Founder story placeholder]</strong> — Add a short paragraph here about why
+              GoldSignal exists, who built it, and what problem it solves for precious-metals
+              investors.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section className="explained" id="data-we-show">
+        <div className="explained__inner">
+          <h2 className="explained__section-title">What we show</h2>
+          <div className="explained__grid">
+            {DATA_SOURCES.map((item) => (
+              <article key={item.title} className="explained__card">
+                <h3 className="explained__card-title">{item.title}</h3>
+                <p className="explained__card-body">{item.body}</p>
+              </article>
             ))}
-          </ol>
+          </div>
+        </div>
+      </section>
 
-          <h2 className="ss-metrics-heading">The torque multiplier</h2>
-          <p className="ss-metrics-intro">
-            Applied after SmartMoneyBase — a gentle adjustment for gold-price leverage, not a fourth
-            weighted vote.
+      <section className="explained explained--alt" id="philosophy">
+        <div className="explained__inner">
+          <h2 className="explained__section-title">Philosophy</h2>
+          <p className="explained__lead">
+            Smart-money activity is useful context, not a guarantee. A stock held by respected
+            investors can still fall; insider buying can precede bad news. We aggregate public filings
+            so you can compare names quickly — then do your own work on geology, balance sheet, and
+            macro.
           </p>
-          <ol className="explained__metrics explained__metrics--single">
-            <li className="metric fade-in visible">
-              <div className="metric__lead">
-                <MetricIcon name={TORQUE_METRIC.icon} className="metric__icon" />
-                <span className="metric__num mono">{TORQUE_METRIC.num}</span>
-              </div>
-              <div>
-                <h3 className="metric__title">{TORQUE_METRIC.title}</h3>
-                <div className="metric__tags">
-                  {TORQUE_METRIC.tags.map((tag) => (
-                    <span key={tag} className="pill">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-                <p className="metric__desc">{TORQUE_METRIC.desc}</p>
-              </div>
-            </li>
-          </ol>
+          <p className="explained__lead">
+            When data is missing or sparse (common for juniors), we show honest empty states instead
+            of filling gaps with guesses.
+          </p>
         </div>
-        <ScoresInContrast />
-        <DataRefreshSection />
-        <div className="ss-sources" aria-label="Data sources">
-          <p className="ss-sources__label">Data sourced from</p>
-          <ul className="ss-sources__list">
-            <li>SEC EDGAR (13F + Form 4)</li>
-            <li>Exchange price feeds</li>
-            <li>Polygon.io market data</li>
-          </ul>
+      </section>
+
+      <DataRefreshSection />
+
+      <section className="explained" id="explore">
+        <div className="explained__inner explained__inner--center">
+          <h2 className="explained__section-title">Start exploring</h2>
+          <p className="explained__lead">
+            Browse{" "}
+            <Link href="/investors" className="explained__link">
+              tracked investors
+            </Link>
+            , look up any{" "}
+            <Link href="/stocks" className="explained__link">
+              stock
+            </Link>
+            , or request a free{" "}
+            <Link href="/#portfolio-review" className="explained__link">
+              portfolio facts summary
+            </Link>
+            .
+          </p>
         </div>
-        <p className="explained__back">
-          <Link href="/stocks" className="btn btn--primary">
-            View stock rankings
-          </Link>
-        </p>
       </section>
     </main>
   );

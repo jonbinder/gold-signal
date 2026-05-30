@@ -27,15 +27,15 @@ const dmMono = DM_Mono({
 });
 
 const siteDescription =
-  "See which gold and silver stocks the world's biggest investors are buying. SignalScore ranks every stock using 13F filings, insider trades, PE ratios and more.";
+  "Track what famous precious-metals investors own and recent SEC Form 4 insider activity for gold and silver stocks.";
 
 export const metadata: Metadata = {
-  title: "GoldSignal.ai — Gold & Silver Stock Rankings Powered by AI",
+  title: "GoldSignal.ai — Who Owns Gold & Silver Stocks",
   description: siteDescription,
   openGraph: {
     type: "website",
     siteName: "GoldSignal.ai",
-    title: "GoldSignal.ai — Gold & Silver Stock Rankings Powered by AI",
+    title: "GoldSignal.ai — Who Owns Gold & Silver Stocks",
     description: siteDescription,
     url: "https://goldsignal.ai/",
   },

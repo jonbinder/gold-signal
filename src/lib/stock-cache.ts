@@ -1,6 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { cache } from "react";
-import { buildPriceHistory } from "@/lib/stocks-data";
+import { getHolderCountForTicker } from "@/lib/famous-holders";
+import { loadTrackedStocksSync } from "@/lib/tracked-stocks-load";
 
 export type CachedDisplayStock = {
   ticker: string;
@@ -9,14 +10,10 @@ export type CachedDisplayStock = {
   subCategory: string;
   exchange: string | null;
   marketCap: number;
-  peRatio: number | null;
-  priceHistory: number[];
-  above52WeekLow: number;
-  dailyChangePct: number | null;
-  signalScore: number | null;
+  famousHolderCount: number;
+  insiderNet90dUsd: number | null;
   logoUrl: string;
   dataStatus: string;
-  signalCoverage: number | null;
 };
 
 type CacheRow = {
@@ -27,24 +24,14 @@ type CacheRow = {
   exchange: string | null;
   logo_url: string | null;
   market_cap: number | null;
-  pe_ratio: number | null;
-  pct_above_52_week_low: number | null;
-  daily_change_pct: number | null;
-  signal_score: number | null;
+  famous_holder_count: number | null;
+  insider_net_90d_usd: number | null;
   data_status: string | null;
-  signal_coverage: number | null;
 };
 
 function mapRow(row: CacheRow): CachedDisplayStock {
   const marketCapB =
-    row.market_cap != null && row.market_cap > 0
-      ? row.market_cap / 1_000_000_000
-      : 0.1;
-  const daily = row.daily_change_pct ?? 0;
-  const above52 =
-    row.pct_above_52_week_low != null
-      ? row.pct_above_52_week_low
-      : daily;
+    row.market_cap != null && row.market_cap > 0 ? row.market_cap / 1_000_000_000 : 0.1;
 
   return {
     ticker: row.ticker,
@@ -53,16 +40,26 @@ function mapRow(row: CacheRow): CachedDisplayStock {
     subCategory: row.sub_category,
     exchange: row.exchange,
     marketCap: marketCapB,
-    peRatio: row.pe_ratio,
-    priceHistory: buildPriceHistory(row.ticker, daily),
-    above52WeekLow: above52,
-    dailyChangePct: row.daily_change_pct,
-    signalScore:
-      row.data_status === "error" || row.signal_score == null ? null : row.signal_score,
+    famousHolderCount: row.famous_holder_count ?? getHolderCountForTicker(row.ticker),
+    insiderNet90dUsd: row.insider_net_90d_usd,
     logoUrl: row.logo_url ?? "",
     dataStatus: row.data_status ?? "pending",
-    signalCoverage: row.signal_coverage,
   };
+}
+
+function fallbackFromTrackedFile(): CachedDisplayStock[] {
+  return loadTrackedStocksSync().map((s) => ({
+    ticker: s.ticker,
+    name: s.name,
+    category: s.category,
+    subCategory: s.sub_category,
+    exchange: s.exchange,
+    marketCap: 0.1,
+    famousHolderCount: getHolderCountForTicker(s.ticker),
+    insiderNet90dUsd: null,
+    logoUrl: s.logo_url ?? "",
+    dataStatus: "pending",
+  }));
 }
 
 /**
@@ -72,22 +69,24 @@ export const getCachedDisplayStocks = cache(async (): Promise<CachedDisplayStock
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim();
   if (!url || !key) {
-    console.warn("[stock-cache] Supabase public env not configured");
-    return [];
+    console.warn("[stock-cache] Supabase public env not configured — using tracked-stocks.json");
+    return fallbackFromTrackedFile();
   }
 
   const supabase = createClient(url, key);
   const { data, error } = await supabase
     .from("stock_data_cache")
     .select(
-      "ticker, name, category, sub_category, exchange, logo_url, market_cap, pe_ratio, pct_above_52_week_low, daily_change_pct, signal_score, data_status, signal_coverage",
+      "ticker, name, category, sub_category, exchange, logo_url, market_cap, famous_holder_count, insider_net_90d_usd, data_status",
     )
-    .order("signal_score", { ascending: false, nullsFirst: false });
+    .order("famous_holder_count", { ascending: false, nullsFirst: false });
 
   if (error) {
     console.error("[stock-cache] Fetch failed:", error.message);
-    return [];
+    return fallbackFromTrackedFile();
   }
 
-  return (data ?? []).map((row) => mapRow(row as CacheRow));
+  if (!data?.length) return fallbackFromTrackedFile();
+
+  return data.map((row) => mapRow(row as CacheRow));
 });

@@ -8,9 +8,17 @@ import {
   type SubScoreKey,
   type StockRankingResult,
 } from "@/lib/ranking";
+import { getInvestorsForTicker } from "@/lib/famous-holders";
+import {
+  computeInsiderNet90dUsd,
+  fetchForm4Transactions,
+} from "@/lib/form4-insider";
 import { getStockPrice, getTickerDetails, normalizeTicker } from "@/lib/polygon";
+import { fetchYahooSupplement, getPolygonTickerDetails } from "@/lib/stock-profile";
 import { createSupabaseServiceClient } from "@/lib/supabase";
 import type { TrackedStock, TrackedStocksFile } from "@/lib/tracked-stocks";
+
+const SCORING_ENABLED = process.env.SCORING_ENABLED !== "false";
 
 const SUB_SCORE_KEYS = FOOTPRINT_KEYS as readonly FootprintKey[];
 const STALE_HOURS = 20;
@@ -103,8 +111,32 @@ export async function refreshOneStock(tracked: TrackedStock): Promise<{ ok: bool
       dailyChangePct = ((price - previousClose) / previousClose) * 100;
     }
 
-    const ranking = await rankStockFromMarketData(sym);
-    const { signalCoverage, rawMetrics, subScoreColumns } = buildCacheMetricsFromRanking(ranking);
+    const [polygonDetails, insiderResult, yahoo] = await Promise.all([
+      getPolygonTickerDetails(sym),
+      fetchForm4Transactions(sym),
+      fetchYahooSupplement(sym),
+    ]);
+
+    const famousHolders = getInvestorsForTicker(sym);
+    const insiderRows = insiderResult.rows;
+    const insiderNet90d = computeInsiderNet90dUsd(insiderRows);
+    const nowIso = new Date().toISOString();
+
+    let signalCoverage = 0;
+    let rawMetrics: Record<string, unknown> = {};
+    let subScoreColumns: Record<string, number | null> = {};
+    let rankingCompanyName = sym;
+    let signalScore: number | null = null;
+
+    if (SCORING_ENABLED) {
+      const ranking = await rankStockFromMarketData(sym);
+      rankingCompanyName = ranking.companyName ?? sym;
+      signalScore = fetchFailed || !ranking.scoreAvailable ? null : ranking.signalScore;
+      const built = buildCacheMetricsFromRanking(ranking);
+      signalCoverage = built.signalCoverage;
+      rawMetrics = built.rawMetrics;
+      subScoreColumns = built.subScoreColumns;
+    }
 
     let peRatio: number | null = null;
     const inputs = rawMetrics.inputs as { pe?: { trailingPe?: number | null } } | undefined;
@@ -123,12 +155,20 @@ export async function refreshOneStock(tracked: TrackedStock): Promise<{ ok: bool
       );
     }
 
-    const marketCap = detailsRes.ok ? detailsRes.data.marketCap : null;
-    const dataStatus = dataStatusFromCoverage(signalCoverage, fetchFailed);
+    const marketCap =
+      polygonDetails?.market_cap ?? (detailsRes.ok ? detailsRes.data.marketCap : null);
+    const hasFacts = famousHolders.length > 0 || insiderRows.length > 0;
+    const dataStatus = SCORING_ENABLED
+      ? dataStatusFromCoverage(signalCoverage, fetchFailed)
+      : fetchFailed
+        ? "error"
+        : hasFacts
+          ? "healthy"
+          : "partial";
 
     const row = {
       ticker: sym,
-      name: tracked.name || ranking.companyName || sym,
+      name: tracked.name || polygonDetails?.name || rankingCompanyName || sym,
       category: tracked.category,
       sub_category: tracked.sub_category,
       exchange: tracked.exchange,
@@ -139,12 +179,19 @@ export async function refreshOneStock(tracked: TrackedStock): Promise<{ ok: bool
       market_cap: marketCap,
       pe_ratio: peRatio,
       pct_above_52_week_low: pctAbove52,
-      signal_score: fetchFailed || !ranking.scoreAvailable ? null : ranking.signalScore,
+      company_description: polygonDetails?.description ?? null,
+      ceo: yahoo.ceo,
+      famous_holder_count: famousHolders.length,
+      famous_holders: famousHolders,
+      insider_transactions: insiderRows,
+      insider_net_90d_usd: insiderNet90d,
+      insider_as_of: nowIso,
+      signal_score: signalScore,
       ...subScoreColumns,
       signal_coverage: signalCoverage,
       raw_metrics: rawMetrics,
       data_status: dataStatus,
-      last_updated: new Date().toISOString(),
+      last_updated: nowIso,
       error_message: !priceRes.ok ? priceRes.error : null,
     };
 

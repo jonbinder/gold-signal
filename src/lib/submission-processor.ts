@@ -1,42 +1,8 @@
-import { sendReportEmail } from "@/lib/email/send-report-email";
-import { generateSignalScorePdf } from "@/lib/pdf/generate-report";
-import { topPickAndWatchOut } from "@/lib/pdf/report-copy";
-import {
-  calculatePortfolioScore,
-  isSignalAvailable,
-  rankStockFromMarketData,
-  type StockRankingResult,
-  type SubScoreKey,
-} from "@/lib/ranking";
+import { sendFactsEmail } from "@/lib/email/send-facts-email";
+import { collectTickerFacts } from "@/lib/portfolio-facts";
 import { createSupabaseServiceClient } from "@/lib/supabase";
-import { uploadReportPdf } from "@/lib/storage/reports";
-
-const SUB_SCORE_DB_MAP: Record<SubScoreKey, keyof StockRankingRowInsert> = {
-  institutional: "institutional_score",
-  insider: "insider_score",
-  pe: "pe_score",
-  famousInvestor: "famous_investor_score",
-  support: "support_score",
-  correlation: "correlation_score",
-  fcfYield: "fcf_yield_score",
-};
 
 const STALE_PROCESSING_MS = 15 * 60 * 1000;
-
-type StockRankingRowInsert = {
-  submission_id: string;
-  ticker: string;
-  company_name: string | null;
-  signal_score: number | null;
-  institutional_score: number | null;
-  insider_score: number | null;
-  pe_score: number | null;
-  famous_investor_score: number | null;
-  support_score: number | null;
-  correlation_score: number | null;
-  fcf_yield_score: number | null;
-  raw_metrics: Record<string, unknown>;
-};
 
 export type SubmissionRow = {
   id: string;
@@ -221,7 +187,7 @@ export async function claimPendingSubmissions(limit: number): Promise<Submission
 }
 
 /**
- * Processes one submission already in processing state: rank stocks, PDF, email.
+ * Processes one submission already in processing state: collect facts per ticker, email summary.
  */
 export async function processSubmission(submission: SubmissionRow): Promise<void> {
   const supabase = createSupabaseServiceClient();
@@ -237,82 +203,17 @@ export async function processSubmission(submission: SubmissionRow): Promise<void
   });
 
   try {
-    await supabase.from("stock_rankings").delete().eq("submission_id", submissionId);
-
-    const rankings: StockRankingResult[] = [];
-
+    const factsList = [];
     for (const rawTicker of submission.tickers) {
-      console.info("[processor] Ranking ticker", { submissionId, ticker: rawTicker });
-      const ranking = await rankStockFromMarketData(rawTicker);
-      rankings.push(ranking);
-
-      const row: StockRankingRowInsert = {
-        submission_id: submissionId,
-        ticker: ranking.ticker,
-        company_name: ranking.companyName,
-        signal_score: ranking.scoreAvailable ? ranking.signalScore : null,
-        institutional_score: null,
-        insider_score: null,
-        pe_score: null,
-        famous_investor_score: null,
-        support_score: null,
-        correlation_score: null,
-        fcf_yield_score: null,
-        raw_metrics: ranking.rawMetrics,
-      };
-
-      for (const [key, col] of Object.entries(SUB_SCORE_DB_MAP) as [
-        SubScoreKey,
-        keyof StockRankingRowInsert,
-      ][]) {
-        const sub = ranking.subScores[key];
-        (row as Record<string, unknown>)[col] = isSignalAvailable(sub) ? sub.score : null;
-      }
-
-      const { error: insertError } = await supabase.from("stock_rankings").insert(row);
-      if (insertError) {
-        throw new Error(`stock_rankings insert failed for ${ranking.ticker}: ${insertError.message}`);
-      }
+      console.info("[processor] Collecting facts", { submissionId, ticker: rawTicker });
+      factsList.push(await collectTickerFacts(rawTicker));
     }
 
-    const portfolio = calculatePortfolioScore(rankings);
-    console.info("[processor] Portfolio scored", {
-      submissionId,
-      score: portfolio.averageSignalScore,
-      grade: portfolio.letterGrade,
-    });
-
-    const reportDate = new Date().toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-
-    console.info("[processor] Generating PDF", { submissionId });
-    const pdfBuffer = await generateSignalScorePdf({
-      userName: submission.name,
-      reportDate,
-      portfolioScore: portfolio.averageSignalScore,
-      portfolioGrade: portfolio.letterGrade,
-      rankings,
-    });
-    console.info("[processor] Generated PDF", {
-      submissionId,
-      bytes: pdfBuffer.length,
-    });
-
-    console.info("[processor] Uploading PDF", { submissionId });
-    const { signedUrl } = await uploadReportPdf(submissionId, pdfBuffer);
-
-    console.info("[processor] Sending email", { submissionId });
-    const { emailId } = await sendReportEmail({
+    console.info("[processor] Sending facts email", { submissionId });
+    const { emailId } = await sendFactsEmail({
       to: submission.email,
       userName: submission.name,
-      portfolioGrade: portfolio.letterGrade,
-      portfolioScore: portfolio.averageSignalScore,
-      rankings,
-      pdfBuffer,
-      downloadUrl: signedUrl,
+      tickers: factsList,
     });
 
     const { error: completeError } = await supabase
@@ -321,9 +222,9 @@ export async function processSubmission(submission: SubmissionRow): Promise<void
         status: "completed",
         completed_at: new Date().toISOString(),
         error_message: null,
-        portfolio_score: portfolio.averageSignalScore,
-        portfolio_grade: portfolio.letterGrade,
-        pdf_url: signedUrl,
+        portfolio_score: null,
+        portfolio_grade: null,
+        pdf_url: null,
       })
       .eq("id", submissionId);
 
@@ -331,15 +232,8 @@ export async function processSubmission(submission: SubmissionRow): Promise<void
       throw new Error(`Failed to mark completed: ${completeError.message}`);
     }
 
-    console.info("[processor] Sent email via Resend", { submissionId, emailId });
-
-    const picks = topPickAndWatchOut(rankings);
-    console.info("[processor] Marked submission as completed", {
-      submissionId,
-      emailId,
-      top: picks.top?.ticker,
-      bottom: picks.bottom?.ticker,
-    });
+    console.info("[processor] Sent facts email via Resend", { submissionId, emailId });
+    console.info("[processor] Marked submission as completed", { submissionId, emailId });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown processing error";
     console.error("[processor] Failed", { submissionId, message });

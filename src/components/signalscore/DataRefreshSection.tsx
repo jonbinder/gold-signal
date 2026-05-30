@@ -1,19 +1,19 @@
 const REFRESH_ROWS = [
   {
-    component: "Insider Buying vs Selling",
-    cadence: "As new Form 4 filings appear on SEC EDGAR (typically within days of the trade)",
+    component: "Insider transactions (Form 4)",
+    cadence: "Daily batch refresh; new filings appear on SEC EDGAR within days of the trade",
   },
   {
-    component: "Institutional 13F Data",
-    cadence: "Quarterly, as 13F-HR filings are published (45 days after quarter-end)",
+    component: "Famous investor holdings",
+    cadence: "Updated when our curated investor portfolio list is refreshed from public sources",
   },
   {
-    component: "Famous Investor Portfolio Tracking",
-    cadence: "Updated as our tracked-investor holdings list is refreshed from public sources",
+    component: "Company reference data",
+    cadence: "Daily — market cap, exchange, and descriptions from exchange and SEC feeds",
   },
   {
-    component: "Gold Torque (beta multiplier)",
-    cadence: "Daily, recalculated on market close using price history vs GLD or SLV",
+    component: "Stock universe cache",
+    cadence: "Rolling refresh across the full tracked universe (~20-hour cycle per ticker)",
   },
 ] as const;
 
@@ -31,6 +31,10 @@ export function DataRefreshSection() {
           </div>
         ))}
       </dl>
+      <p className="ss-refresh__note" style={{ marginTop: "1rem", fontSize: "0.875rem", color: "var(--text-muted, #5C5649)" }}>
+        Data sourced from SEC EDGAR (Form 4, 13F), exchange feeds, and curated public disclosures.
+        Not investment advice.
+      </p>
     </section>
   );
 }

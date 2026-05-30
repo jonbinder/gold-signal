@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Sparkline } from "@/components/stocks/Sparkline";
 import { StockLogo } from "@/components/stocks/StockLogo";
 import type { EnrichedHolding } from "@/lib/investors-data";
@@ -7,8 +8,6 @@ interface InvestorHoldingsTableProps {
 }
 
 export function InvestorHoldingsTable({ holdings }: InvestorHoldingsTableProps) {
-  const lastIndex = holdings.length - 1;
-
   return (
     <div className="investor-profile__table-wrap">
       <table className="stocks-table investor-holdings-table">
@@ -25,19 +24,8 @@ export function InvestorHoldingsTable({ holdings }: InvestorHoldingsTableProps) 
             <th className="stocks-table__th stocks-table__th--sort stocks-table__th--active" scope="col">
               ▼ Market Cap
             </th>
-            <th className="stocks-table__th stocks-table__th--sort" scope="col">
-              P/E Ratio
-            </th>
             <th className="stocks-table__th stocks-table__th--spark" scope="col">
               1Y Price History
-            </th>
-            <th
-              className="stocks-table__th stocks-table__th--signal"
-              scope="col"
-            >
-              SignalScore
-              <br />
-              Rating
             </th>
           </tr>
         </thead>
@@ -50,7 +38,9 @@ export function InvestorHoldingsTable({ holdings }: InvestorHoldingsTableProps) 
                   <StockLogo ticker={h.ticker} logoUrl={h.logoUrl} size={44} />
                   <div>
                     {h.ticker !== "—" ? (
-                      <span className="stocks-table__ticker">{h.ticker}</span>
+                      <Link href={`/stocks/${h.ticker}`} className="stocks-table__ticker stocks-table__name-link">
+                        {h.ticker}
+                      </Link>
                     ) : null}
                     <span className="stocks-table__company">{h.company}</span>
                   </div>
@@ -59,9 +49,6 @@ export function InvestorHoldingsTable({ holdings }: InvestorHoldingsTableProps) 
               <td className="stocks-table__td stocks-table__td--num">
                 {h.marketCap != null ? `${h.marketCap.toFixed(1)}B` : "—"}
               </td>
-              <td className="stocks-table__td stocks-table__td--num">
-                {h.peRatio != null ? h.peRatio : <span className="stocks-table__na">N/A</span>}
-              </td>
               <td className="stocks-table__td stocks-table__td--spark">
                 {h.priceHistory.length > 0 ? (
                   <Sparkline data={h.priceHistory} />
@@ -69,20 +56,9 @@ export function InvestorHoldingsTable({ holdings }: InvestorHoldingsTableProps) 
                   <span className="stocks-table__na">—</span>
                 )}
               </td>
-              <td
-                className={`stocks-table__td stocks-table__td--signal ${i === lastIndex ? "stocks-table__td--signal-last" : ""}`}
-              >
-                {h.signalScore != null ? h.signalScore : "—"}
-              </td>
             </tr>
           ))}
         </tbody>
-        <tfoot>
-          <tr>
-            <td colSpan={5} />
-            <td className="stocks-table__signal-foot" />
-          </tr>
-        </tfoot>
       </table>
     </div>
   );

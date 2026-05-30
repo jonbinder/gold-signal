@@ -124,7 +124,7 @@ export default function GoldSignalClient() {
 
         const successText =
           payload.message ??
-          `Thanks, ${name}! Your SignalScore report is being generated and will arrive at ${email} within the next few minutes.`;
+          `Thanks, ${name}! Your portfolio facts summary is being generated and will arrive at ${email} within the next few minutes.`;
 
         card.innerHTML = `
         <div class="portfolio-form__success" role="status">

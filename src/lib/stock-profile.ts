@@ -603,7 +603,7 @@ async function yahooQuoteSummary(sym: string): Promise<unknown | null> {
   }
 }
 
-async function fetchYahooSupplement(ticker: string): Promise<YahooSupplement> {
+export async function fetchYahooSupplement(ticker: string): Promise<YahooSupplement> {
   const empty: YahooSupplement = { ceo: null, nextEarningsDate: null };
   const sym = normalizeTicker(ticker);
   try {

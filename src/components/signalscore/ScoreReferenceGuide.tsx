@@ -19,7 +19,7 @@ const SCORE_TIERS: ScoreTier[] = [
     label: "Exceptional",
     color: "green",
     description:
-      "Near-perfect alignment across all seven factors. Rare. Institutions are loading up, insiders are buying heavily, valuation is compelling, and famous investors are already in. Worth serious attention.",
+      "Rare alignment across smart-money footprints with favorable or neutral gold torque. Institutions accumulating, insiders buying, and famous specialists present. Worth serious attention.",
   },
   {
     min: 80,
@@ -27,7 +27,7 @@ const SCORE_TIERS: ScoreTier[] = [
     label: "Strong conviction",
     color: "green",
     description:
-      "Multiple high-quality signals are aligned. Institutions are accumulating, insiders are buying, valuation looks attractive, and smart money is present. These are the stocks GoldSignal ranks highest.",
+      "Multiple footprint signals aligned. Institutions adding, insiders supportive, and tracked famous investors in the name. These are the stocks GoldSignal ranks highest.",
   },
   {
     min: 65,
@@ -35,7 +35,7 @@ const SCORE_TIERS: ScoreTier[] = [
     label: "Promising",
     color: "amber",
     description:
-      "More positives than negatives. Some signals are strong but others are neutral or mixed. Worth watching closely. Could move up or down depending on how the weaker factors develop.",
+      "More footprint positives than negatives. Some smart-money signals are strong but others are neutral or mixed. Worth watching — torque may nudge the score slightly up or down.",
   },
   {
     min: 45,
@@ -43,7 +43,7 @@ const SCORE_TIERS: ScoreTier[] = [
     label: "Neutral",
     color: "amber",
     description:
-      "The data is mixed. No strong buy signals, but no major red flags either. These stocks sit in the middle of the rankings and may need a catalyst before they move meaningfully in either direction.",
+      "Footprint data is mixed. No strong smart-money conviction, but no major red flags either. May need a filing catalyst before the score moves meaningfully.",
   },
   {
     min: 20,
@@ -51,7 +51,7 @@ const SCORE_TIERS: ScoreTier[] = [
     label: "Weak",
     color: "orange",
     description:
-      "More negatives than positives. Institutions may be trimming, insiders are quiet or selling, and valuation offers little comfort. Approach with caution until the data improves.",
+      "More footprint negatives than positives. Institutions may be trimming, insiders quiet or selling, and famous-investor overlap thin. Approach with caution until filings improve.",
   },
   {
     min: 0,
@@ -59,7 +59,7 @@ const SCORE_TIERS: ScoreTier[] = [
     label: "Avoid",
     color: "red",
     description:
-      "Significant red flags across multiple factors. Institutional selling, insider distribution, poor valuation, or a combination of all three. GoldSignal does not recommend these stocks at current readings.",
+      "Significant red flags across smart-money footprints. Institutional selling, insider distribution, or absent specialist interest. Gold torque rarely rescues a weak base.",
   },
 ];
 

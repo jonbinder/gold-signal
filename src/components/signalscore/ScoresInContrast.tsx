@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-type FactorRow = {
+type FootprintRow = {
   name: string;
   score: number;
   note: string;
@@ -11,9 +11,11 @@ type ContrastCard = {
   variant: "high" | "low";
   company: string;
   ticker: string;
+  footprints: FootprintRow[];
+  smartMoneyBase: number;
+  torqueMultiplier: number;
   overallScore: number;
   tier: string;
-  factors: FactorRow[];
   summary: string;
 };
 
@@ -21,23 +23,16 @@ const HIGH_CARD: ContrastCard = {
   variant: "high",
   company: "Hartwell Mining Co",
   ticker: "HMC",
-  overallScore: 86,
-  tier: "Strong conviction",
-  factors: [
-    {
-      name: "Institutional 13F Data",
-      score: 91,
-      note: "Four major gold-focused funds increased positions last quarter, net accumulation up 18%",
-    },
+  footprints: [
     {
       name: "Insider Buying vs Selling",
       score: 89,
       note: "CEO purchased 240,000 shares on the open market 30 days ago, no insider selling in 12 months",
     },
     {
-      name: "PE Ratio Analysis",
-      score: 74,
-      note: "Trailing PE sits 11% below sector median, offering a modest valuation discount",
+      name: "Institutional 13F Data",
+      score: 91,
+      note: "Four major gold-focused funds increased positions last quarter, net accumulation up 18%",
     },
     {
       name: "Famous Investor Portfolio Tracking",
@@ -45,71 +40,42 @@ const HIGH_CARD: ContrastCard = {
       note: "Held by five of the precious-metals specialists tracked on our Investors page",
       noteHasInvestorsLink: true,
     },
-    {
-      name: "52-Week Support Level",
-      score: 78,
-      note: "Trading 9% above its 52-week low, a level that has held twice in the past year",
-    },
-    {
-      name: "Gold Price Correlation",
-      score: 88,
-      note: "Moves closely with gold, giving investors real leverage when the metal rallies",
-    },
-    {
-      name: "Free Cash Flow Yield",
-      score: 87,
-      note: "Generates 11% free cash flow yield on current market cap, well above sector average of 6%",
-    },
   ],
+  smartMoneyBase: 91,
+  torqueMultiplier: 1.12,
+  overallScore: 100,
+  tier: "Strong conviction",
   summary:
-    "Hartwell Mining Co is showing alignment across nearly every factor we track. Institutions are adding, insiders are putting personal capital in, valuation is reasonable, the company is generating strong free cash flow, and the stock moves in step with gold. A score of 86 is not common. It reflects a stock where the weight of evidence is pointing in the same direction.",
+    "Hartwell shows strong alignment across all three smart-money footprints — insiders buying, institutions adding, and multiple famous specialists in the name. SmartMoneyBase of 91 is already exceptional. Gold torque of ×1.12 nudges the raw score above 100 (display capped at 100), reflecting meaningful leverage to gold without overriding the footprint story.",
 };
 
 const LOW_CARD: ContrastCard = {
   variant: "low",
   company: "Caldera Resources Inc",
   ticker: "CLDR",
-  overallScore: 28,
-  tier: "Avoid",
-  factors: [
-    {
-      name: "Institutional 13F Data",
-      score: 22,
-      note: "Net institutional selling for two consecutive quarters, three major holders reduced positions significantly",
-    },
+  footprints: [
     {
       name: "Insider Buying vs Selling",
       score: 18,
       note: "Two executives sold shares in the past 60 days, no open-market purchases in over a year",
     },
     {
-      name: "PE Ratio Analysis",
-      score: 35,
-      note: "Trailing PE is elevated relative to peers, suggesting the stock may still be priced for growth that has not arrived",
+      name: "Institutional 13F Data",
+      score: 22,
+      note: "Net institutional selling for two consecutive quarters, three major holders reduced positions significantly",
     },
     {
       name: "Famous Investor Portfolio Tracking",
       score: 24,
       note: "Not held by any of the precious-metals specialists we track",
     },
-    {
-      name: "52-Week Support Level",
-      score: 31,
-      note: "Trading near its 52-week low, and that level has already been tested and broken once",
-    },
-    {
-      name: "Gold Price Correlation",
-      score: 42,
-      note: "Correlation with gold has weakened, likely due to company-specific operational issues muting the relationship",
-    },
-    {
-      name: "Free Cash Flow Yield",
-      score: 26,
-      note: "Free cash flow has turned negative over the last two reporting periods, offering no margin of safety on a cash basis",
-    },
   ],
+  smartMoneyBase: 21,
+  torqueMultiplier: 0.91,
+  overallScore: 19,
+  tier: "Avoid",
   summary:
-    "Caldera Resources Inc is showing warning signs across almost every dimension. Institutions are leaving, insiders are not buying their own stock, valuation is not cheap enough to compensate for the risks, and the company is burning cash rather than generating it. A score of 28 is a signal to wait for conditions to improve before considering this name.",
+    "Caldera's footprints are weak across the board — institutions leaving, insiders not buying, and no famous-investor overlap. SmartMoneyBase of 21 reflects that. Low gold torque (×0.91) dampens the score slightly, illustrating that torque is gentle: it does not rescue a name with poor smart-money evidence, it only nudges similar peers apart.",
 };
 
 function scoreTone(score: number): "high" | "mid" | "low" {
@@ -118,9 +84,9 @@ function scoreTone(score: number): "high" | "mid" | "low" {
   return "low";
 }
 
-function FactorNote({ factor }: { factor: FactorRow }) {
-  if (factor.noteHasInvestorsLink) {
-    const parts = factor.note.split("Investors page");
+function FootprintNote({ row }: { row: FootprintRow }) {
+  if (row.noteHasInvestorsLink) {
+    const parts = row.note.split("Investors page");
     return (
       <p className="ss-contrast__factor-note">
         {parts[0]}
@@ -128,11 +94,12 @@ function FactorNote({ factor }: { factor: FactorRow }) {
       </p>
     );
   }
-  return <p className="ss-contrast__factor-note">{factor.note}</p>;
+  return <p className="ss-contrast__factor-note">{row.note}</p>;
 }
 
 function ContrastCardView({ card }: { card: ContrastCard }) {
   const overallTone = scoreTone(card.overallScore);
+  const rawScore = Math.round(card.smartMoneyBase * card.torqueMultiplier);
 
   return (
     <article className={`ss-contrast__card ss-contrast__card--${card.variant}`}>
@@ -149,30 +116,49 @@ function ContrastCardView({ card }: { card: ContrastCard }) {
         </div>
       </header>
 
+      <p className="ss-contrast__section-label">Smart-money footprints</p>
       <ul className="ss-contrast__factors">
-        {card.factors.map((factor) => {
-          const tone = scoreTone(factor.score);
+        {card.footprints.map((row) => {
+          const tone = scoreTone(row.score);
           return (
-            <li key={factor.name} className="ss-contrast__factor">
+            <li key={row.name} className="ss-contrast__factor">
               <div className="ss-contrast__factor-row">
-                <span className="ss-contrast__factor-name">{factor.name}</span>
+                <span className="ss-contrast__factor-name">{row.name}</span>
                 <div className="ss-contrast__factor-bar-wrap">
                   <div className="ss-contrast__factor-bar">
                     <span
                       className={`ss-contrast__factor-fill ss-contrast__factor-fill--${tone}`}
-                      style={{ width: `${factor.score}%` }}
+                      style={{ width: `${row.score}%` }}
                     />
                   </div>
                 </div>
                 <span className={`ss-contrast__factor-score mono ss-contrast__score--${tone}`}>
-                  {factor.score}
+                  {row.score}
                 </span>
               </div>
-              <FactorNote factor={factor} />
+              <FootprintNote row={row} />
             </li>
           );
         })}
       </ul>
+
+      <div className="ss-contrast__math">
+        <div className="ss-contrast__math-row">
+          <span className="ss-contrast__math-label">SmartMoneyBase</span>
+          <span className="ss-contrast__math-value mono">{card.smartMoneyBase}</span>
+        </div>
+        <div className="ss-contrast__math-row">
+          <span className="ss-contrast__math-label">Gold torque</span>
+          <span className="ss-contrast__math-value mono">×{card.torqueMultiplier.toFixed(2)}</span>
+        </div>
+        <div className="ss-contrast__math-row ss-contrast__math-row--result">
+          <span className="ss-contrast__math-label">SignalScore</span>
+          <span className="ss-contrast__math-value mono">
+            {card.smartMoneyBase} × {card.torqueMultiplier.toFixed(2)} = {rawScore}
+            {rawScore !== card.overallScore ? ` → ${card.overallScore} display` : ""}
+          </span>
+        </div>
+      </div>
 
       <p className="ss-contrast__card-summary">{card.summary}</p>
     </article>
@@ -186,8 +172,9 @@ export function ScoresInContrast() {
         Two stocks, two very different stories
       </h2>
       <p className="ss-contrast__intro">
-        The same seven factors. Completely different conclusions. Here is what the SignalScore looks
-        like when the data is strong versus when it is sending warnings.
+        The same three footprints and the same torque logic — completely different conclusions.
+        Here is how SmartMoneyBase, gold torque, and the final SignalScore tie together when data
+        is strong versus when it is sending warnings.
       </p>
       <div className="ss-contrast__grid">
         <ContrastCardView card={HIGH_CARD} />

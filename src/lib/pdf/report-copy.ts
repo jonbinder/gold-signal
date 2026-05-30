@@ -33,9 +33,11 @@ export function topPickAndWatchOut(rankings: StockRankingResult[]): {
   top: { ticker: string; score: number; reason: string } | null;
   bottom: { ticker: string; score: number; reason: string } | null;
 } {
-  if (rankings.length === 0) return { top: null, bottom: null };
+  const scored = rankings.filter((r) => r.scoreAvailable && r.signalScore != null);
+  if (scored.length === 0) return { top: null, bottom: null };
 
-  const sorted = [...rankings].sort((a, b) => b.signalScore - a.signalScore);
+  const sortValue = (r: StockRankingResult) => r.signalScoreRaw ?? r.signalScore ?? -Infinity;
+  const sorted = [...scored].sort((a, b) => sortValue(b) - sortValue(a));
   const top = sorted[0];
   const bottom = sorted[sorted.length - 1];
 
@@ -48,12 +50,12 @@ export function topPickAndWatchOut(rankings: StockRankingResult[]): {
   return {
     top: {
       ticker: top.ticker,
-      score: top.signalScore,
+      score: top.signalScore ?? 0,
       reason: bestSub?.note ?? "Strong overall signal alignment",
     },
     bottom: {
       ticker: bottom.ticker,
-      score: bottom.signalScore,
+      score: bottom.signalScore ?? 0,
       reason: worstSub?.note ?? "Weakest overall signal alignment",
     },
   };

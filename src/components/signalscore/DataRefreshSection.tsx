@@ -1,11 +1,20 @@
 const REFRESH_ROWS = [
-  { component: "Institutional 13F Data", cadence: "Quarterly, within 2 days of SEC filing deadline" },
-  { component: "Insider Buying vs Selling", cadence: "Within 48 hours of Form 4 SEC filing" },
-  { component: "PE Ratio Analysis", cadence: "Weekly, based on latest reported earnings" },
-  { component: "Famous Investor Portfolio Tracking", cadence: "Quarterly, upon 13F publication" },
-  { component: "52-Week Support Level", cadence: "Daily, based on closing price" },
-  { component: "Gold Price Correlation", cadence: "Daily, recalculates on market close" },
-  { component: "Free Cash Flow Yield", cadence: "Weekly, based on latest reported quarterly financials" },
+  {
+    component: "Insider Buying vs Selling",
+    cadence: "As new Form 4 filings appear on SEC EDGAR (typically within days of the trade)",
+  },
+  {
+    component: "Institutional 13F Data",
+    cadence: "Quarterly, as 13F-HR filings are published (45 days after quarter-end)",
+  },
+  {
+    component: "Famous Investor Portfolio Tracking",
+    cadence: "Updated as our tracked-investor holdings list is refreshed from public sources",
+  },
+  {
+    component: "Gold Torque (beta multiplier)",
+    cadence: "Daily, recalculated on market close using price history vs GLD or SLV",
+  },
 ] as const;
 
 export function DataRefreshSection() {

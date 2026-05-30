@@ -1288,6 +1288,39 @@ h1, h2, h3 {
   color: var(--gold-dark, #a67d24);
 }
 
+.ss-hero__score-math {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.ss-hero__formula {
+  margin: 24px auto 0;
+  max-width: 36rem;
+  padding: 12px 20px;
+  font-size: clamp(0.85rem, 2vw, 1rem);
+  line-height: 1.5;
+  color: var(--ink);
+  background: rgba(201, 151, 28, 0.08);
+  border: 1px solid rgba(201, 151, 28, 0.2);
+  border-radius: var(--radius-card);
+}
+
+.ss-hero__col-caption {
+  margin: 12px 0 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--gold-dark, #a67d24);
+}
+
+.ss-hero__torque-note {
+  margin: 14px 0 0;
+  font-size: 12px;
+  line-height: 1.45;
+  font-weight: 500;
+  color: var(--ink);
+}
+
 .ss-hero__connector {
   color: rgba(15, 23, 42, 0.28);
   align-self: center;
@@ -2190,6 +2223,49 @@ h1, h2, h3 {
   text-underline-offset: 2px;
 }
 
+.ss-contrast__section-label {
+  margin: 0 0 12px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.ss-contrast__math {
+  margin: 20px 0 0;
+  padding: 16px;
+  background: rgba(15, 23, 42, 0.03);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-card);
+}
+
+.ss-contrast__math-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding: 6px 0;
+  font-size: 13px;
+}
+
+.ss-contrast__math-row--result {
+  margin-top: 6px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-light);
+  font-weight: 600;
+}
+
+.ss-contrast__math-label {
+  color: var(--text-muted);
+}
+
+.ss-contrast__math-value {
+  text-align: right;
+  color: var(--ink);
+}
+
 .ss-contrast__card-summary {
   margin-top: 20px;
   padding-top: 16px;
@@ -2375,6 +2451,26 @@ h1, h2, h3 {
   font-weight: 500;
   color: var(--gold);
   line-height: 1.2;
+}
+
+.ss-metrics-heading {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 48px 0 8px;
+  color: var(--ink);
+}
+
+.ss-metrics-intro {
+  margin: 0 0 24px;
+  max-width: 52ch;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--text-muted);
+}
+
+.explained__metrics--single {
+  margin-bottom: 0;
 }
 
 .metric__title {

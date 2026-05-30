@@ -3,15 +3,16 @@ import path from "path";
 import {
   rankStockFromMarketData,
   isSignalAvailable,
+  FOOTPRINT_KEYS,
+  type FootprintKey,
   type SubScoreKey,
-  SIGNAL_WEIGHTS,
   type StockRankingResult,
 } from "@/lib/ranking";
 import { getStockPrice, getTickerDetails, normalizeTicker } from "@/lib/polygon";
 import { createSupabaseServiceClient } from "@/lib/supabase";
 import type { TrackedStock, TrackedStocksFile } from "@/lib/tracked-stocks";
 
-const SUB_SCORE_KEYS = Object.keys(SIGNAL_WEIGHTS) as SubScoreKey[];
+const SUB_SCORE_KEYS = FOOTPRINT_KEYS as readonly FootprintKey[];
 const STALE_HOURS = 20;
 export const REFRESH_BATCH_SIZE = 25;
 
@@ -69,8 +70,8 @@ export function buildCacheMetricsFromRanking(ranking: StockRankingResult): {
 
 function dataStatusFromCoverage(coverage: number, fetchFailed: boolean): DataStatus {
   if (fetchFailed) return "error";
-  if (coverage >= 5) return "healthy";
-  if (coverage >= 2) return "partial";
+  if (coverage >= 3) return "healthy";
+  if (coverage >= 1) return "partial";
   return "error";
 }
 
@@ -138,7 +139,7 @@ export async function refreshOneStock(tracked: TrackedStock): Promise<{ ok: bool
       market_cap: marketCap,
       pe_ratio: peRatio,
       pct_above_52_week_low: pctAbove52,
-      signal_score: fetchFailed ? null : ranking.signalScore,
+      signal_score: fetchFailed || !ranking.scoreAvailable ? null : ranking.signalScore,
       ...subScoreColumns,
       signal_coverage: signalCoverage,
       raw_metrics: rawMetrics,

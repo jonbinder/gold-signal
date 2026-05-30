@@ -6,29 +6,56 @@ import {
   getInsiderTransactions,
   getInstitutionalOwnership,
   getPriceHistory,
+  getSilverPriceHistory,
   getStockPrice,
   getTickerDetails,
   normalizeTicker,
 } from "@/lib/polygon";
+import { loadTrackedStocksSync } from "@/lib/tracked-stocks-load";
 import type { EdgarInsiderFiling } from "@/lib/sec-edgar";
 import { getInsiderTransactions as getEdgarInsiderFilings } from "@/lib/sec-edgar";
+import { buildTorqueInputs, resolveMetalProxy } from "@/lib/universe-beta";
+import { computeTorqueMultiplier, type TorqueInputs } from "@/lib/torque";
 
-/** Gold/silver mining sector median PE — adjustable benchmark. */
+/** Gold/silver mining sector median PE — adjustable benchmark (dormant context metric). */
 export const SECTOR_PE_MEDIAN = 18;
 
-export const SIGNAL_WEIGHTS = {
-  institutional: 0.15,
-  insider: 0.2,
+/** Scored smart-money footprints (renormalize across AVAILABLE). */
+export const FOOTPRINT_WEIGHTS = {
+  insider: 0.45,
+  institutional: 0.3,
+  famousInvestor: 0.25,
+} as const;
+
+/** Legacy weights for dormant context signals (not scored in v3). */
+export const DORMANT_SIGNAL_WEIGHTS = {
   pe: 0.1,
-  famousInvestor: 0.2,
   support: 0.1,
   correlation: 0.1,
   fcfYield: 0.15,
 } as const;
 
-export const NEUTRAL_SCORE = 50;
-export const SIGNAL_COUNT = 7;
-export const SCORING_VERSION = 2;
+/** @deprecated Use FOOTPRINT_WEIGHTS + DORMANT_SIGNAL_WEIGHTS. Kept for DB column mapping. */
+export const SIGNAL_WEIGHTS = {
+  institutional: FOOTPRINT_WEIGHTS.institutional,
+  insider: FOOTPRINT_WEIGHTS.insider,
+  famousInvestor: FOOTPRINT_WEIGHTS.famousInvestor,
+  pe: DORMANT_SIGNAL_WEIGHTS.pe,
+  support: DORMANT_SIGNAL_WEIGHTS.support,
+  correlation: DORMANT_SIGNAL_WEIGHTS.correlation,
+  fcfYield: DORMANT_SIGNAL_WEIGHTS.fcfYield,
+} as const;
+
+export const FOOTPRINT_KEYS = ["insider", "institutional", "famousInvestor"] as const;
+export type FootprintKey = (typeof FOOTPRINT_KEYS)[number];
+
+export const DORMANT_SIGNAL_KEYS = ["pe", "support", "fcfYield", "correlation"] as const;
+export type DormantSignalKey = (typeof DORMANT_SIGNAL_KEYS)[number];
+
+export const FOOTPRINT_COUNT = FOOTPRINT_KEYS.length;
+/** @deprecated Use FOOTPRINT_COUNT. */
+export const SIGNAL_COUNT = FOOTPRINT_COUNT;
+export const SCORING_VERSION = 3;
 
 export type SignalAvailability = "AVAILABLE" | "UNAVAILABLE";
 export type ConfidenceTier = "high" | "medium" | "low" | "none";
@@ -73,13 +100,22 @@ export type RankingInputs = {
   fcfYield?: {
     fcfYieldPercent: number | null;
   } | null;
+  /** Precomputed torque normalization inputs (optional in unit tests). */
+  torque?: TorqueInputs | null;
 };
 
 export type StockRankingResult = {
   ticker: string;
   companyName: string | null;
-  signalScore: number;
-  /** Count of AVAILABLE signals (0–7). */
+  /** Display score (0–100 clamp). Null when no footprint data exists. */
+  signalScore: number | null;
+  /** Unclamped SmartMoneyBase × torqueMultiplier — use for sorting. */
+  signalScoreRaw: number | null;
+  /** False when zero footprints are AVAILABLE (no fabricated score). */
+  scoreAvailable: boolean;
+  smartMoneyBase: number | null;
+  torqueMultiplier: number;
+  /** Count of AVAILABLE footprint signals (0–3). */
   signalCoverage: number;
   coveragePercent: number;
   confidenceTier: ConfidenceTier;
@@ -137,8 +173,8 @@ export function coveragePercentFromCount(availableCount: number): number {
 }
 
 export function confidenceTierFromCoverage(availableCount: number): ConfidenceTier {
-  if (availableCount >= 6) return "high";
-  if (availableCount >= 4) return "medium";
+  if (availableCount >= 3) return "high";
+  if (availableCount >= 2) return "medium";
   if (availableCount >= 1) return "low";
   return "none";
 }
@@ -174,7 +210,7 @@ export function scoreFromBands(
  * Signal 1 — Institutional 13F (15%): ownership level and quarter-over-quarter trend.
  */
 export function scoreInstitutional(input: RankingInputs["institutional"]): SubScoreResult {
-  const weight = SIGNAL_WEIGHTS.institutional;
+  const weight = FOOTPRINT_WEIGHTS.institutional;
   if (!input || input.ownershipPercent == null) {
     return unavailableSubScore(weight, "Institutional ownership data unavailable");
   }
@@ -209,7 +245,7 @@ const INSIDER_EXCLUDE_CODES = new Set(["M", "A", "G", "C", "F", "J", "L"]);
  * Signal 2 — Insider buying vs selling (20%): net open-market dollar flow, last 90 days.
  */
 export function scoreInsider(input: RankingInputs["insider"]): SubScoreResult {
-  const weight = SIGNAL_WEIGHTS.insider;
+  const weight = FOOTPRINT_WEIGHTS.insider;
   if (!input || input.netDollarValue90d == null) {
     return unavailableSubScore(weight, "Insider transaction data unavailable");
   }
@@ -230,7 +266,7 @@ export function scoreInsider(input: RankingInputs["insider"]): SubScoreResult {
  * Signal 3 — PE ratio vs sector median (10%).
  */
 export function scorePe(input: RankingInputs["pe"]): SubScoreResult {
-  const weight = SIGNAL_WEIGHTS.pe;
+  const weight = DORMANT_SIGNAL_WEIGHTS.pe;
   const median = input?.sectorMedianPe ?? SECTOR_PE_MEDIAN;
 
   if (!input || input.trailingPe == null) {
@@ -263,7 +299,7 @@ export function scorePe(input: RankingInputs["pe"]): SubScoreResult {
  * Signal 4 — Famous investor holdings (20%).
  */
 export function scoreFamousInvestor(input: RankingInputs["famousInvestor"]): SubScoreResult {
-  const weight = SIGNAL_WEIGHTS.famousInvestor;
+  const weight = FOOTPRINT_WEIGHTS.famousInvestor;
   if (!input) {
     return unavailableSubScore(weight, "Famous investor data unavailable");
   }
@@ -287,7 +323,7 @@ export function scoreFamousInvestor(input: RankingInputs["famousInvestor"]): Sub
  * Signal 5 — 52-week support / price position (10%).
  */
 export function scoreSupport(input: RankingInputs["support"]): SubScoreResult {
-  const weight = SIGNAL_WEIGHTS.support;
+  const weight = DORMANT_SIGNAL_WEIGHTS.support;
   if (!input || input.fiftyTwoWeekHigh <= input.fiftyTwoWeekLow) {
     return unavailableSubScore(weight, "52-week range data unavailable");
   }
@@ -314,7 +350,7 @@ export function scoreSupport(input: RankingInputs["support"]): SubScoreResult {
  * Signal 6 — Gold price correlation via GLD (10%).
  */
 export function scoreCorrelation(input: RankingInputs["correlation"]): SubScoreResult {
-  const weight = SIGNAL_WEIGHTS.correlation;
+  const weight = DORMANT_SIGNAL_WEIGHTS.correlation;
   if (!input || input.correlation180d == null) {
     return unavailableSubScore(weight, "Gold correlation data unavailable");
   }
@@ -337,7 +373,7 @@ export function scoreCorrelation(input: RankingInputs["correlation"]): SubScoreR
  * Signal 7 — Free cash flow yield (15%).
  */
 export function scoreFcfYield(input: RankingInputs["fcfYield"]): SubScoreResult {
-  const weight = SIGNAL_WEIGHTS.fcfYield;
+  const weight = DORMANT_SIGNAL_WEIGHTS.fcfYield;
   if (!input || input.fcfYieldPercent == null) {
     return unavailableSubScore(weight, "Free cash flow yield unavailable");
   }
@@ -355,63 +391,87 @@ export function scoreFcfYield(input: RankingInputs["fcfYield"]): SubScoreResult 
 }
 
 /**
- * Composite SignalScore from sub-scores with real data only; weights renormalize to 100%.
+ * Composite weighted average from footprint sub-scores only; null when none available.
  */
-export function computeWeightedSignalScore(signals: WeightedSignalInput[]): number {
+export function computeSmartMoneyBase(subScores: Record<SubScoreKey, SubScoreResult>): number | null {
+  const signals = FOOTPRINT_KEYS.map((key) => ({
+    score: subScores[key].score ?? 0,
+    weight: subScores[key].weight,
+    defaulted: !isSignalAvailable(subScores[key]),
+  }));
   const realSignals = signals.filter((s) => !s.defaulted);
-  if (realSignals.length === 0) {
-    return NEUTRAL_SCORE;
-  }
+  if (realSignals.length === 0) return null;
 
   const totalRealWeight = realSignals.reduce((sum, s) => sum + s.weight, 0);
-  if (totalRealWeight <= 0) {
-    return NEUTRAL_SCORE;
-  }
+  if (totalRealWeight <= 0) return null;
+
+  const weightedSum = realSignals.reduce((sum, s) => sum + s.score * s.weight, 0);
+  return weightedSum / totalRealWeight;
+}
+
+/**
+ * @deprecated Use computeSmartMoneyBase. Kept for legacy tests/helpers.
+ */
+export function computeWeightedSignalScore(signals: WeightedSignalInput[]): number | null {
+  const realSignals = signals.filter((s) => !s.defaulted);
+  if (realSignals.length === 0) return null;
+
+  const totalRealWeight = realSignals.reduce((sum, s) => sum + s.weight, 0);
+  if (totalRealWeight <= 0) return null;
 
   const weightedSum = realSignals.reduce((sum, s) => sum + s.score * s.weight, 0);
   return clampScore(weightedSum / totalRealWeight);
 }
 
 /**
- * Effective weights after excluding defaulted signals (sums to 1 when any real signal exists).
+ * Effective footprint weights after excluding unavailable signals (sums to 1 when any exist).
  */
 export function computeEffectiveWeights(
   subScores: Record<SubScoreKey, SubScoreResult>,
-): Partial<Record<SubScoreKey, number>> {
-  const real = (Object.keys(SIGNAL_WEIGHTS) as SubScoreKey[]).filter((key) =>
-    isSignalAvailable(subScores[key]),
-  );
+): Partial<Record<FootprintKey, number>> {
+  const real = FOOTPRINT_KEYS.filter((key) => isSignalAvailable(subScores[key]));
   const totalRealWeight = real.reduce((sum, key) => sum + subScores[key].weight, 0);
   if (totalRealWeight <= 0) {
     return {};
   }
 
-  const effective: Partial<Record<SubScoreKey, number>> = {};
-  for (const key of Object.keys(SIGNAL_WEIGHTS) as SubScoreKey[]) {
-    if (!isSignalAvailable(subScores[key])) {
-      continue;
-    }
+  const effective: Partial<Record<FootprintKey, number>> = {};
+  for (const key of FOOTPRINT_KEYS) {
+    if (!isSignalAvailable(subScores[key])) continue;
     effective[key] = subScores[key].weight / totalRealWeight;
   }
   return effective;
 }
 
 export function countSignalCoverage(subScores: Record<SubScoreKey, SubScoreResult>): number {
-  return (Object.keys(SIGNAL_WEIGHTS) as SubScoreKey[]).filter((key) =>
-    isSignalAvailable(subScores[key]),
-  ).length;
+  return FOOTPRINT_KEYS.filter((key) => isSignalAvailable(subScores[key])).length;
 }
 
 /**
- * Computes weighted SignalScore (0–100) from seven sub-scores.
+ * Computes display + raw final scores from SmartMoneyBase and torque multiplier.
  */
-export function computeSignalScore(subScores: Record<SubScoreKey, SubScoreResult>): number {
-  const signals = (Object.keys(SIGNAL_WEIGHTS) as SubScoreKey[]).map((key) => ({
-    score: subScores[key].score ?? 0,
-    weight: subScores[key].weight,
-    defaulted: !isSignalAvailable(subScores[key]),
-  }));
-  return computeWeightedSignalScore(signals);
+export function computeFinalScore(
+  smartMoneyBase: number | null,
+  torqueMultiplier: number,
+): { signalScore: number | null; signalScoreRaw: number | null; scoreAvailable: boolean } {
+  if (smartMoneyBase == null) {
+    return { signalScore: null, signalScoreRaw: null, scoreAvailable: false };
+  }
+  const raw = smartMoneyBase * torqueMultiplier;
+  return {
+    signalScoreRaw: raw,
+    signalScore: clampScore(raw),
+    scoreAvailable: true,
+  };
+}
+
+/**
+ * @deprecated Use computeSmartMoneyBase + computeFinalScore (v3 model).
+ */
+export function computeSignalScore(subScores: Record<SubScoreKey, SubScoreResult>): number | null {
+  const base = computeSmartMoneyBase(subScores);
+  if (base == null) return null;
+  return clampScore(base);
 }
 
 /**
@@ -434,20 +494,78 @@ export function rankStock(inputs: RankingInputs): StockRankingResult {
     }
   }
 
+  const footprintAvailability = Object.fromEntries(
+    FOOTPRINT_KEYS.map((key) => [key, subScores[key].availability]),
+  ) as Record<FootprintKey, SignalAvailability>;
+
   const signalCoverage = countSignalCoverage(subScores);
   const coveragePercent = coveragePercentFromCount(signalCoverage);
   const confidenceTier = confidenceTierFromCoverage(signalCoverage);
   const effectiveWeights = computeEffectiveWeights(subScores);
-  const signalAvailability = buildSignalAvailabilityMap(subScores);
+  const smartMoneyBase = computeSmartMoneyBase(subScores);
+
+  const torqueInputs: TorqueInputs = inputs.torque ?? {
+    beta: null,
+    rSquared: null,
+    universeMedianBeta: null,
+    universeMinBeta: null,
+    universeMaxBeta: null,
+    universeValidBetaCount: 0,
+    metalProxy: resolveMetalProxy(inputs.ticker),
+  };
+  const torque = computeTorqueMultiplier(torqueInputs);
+  const finalScores = computeFinalScore(smartMoneyBase, torque.torqueMultiplier);
 
   const rawMetrics: Record<string, unknown> = {
     scoringVersion: SCORING_VERSION,
+    model: "smart-money-footprints-x-torque",
     inputs,
+    footprintAvailability,
+    dormantSignals: DORMANT_SIGNAL_KEYS,
     signalCoverage,
     coveragePercent,
     confidenceTier,
-    signalAvailability,
     effectiveWeights,
+    smartMoneyBase,
+    torqueMultiplier: torque.torqueMultiplier,
+    torqueDetail: {
+      beta: torqueInputs.beta,
+      rSquared: torqueInputs.rSquared,
+      r2GateTriggered: torque.r2GateTriggered,
+      betaMissing: torque.betaMissing,
+      universeFallback: torque.universeFallback,
+      universeMedianBeta: torqueInputs.universeMedianBeta,
+      universeMinBeta: torqueInputs.universeMinBeta,
+      universeMaxBeta: torqueInputs.universeMaxBeta,
+      universeValidBetaCount: torqueInputs.universeValidBetaCount,
+      metalProxy: torqueInputs.metalProxy,
+      note: torque.note,
+    },
+    signalScoreRaw: finalScores.signalScoreRaw,
+    signalScoreDisplay: finalScores.signalScore,
+    scoreAvailable: finalScores.scoreAvailable,
+    footprintSubScores: Object.fromEntries(
+      FOOTPRINT_KEYS.map((key) => [
+        key,
+        {
+          score: subScores[key].score,
+          availability: subScores[key].availability,
+          missing: subScores[key].missing,
+          note: subScores[key].note,
+        },
+      ]),
+    ),
+    contextSubScores: Object.fromEntries(
+      DORMANT_SIGNAL_KEYS.map((key) => [
+        key,
+        {
+          score: subScores[key].score,
+          availability: subScores[key].availability,
+          scored: false,
+          note: subScores[key].note,
+        },
+      ]),
+    ),
     subScores: Object.fromEntries(
       Object.entries(subScores).map(([k, v]) => [
         k,
@@ -456,6 +574,7 @@ export function rankStock(inputs: RankingInputs): StockRankingResult {
           availability: v.availability,
           missing: v.missing,
           note: v.note,
+          scored: (FOOTPRINT_KEYS as readonly string[]).includes(k),
         },
       ]),
     ),
@@ -464,7 +583,11 @@ export function rankStock(inputs: RankingInputs): StockRankingResult {
   return {
     ticker: normalizeTicker(inputs.ticker),
     companyName: inputs.companyName ?? null,
-    signalScore: computeSignalScore(subScores),
+    signalScore: finalScores.signalScore,
+    signalScoreRaw: finalScores.signalScoreRaw,
+    scoreAvailable: finalScores.scoreAvailable,
+    smartMoneyBase,
+    torqueMultiplier: torque.torqueMultiplier,
     signalCoverage,
     coveragePercent,
     confidenceTier,
@@ -491,21 +614,21 @@ export function letterGradeFromScore(score: number): string {
 }
 
 /**
- * Portfolio-level average SignalScore and letter grade.
+ * Portfolio-level average SignalScore and letter grade (scored stocks only).
  */
 export function calculatePortfolioScore(
-  rankings: Pick<StockRankingResult, "signalScore">[],
+  rankings: Pick<StockRankingResult, "signalScore" | "scoreAvailable">[],
 ): PortfolioRankingResult {
-  if (rankings.length === 0) {
+  const scored = rankings.filter((r) => r.scoreAvailable && r.signalScore != null);
+  if (scored.length === 0) {
     return { averageSignalScore: 0, letterGrade: "F", stockCount: 0 };
   }
-  const avg =
-    rankings.reduce((sum, r) => sum + r.signalScore, 0) / rankings.length;
+  const avg = scored.reduce((sum, r) => sum + (r.signalScore ?? 0), 0) / scored.length;
   const averageSignalScore = clampScore(avg);
   return {
     averageSignalScore,
     letterGrade: letterGradeFromScore(averageSignalScore),
-    stockCount: rankings.length,
+    stockCount: scored.length,
   };
 }
 
@@ -671,14 +794,16 @@ export async function countFamousInvestorsForTicker(ticker: string): Promise<num
 export async function rankStockFromMarketData(ticker: string): Promise<StockRankingResult> {
   const sym = normalizeTicker(ticker);
   const rawMetrics: Record<string, unknown> = { ticker: sym, fetchedAt: new Date().toISOString() };
+  const tracked = loadTrackedStocksSync().find((s) => normalizeTicker(s.ticker) === sym);
+  const metalProxy = resolveMetalProxy(sym, tracked?.sub_category ?? null);
 
-  const [priceRes, detailsRes, financialsRes, historyRes, goldRes, instRes, insiderRes, edgarRes, famousCount] =
+  const [priceRes, detailsRes, financialsRes, historyRes, metalRes, instRes, insiderRes, edgarRes, famousCount] =
     await Promise.all([
       getStockPrice(sym),
       getTickerDetails(sym),
       getFinancials(sym),
-      getPriceHistory(sym, 365),
-      getGoldPriceHistory(365),
+      getPriceHistory(sym, 400),
+      metalProxy === "SLV" ? getSilverPriceHistory(400) : getGoldPriceHistory(400),
       getInstitutionalOwnership(sym),
       getInsiderTransactions(sym),
       getEdgarInsiderFilings(sym),
@@ -689,10 +814,20 @@ export async function rankStockFromMarketData(ticker: string): Promise<StockRank
   rawMetrics.details = detailsRes;
   rawMetrics.financials = financialsRes;
   rawMetrics.history = historyRes.ok ? { barCount: historyRes.data.length } : historyRes;
-  rawMetrics.gold = goldRes.ok ? { barCount: goldRes.data.length } : goldRes;
+  rawMetrics.metalProxy = metalProxy;
+  rawMetrics.metal = metalRes.ok ? { barCount: metalRes.data.length } : metalRes;
   rawMetrics.institutional = instRes;
   rawMetrics.insider = insiderRes;
   rawMetrics.edgarInsider = edgarRes;
+
+  let torqueInputs: TorqueInputs | null = null;
+  let betaRegression: ReturnType<typeof import("@/lib/torque").computeReturnBeta> = null;
+  if (historyRes.ok && metalRes.ok) {
+    const built = await buildTorqueInputs(sym, historyRes.data, metalRes.data, tracked?.sub_category ?? null);
+    torqueInputs = built.torqueInputs;
+    betaRegression = built.regression;
+    rawMetrics.torqueRegression = betaRegression;
+  }
 
   const companyName = detailsRes.ok ? detailsRes.data.name : null;
   const currentPrice = priceRes.ok ? priceRes.data.close : null;
@@ -745,8 +880,8 @@ export async function rankStockFromMarketData(ticker: string): Promise<StockRank
   }
 
   let correlation: RankingInputs["correlation"] = null;
-  if (historyRes.ok && goldRes.ok) {
-    const corr = computeReturnCorrelation(historyRes.data, goldRes.data);
+  if (historyRes.ok && metalRes.ok) {
+    const corr = computeReturnCorrelation(historyRes.data, metalRes.data);
     correlation = { correlation180d: corr };
   }
 
@@ -760,6 +895,7 @@ export async function rankStockFromMarketData(ticker: string): Promise<StockRank
     support,
     correlation,
     fcfYield,
+    torque: torqueInputs,
   };
 
   const result = rankStock(inputs);

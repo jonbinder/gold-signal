@@ -368,10 +368,17 @@ export async function getPriceHistory(ticker: string, days: number): Promise<Api
 }
 
 /**
- * Fetches daily bars for GLD as a gold price proxy (for correlation calculations).
+ * Fetches daily bars for GLD as a gold price proxy (for beta / correlation).
  */
 export async function getGoldPriceHistory(days: number): Promise<ApiResult<DailyBar[]>> {
   return getPriceHistory("GLD", days);
+}
+
+/**
+ * Fetches daily bars for SLV as a silver price proxy (for beta / torque).
+ */
+export async function getSilverPriceHistory(days: number): Promise<ApiResult<DailyBar[]>> {
+  return getPriceHistory("SLV", days);
 }
 
 /**

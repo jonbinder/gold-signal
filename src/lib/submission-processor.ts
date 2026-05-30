@@ -27,7 +27,7 @@ type StockRankingRowInsert = {
   submission_id: string;
   ticker: string;
   company_name: string | null;
-  signal_score: number;
+  signal_score: number | null;
   institutional_score: number | null;
   insider_score: number | null;
   pe_score: number | null;
@@ -250,7 +250,7 @@ export async function processSubmission(submission: SubmissionRow): Promise<void
         submission_id: submissionId,
         ticker: ranking.ticker,
         company_name: ranking.companyName,
-        signal_score: ranking.signalScore,
+        signal_score: ranking.scoreAvailable ? ranking.signalScore : null,
         institutional_score: null,
         insider_score: null,
         pe_score: null,

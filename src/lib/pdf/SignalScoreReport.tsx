@@ -160,8 +160,8 @@ export function SignalScoreReport({
                 {stock.companyName ? ` · ${stock.companyName}` : ""}
               </Text>
             </View>
-            <Text style={[styles.stockScore, { color: scoreColor(stock.signalScore) }]}>
-              {stock.signalScore}
+            <Text style={[styles.stockScore, { color: scoreColor(stock.signalScore ?? 0) }]}>
+              {stock.signalScore ?? "N/A"}
             </Text>
           </View>
 

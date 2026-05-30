@@ -1,30 +1,26 @@
 import { MetricIcon } from "@/components/signalscore/MetricIcon";
 
-const SIGNAL_PILLS = [
-  { icon: "ti-building-bank", label: "Institutional 13F Data" },
+const FOOTPRINT_PILLS = [
   { icon: "ti-user-dollar", label: "Insider Buying vs Selling" },
-  { icon: "ti-chart-bar", label: "PE Ratio Analysis" },
+  { icon: "ti-building-bank", label: "Institutional 13F Data" },
   { icon: "ti-star", label: "Famous Investor Tracking" },
-  { icon: "ti-chart-line", label: "52-Week Support Level" },
-  { icon: "ti-coins", label: "Gold Price Correlation" },
-  { icon: "ti-cash", label: "Free Cash Flow Yield" },
 ] as const;
 
 const WEIGHT_BARS = [
   {
-    label: "Primary signals",
-    note: "(Institutional 13F, Insider Buying, Famous Investor Tracking) — highest weight",
+    label: "Insider activity",
+    note: "Highest emphasis — personal capital at risk",
     width: "100%",
   },
   {
-    label: "Valuation signals",
-    note: "(PE Ratio, Free Cash Flow Yield) — moderate weight",
-    width: "68%",
+    label: "Institutional 13F",
+    note: "Strong emphasis — quarterly smart-money footprint",
+    width: "72%",
   },
   {
-    label: "Confirming signals",
-    note: "(52-Week Support, Gold Price Correlation) — confirming layer",
-    width: "42%",
+    label: "Famous investor holdings",
+    note: "Meaningful emphasis — sector specialists we track",
+    width: "58%",
   },
 ] as const;
 
@@ -56,35 +52,40 @@ export function SignalScoreHero() {
       <h1 className="ss-hero__title">What is the SignalScore?</h1>
       <p className="ss-hero__subhead">
         A single number from 0 to 100 that tells you how much conviction the smartest money in the
-        gold market has in a stock right now.
+        gold market has in a stock right now — gently adjusted for how hard that stock moves when
+        gold moves.
       </p>
       <p className="ss-hero__body">
-        We track seven separate data sources for every stock we cover, from what major institutions
-        are buying to how much free cash flow a miner generates. Each one is scored
-        individually, then combined using a weighted formula that reflects how predictive each
-        signal has historically been. The result is the SignalScore: one number that does the work
-        of seven.
+        We combine three smart-money footprint signals into a base score, then apply a gentle
+        gold-torque multiplier. The footprints tell you where the conviction is; the torque tells
+        you how much leverage the stock has to the metal price. When a footprint is unavailable, it
+        is excluded — we do not fill gaps with a neutral guess.
       </p>
 
-      <div className="ss-hero__diagram" aria-label="From 7 signals to 1 score">
+      <p className="ss-hero__formula mono" aria-label="SignalScore formula">
+        SignalScore = (Insider + Institutional + Famous Investor) × Gold Torque
+      </p>
+
+      <div className="ss-hero__diagram" aria-label="From three footprints and gold torque to one score">
         <div className="ss-hero__diagram-flow">
           <div className="ss-hero__col">
-            <p className="ss-hero__col-label">The 7 signals</p>
+            <p className="ss-hero__col-label">Three footprints</p>
             <ul className="ss-hero__pills">
-              {SIGNAL_PILLS.map((pill) => (
+              {FOOTPRINT_PILLS.map((pill) => (
                 <li key={pill.label} className="ss-hero__pill">
                   <MetricIcon name={pill.icon} className="ss-hero__pill-icon" />
                   <span>{pill.label}</span>
                 </li>
               ))}
             </ul>
+            <p className="ss-hero__col-caption">→ SmartMoneyBase (0–100)</p>
           </div>
 
           <ConnectorVertical />
           <ConnectorHorizontal />
 
           <div className="ss-hero__col">
-            <p className="ss-hero__col-label">Weighted formula</p>
+            <p className="ss-hero__col-label">Gold torque multiplier</p>
             <div className="ss-hero__weights">
               {WEIGHT_BARS.map((bar) => (
                 <div key={bar.label} className="ss-hero__weight-row">
@@ -98,8 +99,12 @@ export function SignalScoreHero() {
                 </div>
               ))}
             </div>
+            <p className="ss-hero__torque-note">
+              × Gold Torque (~0.85–1.15) — beta vs GLD/SLV, universe-normalized, R²-gated
+            </p>
             <p className="ss-hero__weights-disclaimer">
-              Exact weights are proprietary. The hierarchy reflects historical predictive value.
+              Relative footprint emphasis reflects our view that real-money filings are the
+              strongest evidence of conviction. Exact weights are proprietary.
             </p>
           </div>
 
@@ -114,12 +119,13 @@ export function SignalScoreHero() {
               </div>
               <p className="ss-hero__score-name mono">SignalScore</p>
               <p className="ss-hero__score-tier">Strong conviction</p>
+              <p className="ss-hero__score-math mono">78 × 1.06 ≈ 83</p>
             </div>
           </div>
         </div>
         <p className="ss-hero__diagram-footnote">
-          Every score updates on a rolling basis as new filings, price data, and financials become
-          available.
+          Scores refresh as new SEC filings and market data become available. Display scores are
+          capped at 100; underlying values may rank slightly higher when torque is strong.
         </p>
       </div>
     </header>

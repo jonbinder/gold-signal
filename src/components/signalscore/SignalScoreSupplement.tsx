@@ -1,18 +1,13 @@
 const WEIGHT_TIERS = [
   {
-    label: "Primary signals",
-    detail: "Institutional 13F Data, Insider Buying vs Selling, Famous Investor Portfolio Tracking",
+    label: "Smart-money footprints (the base)",
+    detail: "Insider Form 4, Institutional 13F, Famous investor holdings — blended into SmartMoneyBase",
     width: "100%",
   },
   {
-    label: "Valuation signals",
-    detail: "PE Ratio, Free Cash Flow Yield",
-    width: "68%",
-  },
-  {
-    label: "Confirming signals",
-    detail: "52-Week Support Level, Gold Price Correlation",
-    width: "42%",
+    label: "Gold torque (the multiplier)",
+    detail: "Beta to gold/silver, normalized vs the miner universe — gentle nudge, not a fourth vote",
+    width: "48%",
   },
 ] as const;
 
@@ -20,22 +15,22 @@ const FAQ_ITEMS = [
   {
     question: "Can a stock score high and still decline in price?",
     answer:
-      "Yes. The SignalScore reflects what the data shows at a point in time. It does not predict short-term price movements. A stock scoring 85 today could fall if gold prices drop sharply, if a major holder sells unexpectedly, or if earnings disappoint. The score is a measure of current signal quality, not a guarantee of future performance.",
+      "Yes. The SignalScore reflects what the data shows at a point in time. It does not predict short-term price movements. A stock scoring 85 today could fall if gold prices drop sharply, if a major holder sells unexpectedly, or if operational news disappoints. The score is a measure of current smart-money signal quality, not a guarantee of future performance.",
   },
   {
     question: "How is this different from a stock screener?",
     answer:
-      "Most screeners let you filter stocks by individual metrics like PE ratio or insider buying. The SignalScore combines seven factors into a single weighted number so you can compare stocks at a glance without having to interpret each data point yourself. It is designed specifically for the gold and silver mining sector, which means the benchmarks and thresholds are calibrated for this industry rather than applied generically across all stocks.",
+      "Most screeners let you filter on one metric at a time — insider buying here, institutional ownership there. The SignalScore blends three smart-money footprints into one base, then applies a gentle gold-torque multiplier so you can compare miners at a glance. It is built specifically for gold and silver equities, using SEC filings and sector-relevant price leverage rather than generic screen filters.",
   },
   {
     question: "What happens when the model is updated?",
     answer:
-      "When we adjust component weights or add new data sources, all scores are recalculated from the same starting point so rankings remain comparable. We note any methodology changes on this page.",
+      "When we adjust footprint emphasis or torque rules, scores are recalculated from the same inputs so rankings stay comparable. We note any methodology changes on this page.",
   },
   {
     question: "What does it mean when insider and institutional signals disagree?",
     answer:
-      "It means the stock deserves closer scrutiny. Institutions have broad research capabilities but manage large portfolios and may hold positions for reasons unrelated to near-term conviction. Insiders have direct knowledge of company operations but may sell for personal liquidity reasons. When these two signals point in opposite directions, we weight the direction of insider buying more heavily, since purchasing with personal capital is a stronger signal than maintaining an existing fund position.",
+      "It means the stock deserves closer scrutiny. Institutions have broad research capabilities but manage large portfolios and may hold positions for reasons unrelated to near-term conviction. Insiders have direct knowledge of company operations but may sell for personal liquidity reasons. When these two footprints point in opposite directions, we weight open-market insider buying more heavily, since purchasing with personal capital is a stronger signal than maintaining an existing fund position.",
   },
 ] as const;
 
@@ -44,21 +39,30 @@ export function SignalScoreSupplement() {
     <div className="ss-supplement">
       <section className="ss-block" aria-labelledby="ss-weighting-title">
         <h2 id="ss-weighting-title" className="ss-block__title">
-          Not all signals are weighted equally
+          Footprints form the base; torque nudges the result
         </h2>
         <p className="ss-block__copy">
-          The seven components that make up the SignalScore are not averaged equally. Institutional
-          accumulation, insider activity, and famous investor holdings carry the most weight in our
-          model, reflecting the view that what large funds, company insiders, and proven precious
-          metals investors actually do with real money is more predictive than any valuation metric
-          alone. Valuation factors like PE ratio and free cash flow yield carry moderate weight,
-          capturing both accounting profitability and genuine cash generation. Price-based inputs
-          like 52-week support and gold price correlation serve as confirming or disconfirming
-          signals rather than primary drivers. The exact weighting formula is proprietary, but the
-          hierarchy is intentional and has been calibrated against historical price performance
-          across the gold and silver mining sector.
+          The SignalScore is not a flat average of unrelated metrics. Three smart-money footprints
+          — insider activity, institutional 13F accumulation, and famous-investor holdings — are
+          blended into a SmartMoneyBase from 0 to 100. Insider activity carries the most emphasis,
+          followed by institutional accumulation, then famous-investor overlap. That ordering
+          reflects our view that real money moves in public filings are the strongest evidence of
+          conviction, not a claim that we back-tested every combination against past returns.
         </p>
-        <div className="ss-weights" aria-label="Relative signal weight tiers">
+        <p className="ss-block__copy">
+          Gold torque is applied as a gentle multiplier — typically between about 0.85 and 1.15 —
+          not as a fourth weighted vote. We measure how much the stock&apos;s daily returns move
+          with its metal proxy (GLD for gold names, SLV for silver names), compare that beta to the
+          median miner in our universe (median = neutral, ×1.0), and clamp the effect so torque
+          nudges rankings between similar names rather than overriding strong footprints. A stock
+          with excellent smart-money footprints but modest torque still ranks well — just slightly
+          behind a peer with the same footprints and higher leverage to gold.
+        </p>
+        <p className="ss-block__copy">
+          If the statistical relationship to the metal is too noisy (low R²), torque defaults to
+          neutral — no bonus and no penalty — rather than rewarding random co-movement.
+        </p>
+        <div className="ss-weights" aria-label="Footprint base vs torque multiplier">
           {WEIGHT_TIERS.map((tier) => (
             <div key={tier.label} className="ss-weights__tier">
               <div className="ss-weights__meta">
@@ -78,14 +82,13 @@ export function SignalScoreSupplement() {
           When signals disagree
         </h2>
         <p className="ss-block__copy">
-          Not every stock sends a clean signal. Sometimes institutions are quietly accumulating
-          while insiders are selling, or valuation looks cheap but free cash flow is deteriorating.
-          When signals conflict, the SignalScore reflects that tension rather than hiding it. A
-          stock where three factors score above 85 and two score below 50 will land in the
-          mid-range, not at the top. This is intentional. We think a score that papers over
-          disagreement is less useful than one that tells you the full picture. If you see a stock
-          in the 55 to 70 range, it is worth asking which specific factors are dragging the score
-          down before making any decision.
+          Not every stock sends a clean signal. Institutions may be quietly accumulating while
+          insiders are selling, or famous-investor overlap may be strong while 13F data shows
+          trimming. When footprints conflict, SmartMoneyBase reflects that tension rather than
+          hiding it. A stock where insider and institutional readings diverge will land mid-range,
+          not at the top — even if gold torque is favorable. If you see a score in the 55 to 70
+          range, it is worth checking which specific footprints are pulling in opposite directions
+          before making any decision.
         </p>
       </section>
 

@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import { PageCompliance } from "@/components/layout/PageCompliance";
 import { FundsList } from "@/components/funds/FundsList";
 import { getFundsList, type FundSort } from "@/lib/funds/queries";
+import { SITE_TAGLINE } from "@/lib/site";
 import "@/app/funds.css";
 
 const pageTitle = "Precious-metals funds — 13F holdings | GoldSignal";
@@ -16,6 +18,11 @@ export const metadata: Metadata = {
     description: pageDescription,
     type: "website",
     url: "https://goldsignal.ai/funds",
+  },
+  twitter: {
+    card: "summary",
+    title: pageTitle,
+    description: pageDescription,
   },
 };
 
@@ -39,11 +46,13 @@ export default async function FundsPage({ searchParams }: { searchParams: Search
         <div className="funds-hero__inner">
           <p className="funds-hero__eyebrow">Institutional · 13F</p>
           <h1 className="funds-hero__title">Tracked funds</h1>
+          <p className="hero-tagline">{SITE_TAGLINE}</p>
           <p className="funds-hero__sub">{pageDescription}</p>
         </div>
       </header>
       <div className="funds-main">
         <FundsList funds={funds} sort={sort} />
+        <PageCompliance />
       </div>
     </main>
   );

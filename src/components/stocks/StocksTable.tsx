@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { stockPath } from "@/lib/paths";
 import type { CachedDisplayStock } from "@/lib/stock-cache";
 import { formatInsiderNetLabel, formatHolderCount } from "@/lib/stock-facts-format";
 import {
@@ -106,6 +107,7 @@ export function StocksTable({ stocks }: StocksTableProps) {
           <h1 id="stocks-list-heading" className="stocks-list-hero__title">
             Gold &amp; silver stocks
           </h1>
+          <p className="hero-tagline">The smart money in gold and silver</p>
           <p className="stocks-list-hero__sub">
             {stocks.length} tracked names — SEC Form 4 insider activity, institutional holders from
             13F filings, and market cap. Facts only; updated from cached filings data.
@@ -305,7 +307,7 @@ function StockTableRow({ stock }: { stock: CachedDisplayStock }) {
         <StockLogo ticker={stock.ticker} logoUrl={stock.logoUrl} size={40} />
       </td>
       <td className="stocks-table__td stocks-table__td--name">
-        <Link href={`/stocks/${stock.ticker}`} className="stocks-table__name-link">
+        <Link href={stockPath(stock.ticker)} className="stocks-table__name-link">
           <span className="stocks-table__ticker">{stock.ticker}</span>
           <span className="stocks-table__company">{stock.name}</span>
         </Link>
@@ -337,7 +339,7 @@ function StockCard({ stock }: { stock: CachedDisplayStock }) {
     stock.marketCap >= 0.1 ? `$${stock.marketCap.toFixed(1)}B` : "—";
 
   return (
-    <Link href={`/stocks/${stock.ticker}`} className="stocks-list-card">
+    <Link href={stockPath(stock.ticker)} className="stocks-list-card">
       <div className="stocks-list-card__head">
         <StockLogo ticker={stock.ticker} logoUrl={stock.logoUrl} size={44} />
         <div className="stocks-list-card__identity">

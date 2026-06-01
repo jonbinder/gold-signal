@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { PageCompliance } from "@/components/layout/PageCompliance";
 import { StocksTable } from "@/components/stocks/StocksTable";
 import { getCachedDisplayStocks } from "@/lib/stock-cache";
 import "@/app/stocks-list.css";
@@ -35,6 +36,7 @@ export default async function StocksPage() {
   return (
     <main className="stocks-list-page">
       <StocksTable stocks={stocks} />
+      <PageCompliance />
     </main>
   );
 }

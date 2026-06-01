@@ -15,7 +15,7 @@ const COLS = [
     links: [
       { href: "/stocks", label: "Portfolio companies" },
       { href: "/funds", label: "Fund managers" },
-      { href: "/", label: "Methodology" },
+      { href: "/signalscore", label: "How it works" },
     ],
   },
   {

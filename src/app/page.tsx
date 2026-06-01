@@ -3,8 +3,13 @@ import { SiteNav } from "@/components/goldsignal/SiteNav";
 import { SiteFooter } from "@/components/goldsignal/SiteFooter";
 import { WatchlistCaptureForm } from "@/components/home/WatchlistCaptureForm";
 import { WhatsNewFeed } from "@/components/home/WhatsNewFeed";
+import { SectorInsiderHeatmap } from "@/components/home/SectorInsiderHeatmap";
+import { getSectorInsiderHeatmap } from "@/lib/home/sector-heatmap";
 import { getWhatsNewFeed } from "@/lib/whats-new/feed";
+import { COMPLIANCE_LINE } from "@/lib/site";
 import "./whats-new.css";
+import "./charts.css";
+import "./site-cohesion.css";
 
 const siteTitle = "GoldSignal.ai — Smart Money in Gold & Silver";
 const siteDescription =
@@ -40,7 +45,7 @@ const structuredData = {
 };
 
 export default async function HomePage() {
-  const feed = await getWhatsNewFeed();
+  const [feed, heatmap] = await Promise.all([getWhatsNewFeed(), getSectorInsiderHeatmap()]);
 
   return (
     <>
@@ -68,13 +73,11 @@ export default async function HomePage() {
         </section>
 
         <div className="whats-new-main">
+          <SectorInsiderHeatmap model={heatmap} />
           <WhatsNewFeed feed={feed} />
         </div>
 
-        <p className="whats-new-footer-note">
-          Educational information sourced from public SEC filings and exchange data. Not investment
-          advice.
-        </p>
+        <p className="whats-new-footer-note">{COMPLIANCE_LINE}</p>
       </main>
 
       <SiteFooter />

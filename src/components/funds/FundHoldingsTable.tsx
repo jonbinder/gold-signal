@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { fundChangeBadgeClass, fundChangeLabel } from "@/lib/funds/change-label";
+import { stockPath } from "@/lib/paths";
 import type { FundHoldingRow } from "@/lib/funds/queries";
 import { formatUsdCompact } from "@/lib/whats-new/format";
 
@@ -9,9 +10,11 @@ function fmtShares(n: number): string {
 
 type Props = {
   holdings: FundHoldingRow[];
+  /** Tickers with a stock detail page in our tracked universe */
+  linkableTickers: ReadonlySet<string>;
 };
 
-export function FundHoldingsTable({ holdings }: Props) {
+export function FundHoldingsTable({ holdings, linkableTickers }: Props) {
   const pmCount = holdings.filter((h) => h.isPreciousMetal).length;
 
   return (
@@ -40,7 +43,15 @@ export function FundHoldingsTable({ holdings }: Props) {
                 className={row.isPreciousMetal ? "funds-table__row--pm" : undefined}
               >
                 <td>
-                  <Link href={`/stocks/${row.ticker}`}>{row.ticker}</Link>
+                  {linkableTickers.has(row.ticker) ? (
+                    <Link href={stockPath(row.ticker)} className="funds-table__ticker-link">
+                      {row.ticker}
+                    </Link>
+                  ) : (
+                    <span className="mono funds-table__ticker-muted" title="Not in tracked stock universe">
+                      {row.ticker}
+                    </span>
+                  )}
                 </td>
                 <td>{row.company}</td>
                 <td className="mono">{fmtShares(row.shares)}</td>

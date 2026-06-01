@@ -401,3 +401,101 @@
   line-height: 1.5;
   margin: 0.5rem 0 0;
 }
+
+.stock-detail-viz-label {
+  margin: 0 0 0.65rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}
+
+.stock-detail-viz-block {
+  margin-bottom: 1.25rem;
+}
+
+.stock-detail-viz-block:last-child {
+  margin-bottom: 0;
+}
+
+.stock-detail-viz-block--hero {
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-dim);
+}
+
+/* Insider activity table */
+.insider-activity-table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 0 -0.25rem;
+}
+
+.insider-activity-table {
+  width: 100%;
+  min-width: 20rem;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+}
+
+.insider-activity-table thead th {
+  text-align: left;
+  font-size: 0.625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  padding: 0.5rem 0.5rem 0.4rem;
+  border-bottom: 1px solid var(--border-dim);
+}
+
+.insider-activity-table__num {
+  text-align: right;
+}
+
+.insider-activity-table tbody td {
+  padding: 0.65rem 0.5rem;
+  border-bottom: 1px solid var(--border-dim);
+  vertical-align: top;
+}
+
+.insider-activity-table__row--buy {
+  background: linear-gradient(90deg, var(--green-dim) 0%, transparent 55%);
+}
+
+.insider-activity-table__row--sell {
+  background: linear-gradient(90deg, var(--red-dim) 0%, transparent 55%);
+}
+
+.insider-activity-table__side {
+  display: inline-block;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 0.15rem 0.4rem;
+  border-radius: 3px;
+}
+
+.insider-activity-table__side--buy {
+  color: var(--green);
+  background: var(--green-dim);
+}
+
+.insider-activity-table__side--sell {
+  color: var(--red);
+  background: var(--red-dim);
+}
+
+.insider-activity-table__name {
+  display: block;
+  font-weight: 600;
+  color: var(--navy-900);
+}
+
+.insider-activity-table__title {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin-top: 0.1rem;
+}

@@ -47,7 +47,7 @@ export function WatchlistCaptureForm() {
   }
 
   return (
-    <form className="whats-new-capture" onSubmit={onSubmit} noValidate>
+    <form id="portfolio-review" className="whats-new-capture" onSubmit={onSubmit} noValidate>
       <div className="whats-new-capture__fields">
         <label className="whats-new-capture__field">
           <span className="whats-new-capture__label">Name</span>

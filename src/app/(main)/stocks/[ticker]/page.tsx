@@ -5,6 +5,7 @@ import { getStockDetailPage } from "@/lib/stock-detail";
 import { isTrackedTicker } from "@/lib/portfolio-universe";
 import { loadTrackedStocksSync } from "@/lib/tracked-stocks-load";
 import "../../../stock-detail.css";
+import "../../../charts.css";
 
 export const revalidate = 3600;
 

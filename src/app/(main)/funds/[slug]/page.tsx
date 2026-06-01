@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { PageCompliance } from "@/components/layout/PageCompliance";
 import { FundHoldingsTable } from "@/components/funds/FundHoldingsTable";
 import { getFundDetail } from "@/lib/funds/queries";
+import { loadTrackedStocksSync } from "@/lib/tracked-stocks-load";
 import "@/app/funds.css";
 
 interface Props {
@@ -22,6 +24,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description,
     alternates: { canonical: `https://goldsignal.ai/funds/${slug}` },
     openGraph: { title, description, type: "website", url: `https://goldsignal.ai/funds/${slug}` },
+    twitter: { card: "summary", title, description },
   };
 }
 
@@ -43,6 +46,7 @@ export default async function FundDetailPage({ params }: Props) {
   if (!fund) notFound();
 
   const { config, holdings, periodLabel, periodEnd } = fund;
+  const linkableTickers = new Set(loadTrackedStocksSync().map((s) => s.ticker));
   const asOf =
     periodLabel && periodEnd
       ? `${periodLabel} (period ended ${formatPeriodEnd(periodEnd)})`
@@ -93,8 +97,9 @@ export default async function FundDetailPage({ params }: Props) {
             to <code>data/funds.json</code>, or check back after the next quarterly 13F is filed.
           </p>
         ) : (
-          <FundHoldingsTable holdings={holdings} />
+          <FundHoldingsTable holdings={holdings} linkableTickers={linkableTickers} />
         )}
+        <PageCompliance />
       </div>
     </main>
   );

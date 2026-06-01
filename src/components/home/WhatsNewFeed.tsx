@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { stockPath } from "@/lib/paths";
 import { getTeachingSnippet } from "@/lib/whats-new/teaching-snippets";
 import type { FeedActivityKind, WhatsNewFeed, WhatsNewFeedItem } from "@/lib/whats-new/types";
 
@@ -29,7 +30,7 @@ function FeedCard({ item, featured = false }: { item: WhatsNewFeedItem; featured
         </time>
       </div>
       <h3 className="whats-new-card__title">
-        <Link href={`/stocks/${item.ticker}`} className="whats-new-card__ticker-link">
+        <Link href={stockPath(item.ticker)} className="whats-new-card__ticker-link">
           <span className="whats-new-card__ticker mono">{item.ticker}</span>
         </Link>
         <span className="whats-new-card__company">{item.companyName}</span>

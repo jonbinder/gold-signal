@@ -1,10 +1,7 @@
 import { cache } from "react";
 import { getCachedDisplayStocks } from "@/lib/stock-cache";
+import { normalizeTicker } from "@/lib/polygon";
 import { getTrackedStocks, loadTrackedStocksSync } from "@/lib/tracked-stocks-load";
-
-function normalizeTicker(t: string): string {
-  return t.trim().toUpperCase().replace(/^US:/, "");
-}
 
 /** Tickers in the curated universe (tracked-stocks.json). */
 export const getTrackedTickerSymbols = cache(async (): Promise<string[]> => {

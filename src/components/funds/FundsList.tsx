@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { fundPath } from "@/lib/paths";
 import type { FundListItem } from "@/lib/funds/queries";
 
 type Props = {
@@ -12,18 +13,16 @@ export function FundsList({ funds, sort }: Props) {
       <div className="funds-toolbar">
         <div>
           <span className="funds-toolbar__label">Sort by</span>
-          <div style={{ marginTop: "0.35rem" }}>
+          <div className="funds-toolbar__sorts">
             <Link
               href={{ pathname: "/funds", query: { sort: "name" } }}
-              className={sort === "name" ? "explained__link" : undefined}
-              style={{ marginRight: "1rem", fontSize: "0.875rem" }}
+              className={`funds-toolbar__sort-link ${sort === "name" ? "funds-toolbar__sort-link--active" : ""}`}
             >
               Name {sort === "name" ? "✓" : ""}
             </Link>
             <Link
               href={{ pathname: "/funds", query: { sort: "pm-holdings" } }}
-              className={sort === "pm-holdings" ? "explained__link" : undefined}
-              style={{ fontSize: "0.875rem" }}
+              className={`funds-toolbar__sort-link ${sort === "pm-holdings" ? "funds-toolbar__sort-link--active" : ""}`}
             >
               PM holdings {sort === "pm-holdings" ? "✓" : ""}
             </Link>
@@ -37,7 +36,7 @@ export function FundsList({ funds, sort }: Props) {
         <ul className="funds-grid">
           {funds.map((fund) => (
             <li key={fund.slug}>
-              <Link href={`/funds/${fund.slug}`} className="funds-card">
+              <Link href={fundPath(fund.slug)} className="funds-card">
                 <h2 className="funds-card__name">{fund.name}</h2>
                 {fund.managerName ? (
                   <p className="funds-card__meta">{fund.managerName}</p>

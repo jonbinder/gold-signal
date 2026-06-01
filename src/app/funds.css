@@ -61,6 +61,24 @@
   }
 }
 
+.funds-table__ticker-link {
+  font-weight: 700;
+  color: var(--gold-600);
+  text-decoration: none;
+}
+
+.funds-table__ticker-link:hover {
+  text-decoration: underline;
+}
+
+.funds-table__ticker-muted {
+  color: var(--text-muted);
+}
+
+.funds-toolbar__sorts {
+  margin-top: 0.35rem;
+}
+
 .funds-toolbar {
   display: flex;
   flex-wrap: wrap;

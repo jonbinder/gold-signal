@@ -3,7 +3,14 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { BrandLogo } from "@/components/layout/BrandLogo";
 
-export const metadata: Metadata = { title: "Sign In" };
+const pageDescription =
+  "Sign in to GoldSignal.ai — track SEC Form 4 insider activity and 13F institutional holdings in gold and silver.";
+
+export const metadata: Metadata = {
+  title: "Sign In — GoldSignal.ai",
+  description: pageDescription,
+  robots: { index: false, follow: false },
+};
 
 export default function AuthPage() {
   return (
@@ -13,7 +20,7 @@ export default function AuthPage() {
           <div className="text-center">
             <BrandLogo className="mx-auto justify-center" imageClassName="max-w-[190px]" sizes="190px" />
             <h1 className="mt-6 text-2xl font-bold tracking-tight text-navy-900">Sign in to GoldSignal</h1>
-            <p className="mt-2 text-sm text-slate-600">Track smart money in gold and silver</p>
+            <p className="mt-2 text-sm text-slate-600">The smart money in gold and silver</p>
           </div>
 
           <div className="mt-8 rounded-sm border border-dashed border-navy-300 bg-navy-50/80 px-4 py-8 text-center">

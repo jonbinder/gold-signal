@@ -5,6 +5,7 @@ import { loadLargeStakesForTicker } from "@/lib/stock-detail/stakes";
 import { formatAsOfDate, formatInsiderNetLabel, formatMarketCapDisplay } from "@/lib/stock-facts-format";
 import { getStockFactsModel } from "@/lib/stock-facts";
 import { isTrackedTicker } from "@/lib/portfolio-universe";
+import { stockPath } from "@/lib/paths";
 import { normalizeTicker } from "@/lib/polygon";
 
 function pickInsiderTeachingKey(rows: { title: string }[]): string {
@@ -60,7 +61,7 @@ function buildInstitutionalSection(
 export async function collectStoredTickerReadout(rawTicker: string): Promise<TickerReadout> {
   const ticker = normalizeTicker(rawTicker);
   const siteBase = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://goldsignal.ai").replace(/\/$/, "");
-  const stockPageUrl = `${siteBase}/stocks/${ticker}`;
+  const stockPageUrl = `${siteBase}${stockPath(ticker)}`;
 
   const [facts, tracked, institutionalBundle, largeStakes, fundHolders] = await Promise.all([
     getStockFactsModel(ticker),

@@ -53,7 +53,7 @@ export function SiteNav() {
           <span />
         </button>
         <Link href="/#portfolio-review" className="btn btn--cta nav__cta">
-          Free Portfolio Review
+          Get the readout
         </Link>
       </nav>
 

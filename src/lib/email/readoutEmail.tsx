@@ -195,11 +195,11 @@ export function ReadoutEmail({ userName, tickers, skippedInvalidTickers, substac
         <hr style={{ border: "none", borderTop: "1px solid #E8E2D6", margin: "24px 0" }} />
         <p style={{ fontSize: "12px", color: "#5C5649" }}>
           Educational information sourced from public SEC filings and exchange data. Not investment
-          advice. No portfolio grade, score, or prediction is implied.
+          advice. No buy/sell recommendations or predictions are implied.
         </p>
         <p style={{ fontSize: "12px", color: "#5C5649" }}>
           <a href="https://goldsignal.ai/signalscore" style={{ color: "#C9971C" }}>
-            How we source data
+            How GoldSignal works
           </a>
         </p>
       </body>

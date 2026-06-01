@@ -1,4 +1,5 @@
 import type { StockFactsModel } from "@/lib/stock-facts";
+import type { StockDetailChartsModel } from "@/lib/stock-detail/chart-data";
 
 export type TrackedFundHolder = {
   slug: string;
@@ -33,6 +34,7 @@ export type StockDetailPageModel = StockFactsModel & {
   institutional: InstitutionalSummary;
   fundHolders: TrackedFundHolder[];
   largeStakes: LargeStakeRow[];
+  charts: StockDetailChartsModel;
   teachingKeys: {
     insider: string;
     institutional: string;

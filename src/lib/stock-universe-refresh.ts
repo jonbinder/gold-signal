@@ -1,10 +1,10 @@
 import fs from "fs";
 import path from "path";
-import { getInvestorsForTicker } from "@/lib/famous-holders";
 import {
   computeInsiderNet90dUsd,
   fetchForm4Transactions,
 } from "@/lib/form4-insider";
+import { getTrackedFundHolderCount } from "@/lib/funds/holder-count";
 import { getStockPrice, getTickerDetails, normalizeTicker } from "@/lib/polygon";
 import { fetchYahooSupplement, getPolygonTickerDetails } from "@/lib/stock-profile";
 import { createSupabaseServiceClient } from "@/lib/supabase";
@@ -66,13 +66,12 @@ export async function refreshOneStock(tracked: TrackedStock): Promise<{ ok: bool
       dailyChangePct = ((price - previousClose) / previousClose) * 100;
     }
 
-    const [polygonDetails, insiderResult, yahoo] = await Promise.all([
+    const [polygonDetails, insiderResult, yahoo, trackedFundCount] = await Promise.all([
       getPolygonTickerDetails(sym),
       fetchForm4Transactions(sym),
       fetchYahooSupplement(sym),
+      getTrackedFundHolderCount(sym),
     ]);
-
-    const famousHolders = getInvestorsForTicker(sym);
     const insiderRows = insiderResult.rows;
     const insiderNet90d = computeInsiderNet90dUsd(insiderRows);
     const nowIso = new Date().toISOString();
@@ -136,8 +135,8 @@ export async function refreshOneStock(tracked: TrackedStock): Promise<{ ok: bool
       pct_above_52_week_low: pctAbove52,
       company_description: polygonDetails?.description ?? null,
       ceo: yahoo.ceo,
-      famous_holder_count: famousHolders.length,
-      famous_holders: famousHolders,
+      famous_holder_count: trackedFundCount,
+      famous_holders: [],
       insider_transactions: insiderRows,
       insider_net_90d_usd: insiderNet90d,
       insider_as_of: nowIso,

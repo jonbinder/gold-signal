@@ -11,9 +11,7 @@ export type EnrichedHolding = {
   estWeight: string;
   notes: string;
   marketCap: number | null;
-  peRatio: number | null;
   priceHistory: number[];
-  signalScore: number | null;
   logoUrl: string;
 };
 
@@ -46,9 +44,7 @@ function enrichHolding(holding: InvestorHolding): EnrichedHolding {
     estWeight: holding.weight != null ? `${holding.weight}%` : "—",
     notes: holding.notes,
     marketCap: enrichment?.marketCap ?? null,
-    peRatio: enrichment?.peRatio ?? null,
     priceHistory: enrichment?.priceHistory ?? [],
-    signalScore: enrichment?.signalScore ?? null,
     logoUrl: enrichment?.logoUrl ?? (ticker ? stockLogoUrl(ticker) : ""),
   };
 }

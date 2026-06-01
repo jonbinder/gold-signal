@@ -1,13 +1,5 @@
 import fs from "fs";
 import path from "path";
-import {
-  rankStockFromMarketData,
-  isSignalAvailable,
-  FOOTPRINT_KEYS,
-  type FootprintKey,
-  type SubScoreKey,
-  type StockRankingResult,
-} from "@/lib/ranking";
 import { getInvestorsForTicker } from "@/lib/famous-holders";
 import {
   computeInsiderNet90dUsd,
@@ -18,9 +10,8 @@ import { fetchYahooSupplement, getPolygonTickerDetails } from "@/lib/stock-profi
 import { createSupabaseServiceClient } from "@/lib/supabase";
 import type { TrackedStock, TrackedStocksFile } from "@/lib/tracked-stocks";
 
-const SCORING_ENABLED = process.env.SCORING_ENABLED !== "false";
-
-const SUB_SCORE_KEYS = FOOTPRINT_KEYS as readonly FootprintKey[];
+/** Default off — ranking lives in @/lib/ranking (dormant). Set SCORING_ENABLED=true to recompute scores in cache. */
+const SCORING_ENABLED = process.env.SCORING_ENABLED === "true";
 const STALE_HOURS = 20;
 export const REFRESH_BATCH_SIZE = 25;
 
@@ -38,43 +29,7 @@ function pctAbove52WeekLow(current: number, low: number): number | null {
   return ((current - low) / low) * 100;
 }
 
-/**
- * Applies signal_coverage and defaulted source tags for cache storage.
- */
-export function buildCacheMetricsFromRanking(ranking: StockRankingResult): {
-  signalCoverage: number;
-  rawMetrics: Record<string, unknown>;
-  subScoreColumns: Record<string, number | null>;
-} {
-  let signalCoverage = 0;
-  const rawMetrics: Record<string, unknown> = { ...ranking.rawMetrics };
-
-  const subScoreColumns: Record<string, number | null> = {};
-
-  const columnMap: Record<SubScoreKey, string> = {
-    institutional: "institutional_score",
-    insider: "insider_score",
-    pe: "pe_score",
-    famousInvestor: "famous_investor_score",
-    support: "support_score",
-    correlation: "correlation_score",
-    fcfYield: "fcf_yield_score",
-  };
-
-  for (const key of SUB_SCORE_KEYS) {
-    const sub = ranking.subScores[key];
-    if (!isSignalAvailable(sub)) {
-      rawMetrics[`${key}_source`] = "defaulted";
-      subScoreColumns[columnMap[key]] = null;
-    } else {
-      signalCoverage++;
-      rawMetrics[`${key}_source`] = "computed";
-      subScoreColumns[columnMap[key]] = sub.score;
-    }
-  }
-
-  return { signalCoverage, rawMetrics, subScoreColumns };
-}
+export { buildCacheMetricsFromRanking } from "@/lib/stock-universe-refresh-scoring";
 
 function dataStatusFromCoverage(coverage: number, fetchFailed: boolean): DataStatus {
   if (fetchFailed) return "error";
@@ -129,13 +84,13 @@ export async function refreshOneStock(tracked: TrackedStock): Promise<{ ok: bool
     let signalScore: number | null = null;
 
     if (SCORING_ENABLED) {
-      const ranking = await rankStockFromMarketData(sym);
-      rankingCompanyName = ranking.companyName ?? sym;
-      signalScore = fetchFailed || !ranking.scoreAvailable ? null : ranking.signalScore;
-      const built = buildCacheMetricsFromRanking(ranking);
-      signalCoverage = built.signalCoverage;
-      rawMetrics = built.rawMetrics;
-      subScoreColumns = built.subScoreColumns;
+      const { computeScoringCacheFields } = await import("@/lib/stock-universe-refresh-scoring");
+      const scored = await computeScoringCacheFields(sym, fetchFailed);
+      rankingCompanyName = scored.rankingCompanyName;
+      signalScore = scored.signalScore;
+      signalCoverage = scored.signalCoverage;
+      rawMetrics = scored.rawMetrics;
+      subScoreColumns = scored.subScoreColumns;
     }
 
     let peRatio: number | null = null;
@@ -157,7 +112,7 @@ export async function refreshOneStock(tracked: TrackedStock): Promise<{ ok: bool
 
     const marketCap =
       polygonDetails?.market_cap ?? (detailsRes.ok ? detailsRes.data.marketCap : null);
-    const hasFacts = famousHolders.length > 0 || insiderRows.length > 0;
+    const hasFacts = insiderRows.length > 0 || marketCap != null;
     const dataStatus = SCORING_ENABLED
       ? dataStatusFromCoverage(signalCoverage, fetchFailed)
       : fetchFailed

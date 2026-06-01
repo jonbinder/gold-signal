@@ -13,6 +13,7 @@
     "prebuild": "npm run data:sync",
     "sync-investors-data": "npx tsx scripts/sync-investors-data.ts",
     "sync:investors": "npx tsx scripts/sync-investors-data.ts",
+    "sync:funds": "npx tsx scripts/sync-funds-13f.ts",
     "investors:images:download": "node scripts/download-investor-images.mjs",
     "investors:images:process": "node scripts/process-investor-images.js",
     "test:stocks": "npx tsx scripts/test-stock-quotes.ts",

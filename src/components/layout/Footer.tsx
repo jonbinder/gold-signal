@@ -6,7 +6,7 @@ const COLS = [
     title: "Platform",
     links: [
       { href: "/", label: "Home" },
-      { href: "/investors", label: "Investors" },
+      { href: "/funds", label: "Funds" },
       { href: "/stocks", label: "Stocks" },
     ],
   },
@@ -14,7 +14,7 @@ const COLS = [
     title: "Data",
     links: [
       { href: "/stocks", label: "Portfolio companies" },
-      { href: "/investors", label: "Fund managers" },
+      { href: "/funds", label: "Fund managers" },
       { href: "/", label: "Methodology" },
     ],
   },

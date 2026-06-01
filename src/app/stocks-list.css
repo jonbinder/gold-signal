@@ -1,0 +1,326 @@
+/* /stocks list — aligned with whats-new visual system */
+
+.stocks-list-page {
+  background: var(--bg-void);
+  min-height: 100%;
+}
+
+.stocks-list-hero {
+  background: linear-gradient(165deg, var(--navy-950) 0%, #0f1c2e 45%, #152536 100%);
+  color: #f1f5f9;
+  padding: 1.25rem 1rem 1.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+@media (min-width: 640px) {
+  .stocks-list-hero {
+    padding: 1.5rem 1.5rem 2rem;
+  }
+}
+
+.stocks-list-hero__inner {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.stocks-list-hero__eyebrow {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--gold-400);
+  margin: 0 0 0.35rem;
+}
+
+.stocks-list-hero__title {
+  font-family: var(--font-display);
+  font-size: clamp(1.35rem, 4vw, 1.75rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.5rem;
+  line-height: 1.15;
+}
+
+.stocks-list-hero__sub {
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: #94a3b8;
+  margin: 0;
+  max-width: 40rem;
+}
+
+.stocks-list-main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1.25rem 1rem 3rem;
+}
+
+@media (min-width: 640px) {
+  .stocks-list-main {
+    padding: 1.5rem 1.5rem 4rem;
+  }
+}
+
+.stocks-list-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.stocks-list-toolbar__group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.stocks-list-toolbar__label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-secondary);
+}
+
+.stocks-list-toolbar__select {
+  font-size: 0.875rem;
+  padding: 0.45rem 0.65rem;
+  border: 1px solid var(--border-dim);
+  border-radius: 4px;
+  background: #fff;
+  color: var(--text-primary);
+  min-width: 9rem;
+}
+
+.stocks-list-toolbar__count {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  align-self: center;
+}
+
+.stocks-list-sort {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+}
+
+.stocks-list-sort__btn {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.35rem 0.65rem;
+  border: 1px solid var(--border-dim);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.stocks-list-sort__btn:hover {
+  border-color: var(--gold-500);
+  color: var(--gold-600);
+}
+
+.stocks-list-sort__btn--active {
+  border-color: var(--gold-500);
+  background: var(--gold-100);
+  color: var(--gold-700);
+}
+
+.stocks-list-metal {
+  display: inline-block;
+  font-size: 0.625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+}
+
+.stocks-list-metal--gold {
+  background: rgba(201, 151, 46, 0.15);
+  color: var(--gold-700);
+}
+
+.stocks-list-metal--silver {
+  background: rgba(100, 116, 139, 0.15);
+  color: #475569;
+}
+
+.stocks-list-metal--diversified {
+  background: rgba(37, 99, 235, 0.1);
+  color: #1d4ed8;
+}
+
+.stocks-list-table-wrap {
+  display: none;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  background: #fff;
+  border: 1px solid var(--border-dim);
+  border-radius: 8px;
+}
+
+@media (min-width: 768px) {
+  .stocks-list-table-wrap {
+    display: block;
+  }
+}
+
+.stocks-list-table {
+  width: 100%;
+  min-width: 720px;
+  border-collapse: collapse;
+}
+
+.stocks-list-table .stocks-table__th,
+.stocks-list-table .stocks-table__td {
+  padding: 12px 14px;
+}
+
+.stocks-list-table .stocks-table__th--metal {
+  text-align: left;
+}
+
+.stocks-list-table .stocks-table__td--metal {
+  text-align: left;
+}
+
+.stocks-list-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+@media (min-width: 768px) {
+  .stocks-list-cards {
+    display: none;
+  }
+}
+
+.stocks-list-card {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  background: #fff;
+  border: 1px solid var(--border-dim);
+  border-radius: 8px;
+  padding: 0.9rem 1rem;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.stocks-list-card:hover {
+  border-color: var(--gold-500);
+  box-shadow: 0 4px 16px rgba(201, 151, 46, 0.1);
+}
+
+.stocks-list-card__head {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.stocks-list-card__identity {
+  flex: 1;
+  min-width: 0;
+}
+
+.stocks-list-card__ticker-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.2rem;
+}
+
+.stocks-list-card__ticker {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: #94a3b8;
+}
+
+.stocks-list-card__name {
+  font-weight: 600;
+  font-size: 0.9375rem;
+  color: var(--text-primary);
+  line-height: 1.3;
+}
+
+.stocks-list-card__stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem 0.75rem;
+  margin: 0;
+}
+
+.stocks-list-card__stat {
+  margin: 0;
+}
+
+.stocks-list-card__stat dt {
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #94a3b8;
+  margin: 0 0 0.15rem;
+}
+
+.stocks-list-card__stat dd {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+}
+
+.stocks-list-card__stat--wide {
+  grid-column: 1 / -1;
+}
+
+.stocks-list-insider--buy {
+  color: #15803d;
+  font-weight: 500;
+}
+
+.stocks-list-insider--sell {
+  color: #b91c1c;
+  font-weight: 500;
+}
+
+.stocks-list-insider--neutral {
+  color: #64748b;
+}
+
+.stocks-list-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin: 1.5rem 0 0.5rem;
+}
+
+.stocks-list-pagination__info {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.stocks-list-back {
+  text-align: center;
+  margin-top: 2rem;
+}
+
+.stocks-list-empty {
+  text-align: center;
+  padding: 2rem 1rem;
+  color: var(--text-secondary);
+  background: #fff;
+  border: 1px solid var(--border-dim);
+  border-radius: 8px;
+}

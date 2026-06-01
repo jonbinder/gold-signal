@@ -23,8 +23,8 @@ export const metadata: Metadata = {
 
 const DATA_SOURCES = [
   {
-    title: "Famous investor holdings",
-    body: "We track a curated list of well-known precious-metals investors and map their disclosed holdings to individual tickers. Sources include 13F filings, public interviews, and other voluntary disclosures. When a name is not in a tracked portfolio, we say so — we do not infer ownership.",
+    title: "Institutional funds (13F)",
+    body: "We are building a funds view from SEC 13F filings — quarterly institutional holdings reported to the SEC. That replaces the old curated famous-investor portfolio pages on the public site.",
   },
   {
     title: "Insider transactions (Form 4)",
@@ -44,9 +44,10 @@ export default function AboutPage() {
           <p className="explained__eyebrow">About GoldSignal.ai</p>
           <h1 className="explained__title">We show the facts. You decide.</h1>
           <p className="explained__lead">
-            GoldSignal.ai is built for investors who want a Dataroma-style view of precious-metals
-            equities: which famous specialists hold a stock, and what insiders are buying or selling.
-            We do not publish a composite score or black-box rating on the public site.
+            GoldSignal.ai is built for investors who want a Dataroma-style, facts-only view of
+            precious-metals equities: insider Form 4 activity, company reference data, and
+            institutional 13F funds. We do not publish a composite SignalScore or letter grade on the
+            public site.
           </p>
           {/* PLACEHOLDER: Replace this block with your founder/origin story. */}
           <div className="explained__placeholder" style={{ marginTop: "1.5rem", padding: "1rem 1.25rem", border: "1px dashed var(--gold-500, #C9971C)", borderRadius: "4px", background: "rgba(201, 151, 28, 0.06)" }}>
@@ -96,8 +97,8 @@ export default function AboutPage() {
           <h2 className="explained__section-title">Start exploring</h2>
           <p className="explained__lead">
             Browse{" "}
-            <Link href="/investors" className="explained__link">
-              tracked investors
+            <Link href="/funds" className="explained__link">
+              funds (13F)
             </Link>
             , look up any{" "}
             <Link href="/stocks" className="explained__link">

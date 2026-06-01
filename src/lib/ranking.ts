@@ -1,3 +1,9 @@
+/**
+ * DORMANT — SignalScore / portfolio grading engine (v3).
+ * Kept for a possible paid tier revival. Do not import from user-facing pages or routes.
+ * Pipeline: set SCORING_ENABLED=true to run via stock-universe-refresh (dynamic import).
+ * Tests: npm run test:ranking
+ */
 import { createSupabaseServiceClient } from "@/lib/supabase";
 import type { DailyBar, FinancialsBundle, InsiderTransaction, InstitutionalOwnership } from "@/lib/polygon";
 import {

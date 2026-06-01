@@ -1,0 +1,21 @@
+{
+  "description": "Dev/sample 13D and 13G large stakes. daysAgo is resolved to filing_date at load time.",
+  "stakes": [
+    {
+      "kind": "stake_13d",
+      "ticker": "AG",
+      "companyName": "First Majestic Silver Corp",
+      "filerName": "Example Activist Partners LP",
+      "ownershipPct": 7.2,
+      "daysAgo": 2
+    },
+    {
+      "kind": "stake_13g",
+      "ticker": "HL",
+      "companyName": "Hecla Mining Company",
+      "filerName": "BlackRock Inc.",
+      "ownershipPct": 11.4,
+      "daysAgo": 4
+    }
+  ]
+}

@@ -18,7 +18,7 @@ export type SendReportEmailParams = {
 };
 
 /**
- * Sends the SignalScore PDF report via Resend with attachment and backup link.
+ * DORMANT — Sends the SignalScore PDF report via Resend. Public flow uses send-facts-email instead.
  */
 export async function sendReportEmail(
   params: SendReportEmailParams,

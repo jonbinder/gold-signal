@@ -1,5 +1,6 @@
-import { sendFactsEmail } from "@/lib/email/send-facts-email";
-import { collectTickerFacts } from "@/lib/portfolio-facts";
+import { collectReadoutForTickers } from "@/lib/email/readout/collect-ticker-readout";
+import { sendReadoutEmail } from "@/lib/email/send-readout-email";
+import { sanitizeTickers, parseTickerInput } from "@/lib/portfolio-submission";
 import { createSupabaseServiceClient } from "@/lib/supabase";
 
 const STALE_PROCESSING_MS = 15 * 60 * 1000;
@@ -187,7 +188,7 @@ export async function claimPendingSubmissions(limit: number): Promise<Submission
 }
 
 /**
- * Processes one submission already in processing state: collect facts per ticker, email summary.
+ * Processes one submission: build per-ticker readout from stored data, send via Resend.
  */
 export async function processSubmission(submission: SubmissionRow): Promise<void> {
   const supabase = createSupabaseServiceClient();
@@ -196,31 +197,41 @@ export async function processSubmission(submission: SubmissionRow): Promise<void
   }
 
   const submissionId = submission.id;
+  const tickers = sanitizeTickers(
+    submission.tickers.flatMap((t) =>
+      typeof t === "string" ? (t.includes(",") ? parseTickerInput(t) : [t]) : [],
+    ),
+  );
+
+  if (tickers.length === 0) {
+    throw new Error("No valid tickers to process.");
+  }
+
   console.info("[processor] Loaded submission", {
     submissionId,
-    tickers: submission.tickers,
+    tickers,
     email: submission.email.replace(/(.{2}).*(@.*)/, "$1***$2"),
   });
 
   try {
-    const factsList = [];
-    for (const rawTicker of submission.tickers) {
-      console.info("[processor] Collecting facts", { submissionId, ticker: rawTicker });
-      factsList.push(await collectTickerFacts(rawTicker));
-    }
+    const { readouts } = await collectReadoutForTickers(tickers);
 
-    console.info("[processor] Sending facts email", { submissionId });
-    const { emailId } = await sendFactsEmail({
+    console.info("[processor] Sending readout email", { submissionId, count: readouts.length });
+    const { emailId } = await sendReadoutEmail({
       to: submission.email,
       userName: submission.name,
-      tickers: factsList,
+      tickers: readouts,
+      skippedInvalidTickers: [],
     });
 
+    const sentAt = new Date().toISOString();
     const { error: completeError } = await supabase
       .from("submissions")
       .update({
         status: "completed",
-        completed_at: new Date().toISOString(),
+        completed_at: sentAt,
+        readout_sent_at: sentAt,
+        readout_email_id: emailId,
         error_message: null,
         portfolio_score: null,
         portfolio_grade: null,
@@ -232,8 +243,17 @@ export async function processSubmission(submission: SubmissionRow): Promise<void
       throw new Error(`Failed to mark completed: ${completeError.message}`);
     }
 
-    console.info("[processor] Sent facts email via Resend", { submissionId, emailId });
-    console.info("[processor] Marked submission as completed", { submissionId, emailId });
+    const { error: watchlistLinkError } = await supabase
+      .from("watchlist_signups")
+      .update({ readout_sent_at: sentAt, readout_submission_id: submissionId })
+      .eq("email", submission.email)
+      .is("readout_sent_at", null);
+
+    if (watchlistLinkError) {
+      console.warn("[processor] watchlist_signups link skipped", watchlistLinkError.message);
+    }
+
+    console.info("[processor] Readout sent via Resend", { submissionId, emailId });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown processing error";
     console.error("[processor] Failed", { submissionId, message });

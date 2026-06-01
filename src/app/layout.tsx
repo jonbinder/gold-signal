@@ -27,15 +27,15 @@ const dmMono = DM_Mono({
 });
 
 const siteDescription =
-  "Track what famous precious-metals investors own and recent SEC Form 4 insider activity for gold and silver stocks.";
+  "See what the smart money is doing in gold and silver — insider buys, large stakes, and institutional moves from public SEC filings.";
 
 export const metadata: Metadata = {
-  title: "GoldSignal.ai — Who Owns Gold & Silver Stocks",
+  title: "GoldSignal.ai — Smart Money in Gold & Silver",
   description: siteDescription,
   openGraph: {
     type: "website",
     siteName: "GoldSignal.ai",
-    title: "GoldSignal.ai — Who Owns Gold & Silver Stocks",
+    title: "GoldSignal.ai — Smart Money in Gold & Silver",
     description: siteDescription,
     url: "https://goldsignal.ai/",
   },

@@ -24,6 +24,12 @@ export function formatMarketCapDisplay(value: number | null): string {
   return `$${Math.round(value).toLocaleString("en-US")}`;
 }
 
+export function formatHolderCount(count: number | null): string {
+  if (count == null || !Number.isFinite(count)) return "—";
+  if (count === 0) return "—";
+  return count === 1 ? "1 fund" : `${count} funds`;
+}
+
 export function formatAsOfDate(iso: string | null): string | null {
   if (!iso) return null;
   const d = new Date(iso);

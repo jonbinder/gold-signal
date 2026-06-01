@@ -1,7 +1,5 @@
 import { cache } from "react";
 import { createClient } from "@supabase/supabase-js";
-import type { FamousHolder } from "@/lib/famous-holders";
-import { getInvestorsForTicker } from "@/lib/famous-holders";
 import type { InsiderEmptyReason, InsiderTransactionRow } from "@/lib/form4-insider";
 import { normalizeInsiderTicker } from "@/lib/form4-insider";
 import { formatStockSectorLabel } from "@/lib/stock-category-labels";
@@ -26,8 +24,6 @@ export type StockFactsModel = {
   description: string | null;
   ceo: string | null;
   logoUrl: string | null;
-  famousHolders: FamousHolder[];
-  famousHolderCount: number;
   insider: InsiderTransactionRow[];
   insiderNet90dUsd: number | null;
   insiderAsOf: string | null;
@@ -46,8 +42,6 @@ type FactsCacheRow = {
   market_cap: number | null;
   company_description: string | null;
   ceo: string | null;
-  famous_holder_count: number | null;
-  famous_holders: FamousHolder[] | null;
   insider_transactions: InsiderTransactionRow[] | null;
   insider_net_90d_usd: number | null;
   insider_as_of: string | null;
@@ -85,16 +79,6 @@ function parseInsiderRows(raw: unknown): InsiderTransactionRow[] {
   );
 }
 
-function parseHolders(raw: unknown, ticker: string): FamousHolder[] {
-  if (Array.isArray(raw) && raw.length > 0) {
-    return raw.filter(
-      (h): h is FamousHolder =>
-        h != null && typeof h === "object" && typeof (h as FamousHolder).slug === "string",
-    );
-  }
-  return getInvestorsForTicker(ticker);
-}
-
 async function fetchFactsRow(ticker: string): Promise<FactsCacheRow | null> {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim();
@@ -105,7 +89,7 @@ async function fetchFactsRow(ticker: string): Promise<FactsCacheRow | null> {
   const { data, error } = await supabase
     .from("stock_data_cache")
     .select(
-      "ticker, name, category, sub_category, exchange, logo_url, market_cap, company_description, ceo, famous_holder_count, famous_holders, insider_transactions, insider_net_90d_usd, insider_as_of, data_status, last_updated",
+      "ticker, name, category, sub_category, exchange, logo_url, market_cap, company_description, ceo, insider_transactions, insider_net_90d_usd, insider_as_of, data_status, last_updated",
     )
     .eq("ticker", sym)
     .maybeSingle();
@@ -119,7 +103,6 @@ function buildModel(ticker: string, row: FactsCacheRow | null): StockFactsModel 
   const tracked = trackedMeta(sym);
   if (!row && !tracked) return null;
 
-  const holders = row ? parseHolders(row.famous_holders, sym) : getInvestorsForTicker(sym);
   const insider = row ? parseInsiderRows(row.insider_transactions) : [];
 
   let insiderEmptyReason: InsiderEmptyReason | null = null;
@@ -141,8 +124,6 @@ function buildModel(ticker: string, row: FactsCacheRow | null): StockFactsModel 
     description: row?.company_description ?? null,
     ceo: row?.ceo ?? null,
     logoUrl: row?.logo_url ?? tracked?.logoUrl ?? null,
-    famousHolders: holders,
-    famousHolderCount: row?.famous_holder_count ?? holders.length,
     insider,
     insiderNet90dUsd: row?.insider_net_90d_usd ?? null,
     insiderAsOf: row?.insider_as_of ?? row?.last_updated ?? null,

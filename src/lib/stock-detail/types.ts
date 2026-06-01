@@ -1,0 +1,40 @@
+import type { StockFactsModel } from "@/lib/stock-facts";
+
+export type TrackedFundHolder = {
+  slug: string;
+  name: string;
+  portfolioPct: number | null;
+  changeType: string | null;
+  valueUsd: number | null;
+};
+
+export type LargeStakeRow = {
+  kind: "stake_13d" | "stake_13g";
+  filerName: string;
+  ownershipPct: number;
+  filingDate: string;
+  filingDateLabel: string;
+};
+
+export type InstitutionalSummary = {
+  available: boolean;
+  periodLabel: string | null;
+  periodEnd: string | null;
+  holderCount: number;
+  netChangeSummary: string | null;
+  newPositions: number;
+  additions: number;
+  reductions: number;
+  exits: number;
+};
+
+export type StockDetailPageModel = StockFactsModel & {
+  metalTag: string;
+  institutional: InstitutionalSummary;
+  fundHolders: TrackedFundHolder[];
+  largeStakes: LargeStakeRow[];
+  teachingKeys: {
+    insider: string;
+    institutional: string;
+  };
+};

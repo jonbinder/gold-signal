@@ -13,6 +13,11 @@ const METAL_LABELS: Record<string, string> = {
   diversified: "Diversified",
 };
 
+/** Short metal tag for stock header chips. */
+export function formatMetalTag(subCategory: string): string {
+  return METAL_LABELS[subCategory] ?? "Precious metals";
+}
+
 /** Human-readable sector line, e.g. "Gold royalty & streaming". */
 export function formatStockSectorLabel(category: string, subCategory: string): string {
   const metal = METAL_LABELS[subCategory] ?? subCategory.replace(/_/g, " ");

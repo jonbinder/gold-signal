@@ -1,0 +1,42 @@
+[
+  {
+    "cik": "0000946109",
+    "display_name": "Sprott Asset Management",
+    "slug": "sprott-asset-management",
+    "manager_name": null,
+    "focus_note": "Dedicated precious metals and real assets — physical trusts, uranium, and PM equity strategies.",
+    "website": "https://sprott.com"
+  },
+  {
+    "cik": "0001352858",
+    "display_name": "Adrian Day Asset Management",
+    "slug": "adrian-day-asset-management",
+    "manager_name": "Adrian Day",
+    "focus_note": "Global macro and precious-metals oriented advisory — verify CIK against latest 13F filer name on SEC EDGAR.",
+    "website": "https://www.adriandayassetmanagement.com"
+  },
+  {
+    "cik": "0001081016",
+    "display_name": "Tocqueville Asset Management",
+    "slug": "tocqueville-asset-management",
+    "manager_name": null,
+    "focus_note": "Tocqueville Gold Fund and related precious-metals strategies.",
+    "website": "https://www.tocqueville.com"
+  },
+  {
+    "cik": "0001279936",
+    "display_name": "Baker Steel Capital Managers",
+    "slug": "baker-steel-capital",
+    "manager_name": null,
+    "focus_note": "London-based specialist in gold and precious metals equities.",
+    "website": "https://www.bakersteelcap.com"
+  },
+  {
+    "cik": "0001036325",
+    "display_name": "VanEck Associates",
+    "slug": "van-eck-associates",
+    "manager_name": null,
+    "focus_note": "GDX/GDXJ and active precious metals equity exposure.",
+    "website": "https://www.vaneck.com"
+  }
+]

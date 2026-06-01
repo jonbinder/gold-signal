@@ -1,6 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
 import { cache } from "react";
-import { getHolderCountForTicker } from "@/lib/famous-holders";
 import { loadTrackedStocksSync } from "@/lib/tracked-stocks-load";
 
 export type CachedDisplayStock = {
@@ -10,8 +9,8 @@ export type CachedDisplayStock = {
   subCategory: string;
   exchange: string | null;
   marketCap: number;
-  famousHolderCount: number;
   insiderNet90dUsd: number | null;
+  famousHolderCount: number | null;
   logoUrl: string;
   dataStatus: string;
 };
@@ -24,8 +23,8 @@ type CacheRow = {
   exchange: string | null;
   logo_url: string | null;
   market_cap: number | null;
-  famous_holder_count: number | null;
   insider_net_90d_usd: number | null;
+  famous_holder_count: number | null;
   data_status: string | null;
 };
 
@@ -40,8 +39,11 @@ function mapRow(row: CacheRow): CachedDisplayStock {
     subCategory: row.sub_category,
     exchange: row.exchange,
     marketCap: marketCapB,
-    famousHolderCount: row.famous_holder_count ?? getHolderCountForTicker(row.ticker),
     insiderNet90dUsd: row.insider_net_90d_usd,
+    famousHolderCount:
+      row.famous_holder_count != null && row.famous_holder_count >= 0
+        ? row.famous_holder_count
+        : null,
     logoUrl: row.logo_url ?? "",
     dataStatus: row.data_status ?? "pending",
   };
@@ -55,8 +57,8 @@ function fallbackFromTrackedFile(): CachedDisplayStock[] {
     subCategory: s.sub_category,
     exchange: s.exchange,
     marketCap: 0.1,
-    famousHolderCount: getHolderCountForTicker(s.ticker),
     insiderNet90dUsd: null,
+    famousHolderCount: null,
     logoUrl: s.logo_url ?? "",
     dataStatus: "pending",
   }));
@@ -77,9 +79,9 @@ export const getCachedDisplayStocks = cache(async (): Promise<CachedDisplayStock
   const { data, error } = await supabase
     .from("stock_data_cache")
     .select(
-      "ticker, name, category, sub_category, exchange, logo_url, market_cap, famous_holder_count, insider_net_90d_usd, data_status",
+      "ticker, name, category, sub_category, exchange, logo_url, market_cap, insider_net_90d_usd, famous_holder_count, data_status",
     )
-    .order("famous_holder_count", { ascending: false, nullsFirst: false });
+    .order("ticker", { ascending: true });
 
   if (error) {
     console.error("[stock-cache] Fetch failed:", error.message);

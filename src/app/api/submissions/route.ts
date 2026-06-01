@@ -86,7 +86,7 @@ export async function POST(req: Request) {
     {
       success: true,
       id: data.id,
-      message: `Thanks, ${name}! Your portfolio facts summary is being generated and will arrive at ${email} within the next few minutes.`,
+      message: `Thanks, ${name}! Your filing readout is on its way to ${email} — usually within a few minutes.`,
     },
     { status: 201 }
   );

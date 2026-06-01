@@ -1,3 +1,7 @@
+/**
+ * DORMANT for public UI — curated famous-investor ↔ ticker map (used by scoring pipeline when enabled).
+ * Do not surface on stock or investor pages.
+ */
 import { getInvestors } from "@/lib/goldsignal/data";
 import { normalizeInsiderTicker } from "@/lib/form4-insider";
 

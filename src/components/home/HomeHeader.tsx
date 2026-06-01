@@ -1,9 +1,9 @@
 import Link from "next/link";
 
 const NAV_LINKS = [
-  { href: "/investors", label: "Investors" },
+  { href: "/funds", label: "Funds" },
   { href: "/stocks", label: "Stocks" },
-  { href: "/signalscore", label: "SignalScore" },
+  { href: "/signalscore", label: "About" },
 ] as const;
 
 /** Legacy header — same inline nav as SiteNav (no hamburger). */

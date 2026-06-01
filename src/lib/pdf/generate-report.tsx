@@ -24,7 +24,7 @@ export async function loadReportLogoDataUri(): Promise<string | undefined> {
 }
 
 /**
- * Renders the SignalScore PDF report to a Buffer.
+ * DORMANT — Renders the SignalScore PDF report to a Buffer. Not used by the public submission flow.
  */
 export async function generateSignalScorePdf(params: {
   userName: string;

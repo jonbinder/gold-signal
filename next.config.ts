@@ -15,6 +15,8 @@ const nextConfig: NextConfig = {
     return [
       { source: "/gold-silver-stocks", destination: "/stocks", permanent: true },
       { source: "/leaderboard", destination: "/stocks", permanent: true },
+      { source: "/investors", destination: "/funds", permanent: false },
+      { source: "/investors/:slug", destination: "/funds/:slug", permanent: false },
     ];
   },
 };

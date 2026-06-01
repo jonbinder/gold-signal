@@ -3,6 +3,7 @@ import { getStocks } from "@/lib/goldsignal/data";
 import { GOLD_SILVER_STOCK_SEED } from "@/lib/gold-silver-stocks-seed-data";
 import { stockLogoUrl } from "@/lib/stock-logos";
 
+/** DORMANT enrichment for legacy investor-holdings UI — not used on public stock pages. */
 export type EnrichedStock = {
   ticker: string;
   name: string;
@@ -11,7 +12,6 @@ export type EnrichedStock = {
   peRatio: number | null;
   priceHistory: number[];
   above52WeekLow: number;
-  signalScore: number;
   logoUrl: string;
 };
 
@@ -67,9 +67,7 @@ export function enrichStock(raw: Stock): EnrichedStock {
   const history = buildPriceHistory(raw.ticker, raw.monthlyChange);
   const fromSeed = marketCapBillions.get(raw.ticker);
   const marketCap =
-    fromSeed && fromSeed > 0
-      ? fromSeed
-      : Math.max(0.1, (raw.signalScore / 100) * 50);
+    fromSeed && fromSeed > 0 ? fromSeed : Math.max(0.1, ((hashSeed(raw.ticker) % 40) + 10) / 10);
 
   return {
     ticker: raw.ticker,
@@ -79,7 +77,6 @@ export function enrichStock(raw: Stock): EnrichedStock {
     peRatio: PE_BY_TICKER[raw.ticker] ?? null,
     priceHistory: history,
     above52WeekLow: pctAbove52WeekLow(history),
-    signalScore: raw.signalScore,
     logoUrl: stockLogoUrl(raw.ticker),
   };
 }
@@ -113,7 +110,6 @@ export function getEnrichmentForTicker(rawTicker: string): Partial<EnrichedStock
     marketCap,
     peRatio: PE_BY_TICKER[baseTicker] ?? null,
     priceHistory: history,
-    signalScore: undefined,
     logoUrl: stockLogoUrl(baseTicker),
   };
 }

@@ -151,7 +151,24 @@ async function syncOneFund(
     });
   }
 
-  const totalValue = matched.reduce((sum, r) => sum + r.value_usd, 0) || 1;
+  // Deduplicate rows by security_id before upsert. Some 13F tables contain
+  // multiple lines that map to the same security in our universe, which can
+  // otherwise trigger: "ON CONFLICT DO UPDATE command cannot affect row a second time".
+  const aggregatedBySecurity = new Map<string, { shares: number; value_usd: number }>();
+  for (const row of matched) {
+    const prev = aggregatedBySecurity.get(row.security_id) ?? { shares: 0, value_usd: 0 };
+    prev.shares += row.shares;
+    prev.value_usd += row.value_usd;
+    aggregatedBySecurity.set(row.security_id, prev);
+  }
+
+  const dedupedMatched = Array.from(aggregatedBySecurity.entries()).map(([security_id, v]) => ({
+    security_id,
+    shares: Math.round(v.shares),
+    value_usd: Math.round(v.value_usd),
+  }));
+
+  const totalValue = dedupedMatched.reduce((sum, r) => sum + r.value_usd, 0) || 1;
 
   let priorBySecurity = new Map<string, { shares: number; value_usd: number }>();
   if (priorPeriod?.id) {
@@ -169,7 +186,7 @@ async function syncOneFund(
     );
   }
 
-  const holdingsPayload = matched.map((row) => {
+  const holdingsPayload = dedupedMatched.map((row) => {
     const prev = priorBySecurity.get(row.security_id);
     const change_type = computeChangeType(row.shares, prev?.shares ?? null);
     const portfolio_pct = Math.round((row.value_usd / totalValue) * 10000) / 100;

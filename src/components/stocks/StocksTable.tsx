@@ -12,6 +12,14 @@ interface StocksTableProps {
   stocks: CachedDisplayStock[];
 }
 
+const MOBILE_SORT_OPTIONS: Array<{ key: SortKey; label: string }> = [
+  { key: "marketCap", label: "Market Cap" },
+  { key: "peRatio", label: "PE Ratio" },
+  { key: "forwardPeRatio", label: "Forward PE Ratio" },
+  { key: "holderCount", label: "Tracked Investors" },
+  { key: "ticker", label: "Ticker A-Z" },
+];
+
 function formatMarketCap(valueUsd: number | null): string {
   if (valueUsd == null || !Number.isFinite(valueUsd) || valueUsd <= 0) return "—";
   if (valueUsd >= 1_000_000_000_000) return `$${(valueUsd / 1_000_000_000_000).toFixed(2)}T`;
@@ -87,6 +95,38 @@ export function StocksTable({ stocks }: StocksTableProps) {
           <p className="stocks-list-empty">No tracked stocks yet.</p>
         ) : (
           <>
+            <div className="stocks-list-mobile-sort" aria-label="Mobile stock sorting controls">
+              <label className="stocks-list-mobile-sort__label" htmlFor="stocks-mobile-sort">
+                Sort
+              </label>
+              <div className="stocks-list-mobile-sort__controls">
+                <select
+                  id="stocks-mobile-sort"
+                  className="stocks-list-mobile-sort__select"
+                  value={sortKey}
+                  onChange={(event) => {
+                    const nextKey = event.target.value as SortKey;
+                    setSortKey(nextKey);
+                    setSortDir(nextKey === "ticker" ? "asc" : "desc");
+                  }}
+                >
+                  {MOBILE_SORT_OPTIONS.map((option) => (
+                    <option key={option.key} value={option.key}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  className="stocks-list-mobile-sort__dir"
+                  onClick={() => setSortDir((current) => (current === "desc" ? "asc" : "desc"))}
+                  aria-label={`Sort direction: ${sortDir === "desc" ? "descending" : "ascending"}`}
+                >
+                  {sortDir === "desc" ? "Descending" : "Ascending"}
+                </button>
+              </div>
+            </div>
+
             <div className="stocks-list-table-wrap">
               <table className="stocks-table stocks-table--facts stocks-list-table">
                 <thead>
@@ -217,14 +257,16 @@ function StockCard({ stock }: { stock: CachedDisplayStock }) {
 
   return (
     <Link href={stockPath(stock.ticker)} className="stocks-list-card">
-      <div className="stocks-list-card__identity">
-        <div className="stocks-list-card__ticker-row">
-          <span className={tileClass(stock.subCategory)} aria-hidden>
-            {stock.ticker.charAt(0)}
-          </span>
-          <span className="stocks-list-card__ticker">{stock.ticker}</span>
+      <div className="stocks-list-card__head">
+        <span className={tileClass(stock.subCategory)} aria-hidden>
+          {stock.ticker.charAt(0)}
+        </span>
+        <div className="stocks-list-card__identity">
+          <div className="stocks-list-card__ticker-row">
+            <span className="stocks-list-card__ticker">{stock.ticker}</span>
+          </div>
+          <span className="stocks-list-card__name">{stock.name}</span>
         </div>
-        <span className="stocks-list-card__name">{stock.name}</span>
       </div>
       <dl className="stocks-list-card__stats">
         <div className="stocks-list-card__stat">

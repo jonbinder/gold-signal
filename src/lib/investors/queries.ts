@@ -1,5 +1,5 @@
 import { cache } from "react";
-import { createClient } from "@supabase/supabase-js";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { normalizeTicker } from "@/lib/polygon";
 import { readServiceRoleKey, readSupabaseAnonKey, readSupabaseUrl } from "@/lib/submission-supabase";
 import type {
@@ -55,20 +55,39 @@ type HoldingAutoRow = {
     | null;
 };
 
-function getAnonClient() {
+type InvestorsClientMode = "service_role" | "anon" | "none";
+
+function getInvestorsClient(): {
+  client: SupabaseClient | null;
+  mode: InvestorsClientMode;
+  urlHost: string | null;
+} {
   const url = readSupabaseUrl();
-  if (!url) return null;
+  const urlHost = url ? new URL(url).host : null;
+  if (!url) return { client: null, mode: "none", urlHost };
   const serviceKey = readServiceRoleKey();
   if (serviceKey) {
-    return createClient(url, serviceKey, {
-      auth: { persistSession: false, autoRefreshToken: false },
-    });
+    return {
+      client: createClient(url, serviceKey, {
+        auth: { persistSession: false, autoRefreshToken: false },
+      }),
+      mode: "service_role",
+      urlHost,
+    };
   }
   const anonKey = readSupabaseAnonKey();
-  if (!anonKey) return null;
-  return createClient(url, anonKey, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
+  if (!anonKey) return { client: null, mode: "none", urlHost };
+  return {
+    client: createClient(url, anonKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    }),
+    mode: "anon",
+    urlHost,
+  };
+}
+
+function getAnonClient() {
+  return getInvestorsClient().client;
 }
 
 function mapInvestor(row: InvestorRow): InvestorProfile {
@@ -205,7 +224,7 @@ export const getPublishedInvestors = cache(
     const supabase = getAnonClient();
     if (!supabase) return [];
 
-    const { data: investorsRaw } = await supabase
+    const { data: investorsRaw, error: investorsError } = await supabase
       .from("investors")
       .select(
         "id, slug, name, investor_type, title_role, bio, photo_url, website, website_url, cik, focus_note, context_note, sort_order, is_published",
@@ -213,16 +232,23 @@ export const getPublishedInvestors = cache(
       .eq("is_published", true)
       .order("sort_order", { ascending: true })
       .order("name", { ascending: true });
+    if (investorsError) {
+      console.error("[investors] list query failed", investorsError);
+      return [];
+    }
 
     const investors = ((investorsRaw ?? []) as InvestorRow[]).map(mapInvestor);
     if (investors.length === 0) return [];
 
     const ids = investors.map((i) => i.id);
-    const { data: manualCounts } = await supabase
+    const { data: manualCounts, error: manualCountsError } = await supabase
       .from("investor_positions")
       .select("investor_id")
       .in("investor_id", ids)
       .eq("is_published", true);
+    if (manualCountsError) {
+      console.error("[investors] manual counts query failed", manualCountsError);
+    }
 
     const manualById = new Map<string, number>();
     for (const row of manualCounts ?? []) {
@@ -260,6 +286,42 @@ export const getPublishedInvestors = cache(
     return list.sort((a, b) => a.name.localeCompare(b.name));
   },
 );
+
+export async function getPublishedInvestorsDebug(sort: InvestorSort = "name") {
+  const { client: supabase, mode, urlHost } = getInvestorsClient();
+  const debug: Record<string, unknown> = {
+    mode,
+    urlHost,
+    hasSupabaseUrl: Boolean(readSupabaseUrl()),
+    hasSupabaseServiceRole: Boolean(readServiceRoleKey()),
+    hasSupabaseAnon: Boolean(readSupabaseAnonKey()),
+    sort,
+  };
+  if (!supabase) {
+    return { ...debug, error: "No Supabase credentials available for investor query client." };
+  }
+
+  const base = await supabase.from("investors").select("id", { count: "exact", head: true }).eq("is_published", true);
+  const full = await supabase
+    .from("investors")
+    .select(
+      "id, slug, name, investor_type, title_role, bio, photo_url, website, website_url, cik, focus_note, context_note, sort_order, is_published",
+    )
+    .eq("is_published", true)
+    .order("sort_order", { ascending: true })
+    .order("name", { ascending: true });
+  const list = await getPublishedInvestors(sort);
+
+  return {
+    ...debug,
+    publishedCountSimple: base.count ?? 0,
+    publishedCountSimpleError: base.error?.message ?? null,
+    publishedCountListSelect: (full.data ?? []).length,
+    publishedCountListSelectError: full.error?.message ?? null,
+    finalRenderedCount: list.length,
+    sampleSlugs: list.slice(0, 8).map((row) => row.slug),
+  };
+}
 
 export const getInvestorDetail = cache(async (slug: string): Promise<InvestorDetailModel | null> => {
   const supabase = getAnonClient();

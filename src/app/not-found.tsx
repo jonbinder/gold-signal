@@ -28,8 +28,8 @@ export default function NotFound() {
           <Link href="/stocks" className="btn btn--secondary">
             Stocks
           </Link>
-          <Link href="/funds" className="btn btn--secondary">
-            Funds
+          <Link href="/investors" className="btn btn--secondary">
+            Investors
           </Link>
         </div>
         <p className="page-compliance" style={{ marginTop: "2.5rem" }}>

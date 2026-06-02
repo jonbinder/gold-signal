@@ -9,6 +9,12 @@ export type TrackedFundHolder = {
   valueUsd: number | null;
 };
 
+export type TrackedInvestorRef = {
+  slug: string;
+  name: string;
+  type: "individual" | "fund";
+};
+
 export type LargeStakeRow = {
   kind: "stake_13d" | "stake_13g";
   filerName: string;
@@ -33,6 +39,7 @@ export type StockDetailPageModel = StockFactsModel & {
   metalTag: string;
   institutional: InstitutionalSummary;
   fundHolders: TrackedFundHolder[];
+  trackedInvestors: TrackedInvestorRef[];
   largeStakes: LargeStakeRow[];
   charts: StockDetailChartsModel;
   teachingKeys: {

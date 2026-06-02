@@ -54,9 +54,10 @@ const SITE_GUIDE = [
     detail: "Browse the universe, then open any ticker for Form 4 history, 13F context, charts, and company facts.",
   },
   {
-    name: "Funds",
-    href: "/funds",
-    detail: "See what dedicated precious-metals funds hold and how positions moved quarter over quarter.",
+    name: "Investors",
+    href: "/investors",
+    detail:
+      "Browse curated investors and funds with sourced notable positions, plus auto-13F holdings for tracked filers.",
   },
   {
     name: "Free email readout",

@@ -9,7 +9,7 @@ import { HolderCountCard } from "@/components/charts/HolderCountCard";
 import { InstitutionalTrendChart } from "@/components/charts/InstitutionalTrendChart";
 import { InstitutionalConcentrationDonut } from "@/components/charts/InstitutionalConcentrationDonut";
 import { ChartEmpty } from "@/components/charts/ChartCaption";
-import { fundPath } from "@/lib/paths";
+import { investorPath } from "@/lib/paths";
 import {
   formatAsOfDate,
   formatInsiderNetLabel,
@@ -207,14 +207,33 @@ export function StockDetailView({ model }: { model: StockDetailPageModel }) {
           <TeachingBlock label="Why this matters" snippetKey={model.teachingKeys.institutional} />
         </SectionShell>
 
-        <SectionShell id="funds" title="Tracked funds holding this stock">
+        <SectionShell id="funds" title="Tracked investors holding this stock">
+          {model.trackedInvestors.length === 0 ? (
+            <p className="stock-detail-empty">No tracked investors currently have a sourced position in this ticker.</p>
+          ) : (
+            <ul className="stock-detail-funds">
+              {model.trackedInvestors.map((f) => (
+                <li key={f.slug}>
+                  <Link href={investorPath(f.slug)} className="stock-detail-fund-card">
+                    <span className="stock-detail-fund-card__name">{f.name}</span>
+                    <span className="stock-detail-fund-card__meta mono">
+                      {f.type === "fund" ? "Fund" : "Individual"}
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </SectionShell>
+
+        <SectionShell id="funds13f" title="Latest 13F fund holders">
           {model.fundHolders.length === 0 ? (
-            <p className="stock-detail-empty">No tracked funds currently hold this stock.</p>
+            <p className="stock-detail-empty">No tracked 13F funds currently hold this stock.</p>
           ) : (
             <ul className="stock-detail-funds">
               {model.fundHolders.map((f) => (
                 <li key={f.slug}>
-                  <Link href={fundPath(f.slug)} className="stock-detail-fund-card">
+                  <Link href={investorPath(f.slug)} className="stock-detail-fund-card">
                     <span className="stock-detail-fund-card__name">{f.name}</span>
                     <span className="stock-detail-fund-card__meta mono">
                       {f.portfolioPct != null ? `${f.portfolioPct.toFixed(1)}% of portfolio` : ""}

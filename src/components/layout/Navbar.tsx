@@ -6,7 +6,7 @@ import { PreciousMetalsBanner } from "@/components/layout/PreciousMetalsBanner";
 import { BrandLogo } from "@/components/layout/BrandLogo";
 
 const NAV_LINKS = [
-  { href: "/funds", label: "Funds", icon: Users },
+  { href: "/investors", label: "Investors", icon: Users },
   { href: "/stocks", label: "Stocks", icon: Layers },
 ] as const;
 

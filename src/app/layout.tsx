@@ -2,26 +2,25 @@ import "./globals.css";
 import "./mobile.css";
 
 import type { Metadata } from "next";
-import { DM_Mono, DM_Sans, Playfair_Display } from "next/font/google";
+import { Fraunces, Inter_Tight, Newsreader } from "next/font/google";
 import { cn } from "@/lib/utils";
 
-const dmSans = DM_Sans({
+const interTight = Inter_Tight({
   subsets: ["latin"],
   variable: "--font-body-loaded",
   display: "swap",
 });
 
-const playfair = Playfair_Display({
+const fraunces = Fraunces({
   subsets: ["latin"],
   variable: "--font-display-loaded",
-  weight: ["600", "700", "800"],
-  style: ["normal", "italic"],
+  weight: ["600"],
   display: "swap",
 });
 
-const dmMono = DM_Mono({
+const newsreader = Newsreader({
   subsets: ["latin"],
-  variable: "--font-mono-loaded",
+  variable: "--font-reading-loaded",
   weight: ["400", "500"],
   display: "swap",
 });
@@ -45,14 +44,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="en"
-      className={cn(dmSans.variable, playfair.variable, dmMono.variable, "scroll-smooth")}
+      className={cn(interTight.variable, fraunces.variable, newsreader.variable, "scroll-smooth")}
     >
-      <head>
-        <link
-          href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap"
-          rel="stylesheet"
-        />
-      </head>
       <body>{children}</body>
     </html>
   );

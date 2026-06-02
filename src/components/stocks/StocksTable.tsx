@@ -6,7 +6,7 @@ import { stockPath } from "@/lib/paths";
 import type { CachedDisplayStock } from "@/lib/stock-cache";
 import { formatHolderCount } from "@/lib/stock-facts-format";
 
-type SortKey = "ticker" | "holderCount" | "marketCap";
+type SortKey = "ticker" | "holderCount" | "marketCap" | "peRatio" | "forwardPeRatio";
 
 interface StocksTableProps {
   stocks: CachedDisplayStock[];
@@ -20,21 +20,27 @@ function formatMarketCap(valueUsd: number | null): string {
   return `$${Math.round(valueUsd).toLocaleString()}`;
 }
 
-const MOBILE_SORT_OPTIONS: { key: SortKey; label: string }[] = [
-  { key: "ticker", label: "Ticker A-Z" },
-  { key: "marketCap", label: "Market cap" },
-  { key: "holderCount", label: "Tracked investors" },
-];
+function formatRatio(value: number | null): string {
+  if (value == null || !Number.isFinite(value) || value <= 0) return "—";
+  return `${Math.round(value)}`;
+}
+
+function tileClass(subCategory: string): string {
+  if (subCategory === "silver") return "stocks-list-tile stocks-list-tile--silver";
+  return "stocks-list-tile stocks-list-tile--gold";
+}
 
 function sortValue(stock: CachedDisplayStock, key: SortKey): number | string {
   if (key === "ticker") return stock.ticker;
   if (key === "holderCount") return stock.famousHolderCount ?? -1;
+  if (key === "peRatio") return stock.peRatio ?? -1;
+  if (key === "forwardPeRatio") return stock.forwardPeRatio ?? -1;
   return stock.marketCap ?? -1;
 }
 
 export function StocksTable({ stocks }: StocksTableProps) {
-  const [sortKey, setSortKey] = useState<SortKey>("ticker");
-  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
+  const [sortKey, setSortKey] = useState<SortKey>("marketCap");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
 
   const sorted = useMemo(() => {
     const list = [...stocks];
@@ -77,24 +83,6 @@ export function StocksTable({ stocks }: StocksTableProps) {
       </section>
 
       <div className="stocks-list-main">
-        <div className="stocks-list-sort" role="group" aria-label="Sort stocks">
-          {MOBILE_SORT_OPTIONS.map((opt) => {
-            const active = sortKey === opt.key;
-            return (
-              <button
-                key={opt.key}
-                type="button"
-                className={`stocks-list-sort__btn ${active ? "stocks-list-sort__btn--active" : ""}`}
-                aria-pressed={active}
-                onClick={() => setSort(opt.key)}
-              >
-                {active ? (sortDir === "desc" ? "▼ " : "▲ ") : null}
-                {opt.label}
-              </button>
-            );
-          })}
-        </div>
-
         {sorted.length === 0 ? (
           <p className="stocks-list-empty">No tracked stocks yet.</p>
         ) : (
@@ -116,6 +104,20 @@ export function StocksTable({ stocks }: StocksTableProps) {
                     <SortHeader
                       label="Market Cap"
                       sortKey="marketCap"
+                      active={sortKey}
+                      dir={sortDir}
+                      onSort={setSort}
+                    />
+                    <SortHeader
+                      label="PE Ratio"
+                      sortKey="peRatio"
+                      active={sortKey}
+                      dir={sortDir}
+                      onSort={setSort}
+                    />
+                    <SortHeader
+                      label="Forward PE Ratio"
+                      sortKey="forwardPeRatio"
                       active={sortKey}
                       dir={sortDir}
                       onSort={setSort}
@@ -191,10 +193,17 @@ function StockTableRow({ stock }: { stock: CachedDisplayStock }) {
       </td>
       <td className="stocks-list-table__company">
         <Link href={stockPath(stock.ticker)} className="stocks-list-table__link-subtle">
-          {stock.name}
+          <span className="stocks-list-company-cell">
+            <span className={tileClass(stock.subCategory)} aria-hidden>
+              {stock.ticker.charAt(0)}
+            </span>
+            <span>{stock.name}</span>
+          </span>
         </Link>
       </td>
       <td className="stocks-list-table__num">{marketCap}</td>
+      <td className="stocks-list-table__num">{formatRatio(stock.peRatio)}</td>
+      <td className="stocks-list-table__num">{formatRatio(stock.forwardPeRatio)}</td>
       <td className="stocks-list-table__num">
         {holders === "—" ? <span className="stocks-table__na">—</span> : holders}
       </td>
@@ -210,6 +219,9 @@ function StockCard({ stock }: { stock: CachedDisplayStock }) {
     <Link href={stockPath(stock.ticker)} className="stocks-list-card">
       <div className="stocks-list-card__identity">
         <div className="stocks-list-card__ticker-row">
+          <span className={tileClass(stock.subCategory)} aria-hidden>
+            {stock.ticker.charAt(0)}
+          </span>
           <span className="stocks-list-card__ticker">{stock.ticker}</span>
         </div>
         <span className="stocks-list-card__name">{stock.name}</span>
@@ -218,6 +230,14 @@ function StockCard({ stock }: { stock: CachedDisplayStock }) {
         <div className="stocks-list-card__stat">
           <dt>Market Cap</dt>
           <dd>{cap}</dd>
+        </div>
+        <div className="stocks-list-card__stat">
+          <dt>PE</dt>
+          <dd>{formatRatio(stock.peRatio)}</dd>
+        </div>
+        <div className="stocks-list-card__stat">
+          <dt>Forward PE</dt>
+          <dd>{formatRatio(stock.forwardPeRatio)}</dd>
         </div>
         <div className="stocks-list-card__stat">
           <dt># Tracked Investors</dt>

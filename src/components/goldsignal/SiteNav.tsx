@@ -2,10 +2,12 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { SITE_NAV_LINKS } from "@/lib/goldsignal/nav-links";
 
 export function SiteNav() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const pathname = usePathname();
 
   const closeMenu = useCallback(() => setMenuOpen(false), []);
   const toggleMenu = useCallback(() => setMenuOpen((o) => !o), []);
@@ -36,7 +38,12 @@ export function SiteNav() {
         <ul className="nav__links">
           {SITE_NAV_LINKS.map((link) => (
             <li key={link.href}>
-              <Link href={link.href}>{link.label}</Link>
+              <Link
+                href={link.href}
+                className={pathname === link.href ? "nav__link nav__link--active" : "nav__link"}
+              >
+                {link.label}
+              </Link>
             </li>
           ))}
         </ul>
@@ -73,7 +80,11 @@ export function SiteNav() {
         <ul className="nav__overlay-links">
           {SITE_NAV_LINKS.map((link) => (
             <li key={link.href}>
-              <Link href={link.href} onClick={closeMenu}>
+              <Link
+                href={link.href}
+                className={pathname === link.href ? "nav__link nav__link--active" : "nav__link"}
+                onClick={closeMenu}
+              >
                 {link.label}
               </Link>
             </li>

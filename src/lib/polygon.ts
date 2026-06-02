@@ -34,6 +34,8 @@ export type QuarterlyFinancials = {
   revenue: number | null;
   freeCashFlow: number | null;
   netIncome: number | null;
+  epsBasic: number | null;
+  epsDiluted: number | null;
   totalDebt: number | null;
   equity: number | null;
 };
@@ -149,6 +151,8 @@ function parseQuarter(row: Record<string, unknown>): QuarterlyFinancials {
     revenue: readNestedValue(income, ["revenues", "revenue", "total_revenue"]),
     freeCashFlow: fcf,
     netIncome: readNestedValue(income, ["net_income_loss", "net_income", "net_income_loss_attributable_to_parent"]),
+    epsBasic: readNestedValue(income, ["basic_earnings_per_share", "earnings_per_share_basic"]),
+    epsDiluted: readNestedValue(income, ["diluted_earnings_per_share", "earnings_per_share_diluted"]),
     totalDebt: readNestedValue(balance, [
       "long_term_debt",
       "long_term_debt_noncurrent",
@@ -319,7 +323,7 @@ export async function getFinancials(ticker: string): Promise<ApiResult<Financial
   const res = await polygonFetch<FinResponse>(
     "/vX/reference/financials",
     { ticker: sym, limit: 4, sort: "period_of_report_date.desc" },
-    { cacheKey },
+    { cacheKey, cacheTtlMs: 24 * 60 * 60 * 1000 },
   );
   if (!res.ok) return res;
 

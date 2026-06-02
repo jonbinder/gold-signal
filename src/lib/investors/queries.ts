@@ -1,6 +1,7 @@
 import { cache } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { normalizeTicker } from "@/lib/polygon";
+import { readServiceRoleKey, readSupabaseAnonKey, readSupabaseUrl } from "@/lib/submission-supabase";
 import type {
   InvestorDetailModel,
   InvestorListItem,
@@ -55,10 +56,19 @@ type HoldingAutoRow = {
 };
 
 function getAnonClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim();
-  if (!url || !key) return null;
-  return createClient(url, key);
+  const url = readSupabaseUrl();
+  if (!url) return null;
+  const serviceKey = readServiceRoleKey();
+  if (serviceKey) {
+    return createClient(url, serviceKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+  }
+  const anonKey = readSupabaseAnonKey();
+  if (!anonKey) return null;
+  return createClient(url, anonKey, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
 }
 
 function mapInvestor(row: InvestorRow): InvestorProfile {

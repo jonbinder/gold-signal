@@ -120,7 +120,7 @@ export default async function AdminPage({
             Add/edit investors and sourced positions. Source type, source detail, and as-of date are required.
           </p>
           <p className="funds-hero__sub" style={{ marginTop: "0.35rem" }}>
-            Showing {filter === "drafts" ? "draft review queue (is_published=false, needs_review=true)" : "all records"}.
+            Showing {filter === "drafts" ? "draft review queue (unpublished + needs review)" : "all records"}.
           </p>
           <p className="funds-hero__sub" style={{ marginTop: "0.35rem" }}>
             View:{" "}
@@ -202,7 +202,7 @@ export default async function AdminPage({
               <input type="checkbox" name="is_published" defaultChecked /> Published
             </label>
             <label style={{ alignSelf: "end" }}>
-              <input type="checkbox" name="needs_review" defaultChecked /> Needs review
+              <input type="checkbox" name="needs_review" /> Needs review
             </label>
             <div style={{ gridColumn: "1 / -1" }}>
               <button type="submit" className="btn btn--cta">
@@ -274,7 +274,7 @@ export default async function AdminPage({
               <input type="checkbox" name="is_published" defaultChecked /> Published
             </label>
             <label style={{ alignSelf: "end" }}>
-              <input type="checkbox" name="needs_review" defaultChecked /> Needs review
+              <input type="checkbox" name="needs_review" /> Needs review
             </label>
             <div style={{ gridColumn: "1 / -1" }}>
               <button type="submit" className="btn btn--cta">

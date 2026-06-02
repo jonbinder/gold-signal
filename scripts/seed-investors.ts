@@ -423,6 +423,12 @@ async function upsertInvestor(seed: InvestorSeed): Promise<string> {
   const supabase = getSupabaseServiceRole();
   if (!supabase) throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY");
 
+  const { data: existing } = await supabase
+    .from("investors")
+    .select("id, is_published, needs_review")
+    .eq("slug", seed.slug)
+    .maybeSingle();
+
   const payload = {
     slug: seed.slug,
     name: seed.name,
@@ -434,18 +440,22 @@ async function upsertInvestor(seed: InvestorSeed): Promise<string> {
     cik: seed.cik,
     focus_note: seed.focusNote,
     sort_order: seed.sortOrder,
-    is_published: false,
-    needs_review: true,
+    is_published: existing?.is_published ?? true,
+    needs_review: existing?.needs_review ?? false,
     is_active: true,
     updated_at: new Date().toISOString(),
   };
 
-  const { data, error } = await supabase
-    .from("investors")
-    .upsert(payload, { onConflict: "slug" })
-    .select("id")
-    .single();
-  if (error || !data?.id) throw new Error(`upsert investor ${seed.slug} failed: ${error?.message ?? "unknown"}`);
+  if (existing?.id) {
+    const { data, error } = await supabase.from("investors").update(payload).eq("id", existing.id).select("id").single();
+    if (error || !data?.id) {
+      throw new Error(`update investor ${seed.slug} failed: ${error?.message ?? "unknown"}`);
+    }
+    return data.id as string;
+  }
+
+  const { data, error } = await supabase.from("investors").insert(payload).select("id").single();
+  if (error || !data?.id) throw new Error(`insert investor ${seed.slug} failed: ${error?.message ?? "unknown"}`);
   return data.id as string;
 }
 
@@ -455,7 +465,7 @@ async function upsertPosition(investorId: string, row: PositionSeed): Promise<vo
   const ticker = row.ticker.trim().toUpperCase();
   const { data: existing } = await supabase
     .from("investor_positions")
-    .select("id")
+    .select("id, is_published, needs_review")
     .eq("investor_id", investorId)
     .eq("ticker", ticker)
     .eq("source_type", row.sourceType)
@@ -474,8 +484,8 @@ async function upsertPosition(investorId: string, row: PositionSeed): Promise<vo
     source_detail: row.sourceDetail,
     as_of_date: row.asOfDate,
     why_interesting: row.whyInteresting,
-    is_published: false,
-    needs_review: true,
+    is_published: existing?.is_published ?? true,
+    needs_review: existing?.needs_review ?? false,
     updated_at: new Date().toISOString(),
   };
 
@@ -506,7 +516,7 @@ async function main() {
   }
 
   console.log(
-    `[seed:investors] done: investors upserted=${investorCount}, positions upserted=${positionCount}, all set to draft (is_published=false, needs_review=true)`,
+    `[seed:investors] done: investors upserted=${investorCount}, positions upserted=${positionCount}, defaults are published (is_published=true, needs_review=false), and existing rows keep their current flags`,
   );
   if (missingTickers.size > 0) {
     console.log(`[seed:investors] tickers without stock pages yet: ${[...missingTickers].sort().join(", ")}`);
@@ -514,7 +524,7 @@ async function main() {
     console.log("[seed:investors] all seeded tickers have stock pages");
   }
   console.log(
-    "[seed:investors] funds seeded as draft records only; run `npm run sync:funds` to auto-populate 13F holdings in investor detail.",
+    "[seed:investors] funds seeded; run `npm run sync:funds` to auto-populate 13F holdings in investor detail.",
   );
 }
 

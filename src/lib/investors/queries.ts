@@ -80,18 +80,27 @@ function mapInvestor(row: InvestorRow): InvestorProfile {
 }
 
 function mapManualPosition(row: PositionRow): InvestorPosition {
+  const clean = (value: string | null): string | null => {
+    if (!value) return value;
+    return value
+      .replace(/\s*\(research draft\)\s*/gi, " ")
+      .replace(/\s*[-\u2014]\s*verify[^.]*before publish\.?/gi, "")
+      .replace(/\s+/g, " ")
+      .trim();
+  };
+
   return {
     id: row.id,
     investorId: row.investor_id,
     ticker: normalizeTicker(row.ticker),
     companyName: row.company_name,
     positionType: row.position_type,
-    detail: row.detail,
+    detail: clean(row.detail) ?? "",
     approxSize: row.approx_size,
     sourceType: row.source_type,
-    sourceDetail: row.source_detail,
+    sourceDetail: clean(row.source_detail) ?? "",
     asOfDate: row.as_of_date,
-    whyInteresting: row.why_interesting,
+    whyInteresting: clean(row.why_interesting),
     isPublished: row.is_published,
     createdAt: row.created_at,
     updatedAt: row.updated_at,

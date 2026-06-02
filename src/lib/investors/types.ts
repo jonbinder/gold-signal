@@ -4,6 +4,7 @@ export type PositionType =
   | "stake_filing"
   | "insider_form4"
   | "fund_13f"
+  | "fund_holding"
   | "public_statement"
   | "other_disclosure";
 
@@ -18,6 +19,7 @@ export type InvestorProfile = {
   website: string | null;
   cik: string | null;
   focusNote: string | null;
+  contextNote: string | null;
   sortOrder: number;
   isPublished: boolean;
 };

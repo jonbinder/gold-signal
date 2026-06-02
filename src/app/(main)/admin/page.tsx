@@ -89,6 +89,7 @@ const POSITION_TYPE_OPTIONS = [
   "stake_filing",
   "insider_form4",
   "fund_13f",
+  "fund_holding",
   "public_statement",
   "other_disclosure",
 ] as const;

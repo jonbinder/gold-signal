@@ -21,6 +21,7 @@ type InvestorRow = {
   website_url: string | null;
   cik: string | null;
   focus_note: string | null;
+  context_note: string | null;
   sort_order: number | null;
   is_published: boolean | null;
 };
@@ -72,6 +73,7 @@ function mapInvestor(row: InvestorRow): InvestorProfile {
     website: row.website ?? row.website_url,
     cik: row.cik,
     focusNote: row.focus_note,
+    contextNote: row.context_note,
     sortOrder: row.sort_order ?? 100,
     isPublished: row.is_published ?? false,
   };
@@ -187,7 +189,7 @@ export const getPublishedInvestors = cache(
     const { data: investorsRaw } = await supabase
       .from("investors")
       .select(
-        "id, slug, name, investor_type, title_role, bio, photo_url, website, website_url, cik, focus_note, sort_order, is_published",
+        "id, slug, name, investor_type, title_role, bio, photo_url, website, website_url, cik, focus_note, context_note, sort_order, is_published",
       )
       .eq("is_published", true)
       .order("sort_order", { ascending: true })
@@ -247,7 +249,7 @@ export const getInvestorDetail = cache(async (slug: string): Promise<InvestorDet
   const { data: investorRaw } = await supabase
     .from("investors")
     .select(
-      "id, slug, name, investor_type, title_role, bio, photo_url, website, website_url, cik, focus_note, sort_order, is_published",
+      "id, slug, name, investor_type, title_role, bio, photo_url, website, website_url, cik, focus_note, context_note, sort_order, is_published",
     )
     .eq("slug", slug)
     .eq("is_published", true)

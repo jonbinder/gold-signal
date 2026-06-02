@@ -11,6 +11,7 @@ function sourceBadgeClass(sourceType: string): string {
   if (sourceType.toLowerCase().includes("interview")) return "investor-source-badge investor-source-badge--statement";
   if (sourceType.toLowerCase().includes("podcast")) return "investor-source-badge investor-source-badge--statement";
   if (sourceType.toLowerCase().includes("conference")) return "investor-source-badge investor-source-badge--statement";
+  if (sourceType.toLowerCase().includes("fact sheet")) return "investor-source-badge investor-source-badge--statement";
   return "investor-source-badge";
 }
 
@@ -56,6 +57,12 @@ export function InvestorDetailView({ model }: { model: InvestorDetailModel }) {
           <p className="funds-teaching" style={{ marginTop: "0.5rem" }}>
             <span className="funds-teaching__label">Note</span>
             Positions shown are notable disclosed/stated holdings, not a complete portfolio.
+          </p>
+        ) : null}
+        {investor.contextNote ? (
+          <p className="funds-teaching" style={{ marginTop: "0.5rem" }}>
+            <span className="funds-teaching__label">Context</span>
+            {investor.contextNote}
           </p>
         ) : null}
 

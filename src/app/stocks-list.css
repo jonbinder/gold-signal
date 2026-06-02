@@ -324,3 +324,121 @@
   border: 1px solid var(--border-dim);
   border-radius: 8px;
 }
+
+/* Cleaner stocks list redesign */
+.stocks-list-hero__title {
+  color: #f8fafc;
+}
+
+.stocks-list-hero .hero-tagline {
+  color: #e2e8f0;
+  margin: 0 0 0.45rem;
+}
+
+.stocks-list-main {
+  max-width: 1020px;
+}
+
+.stocks-list-sort {
+  margin-bottom: 0.8rem;
+}
+
+.stocks-list-sort__btn {
+  border-radius: 8px;
+  font-size: 0.72rem;
+}
+
+.stocks-list-table-wrap {
+  display: block;
+  border-radius: 12px;
+  box-shadow: 0 2px 14px rgba(15, 23, 42, 0.05);
+}
+
+.stocks-list-table {
+  min-width: 100%;
+  font-size: 0.9rem;
+}
+
+.stocks-list-table__row td {
+  padding: 0.95rem 0.95rem;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.stocks-list-table__row:last-child td {
+  border-bottom: none;
+}
+
+.stocks-list-table__ticker {
+  width: 110px;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.stocks-list-table__company {
+  min-width: 280px;
+  color: var(--text-secondary);
+}
+
+.stocks-list-table__num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.stocks-list-table__link {
+  color: var(--navy-900);
+  text-decoration: none;
+}
+
+.stocks-list-table__link:hover {
+  color: var(--gold-600);
+}
+
+.stocks-list-table__link-subtle {
+  color: #475569;
+  text-decoration: none;
+}
+
+.stocks-list-table__link-subtle:hover {
+  color: var(--gold-600);
+}
+
+.stocks-table__sort-btn {
+  font-size: 0.72rem;
+}
+
+.stocks-list-cards {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .stocks-list-table-wrap {
+    display: none;
+  }
+
+  .stocks-list-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .stocks-list-card {
+    border-radius: 12px;
+    padding: 0.95rem 1rem;
+  }
+
+  .stocks-list-card__ticker {
+    font-size: 0.78rem;
+    color: var(--gold-700);
+  }
+
+  .stocks-list-card__name {
+    font-size: 1rem;
+    margin-top: 0.15rem;
+    display: block;
+  }
+
+  .stocks-list-card__stats {
+    margin-top: 0.7rem;
+  }
+}

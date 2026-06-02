@@ -308,49 +308,6 @@ export const getPublishedInvestors = cache(
   },
 );
 
-export async function getPublishedInvestorsDebug(sort: InvestorSort = "name") {
-  const { client: supabase, mode, urlHost } = getInvestorsClient();
-  const debug: Record<string, unknown> = {
-    mode,
-    urlHost,
-    hasSupabaseUrl: Boolean(readSupabaseUrl()),
-    hasSupabaseServiceRole: Boolean(readServiceRoleKey()),
-    hasSupabaseAnon: Boolean(readSupabaseAnonKey()),
-    sort,
-  };
-  if (!supabase) {
-    return { ...debug, error: "No Supabase credentials available for investor query client." };
-  }
-
-  const base = await supabase.from("investors").select("id", { count: "exact", head: true }).eq("is_published", true);
-  const full = await supabase
-    .from("investors")
-    .select(INVESTOR_SELECT_WITH_CONTEXT)
-    .eq("is_published", true)
-    .order("sort_order", { ascending: true })
-    .order("name", { ascending: true });
-  const fullLegacy =
-    full.error?.message.includes("context_note")
-      ? await supabase
-          .from("investors")
-          .select(INVESTOR_SELECT_LEGACY)
-          .eq("is_published", true)
-          .order("sort_order", { ascending: true })
-          .order("name", { ascending: true })
-      : null;
-  const list = await getPublishedInvestors(sort);
-
-  return {
-    ...debug,
-    publishedCountSimple: base.count ?? 0,
-    publishedCountSimpleError: base.error?.message ?? null,
-    publishedCountListSelect: (fullLegacy?.data ?? full.data ?? []).length,
-    publishedCountListSelectError: fullLegacy?.error?.message ?? full.error?.message ?? null,
-    finalRenderedCount: list.length,
-    sampleSlugs: list.slice(0, 8).map((row) => row.slug),
-  };
-}
-
 export const getInvestorDetail = cache(async (slug: string): Promise<InvestorDetailModel | null> => {
   const supabase = getAnonClient();
   if (!supabase) return null;

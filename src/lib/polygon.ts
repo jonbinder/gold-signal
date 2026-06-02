@@ -283,7 +283,7 @@ export async function getTickerDetails(ticker: string): Promise<ApiResult<Ticker
   const res = await polygonFetch<RefResponse>(
     `/v3/reference/tickers/${encodeURIComponent(sym)}`,
     {},
-    { cacheKey },
+    { cacheKey, cacheTtlMs: 24 * 60 * 60 * 1000 },
   );
   if (!res.ok) return res;
 

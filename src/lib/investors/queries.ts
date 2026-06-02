@@ -26,6 +26,7 @@ type InvestorRow = {
   sort_order: number | null;
   is_published: boolean | null;
 };
+type InvestorRowLegacy = Omit<InvestorRow, "context_note">;
 
 type PositionRow = {
   id: string;
@@ -107,6 +108,15 @@ function mapInvestor(row: InvestorRow): InvestorProfile {
     isPublished: row.is_published ?? false,
   };
 }
+
+function mapInvestorLegacy(row: InvestorRowLegacy): InvestorProfile {
+  return mapInvestor({ ...row, context_note: null });
+}
+
+const INVESTOR_SELECT_WITH_CONTEXT =
+  "id, slug, name, investor_type, title_role, bio, photo_url, website, website_url, cik, focus_note, context_note, sort_order, is_published";
+const INVESTOR_SELECT_LEGACY =
+  "id, slug, name, investor_type, title_role, bio, photo_url, website, website_url, cik, focus_note, sort_order, is_published";
 
 function mapManualPosition(row: PositionRow): InvestorPosition {
   const clean = (value: string | null): string | null => {
@@ -224,20 +234,31 @@ export const getPublishedInvestors = cache(
     const supabase = getAnonClient();
     if (!supabase) return [];
 
-    const { data: investorsRaw, error: investorsError } = await supabase
+    const withContext = await supabase
       .from("investors")
-      .select(
-        "id, slug, name, investor_type, title_role, bio, photo_url, website, website_url, cik, focus_note, context_note, sort_order, is_published",
-      )
+      .select(INVESTOR_SELECT_WITH_CONTEXT)
       .eq("is_published", true)
       .order("sort_order", { ascending: true })
       .order("name", { ascending: true });
-    if (investorsError) {
-      console.error("[investors] list query failed", investorsError);
+    let investors: InvestorProfile[] = [];
+    if (!withContext.error) {
+      investors = ((withContext.data ?? []) as InvestorRow[]).map(mapInvestor);
+    } else if (withContext.error.message.includes("context_note")) {
+      const legacy = await supabase
+        .from("investors")
+        .select(INVESTOR_SELECT_LEGACY)
+        .eq("is_published", true)
+        .order("sort_order", { ascending: true })
+        .order("name", { ascending: true });
+      if (legacy.error) {
+        console.error("[investors] list query failed (legacy fallback also failed)", legacy.error);
+        return [];
+      }
+      investors = ((legacy.data ?? []) as InvestorRowLegacy[]).map(mapInvestorLegacy);
+    } else {
+      console.error("[investors] list query failed", withContext.error);
       return [];
     }
-
-    const investors = ((investorsRaw ?? []) as InvestorRow[]).map(mapInvestor);
     if (investors.length === 0) return [];
 
     const ids = investors.map((i) => i.id);
@@ -304,20 +325,27 @@ export async function getPublishedInvestorsDebug(sort: InvestorSort = "name") {
   const base = await supabase.from("investors").select("id", { count: "exact", head: true }).eq("is_published", true);
   const full = await supabase
     .from("investors")
-    .select(
-      "id, slug, name, investor_type, title_role, bio, photo_url, website, website_url, cik, focus_note, context_note, sort_order, is_published",
-    )
+    .select(INVESTOR_SELECT_WITH_CONTEXT)
     .eq("is_published", true)
     .order("sort_order", { ascending: true })
     .order("name", { ascending: true });
+  const fullLegacy =
+    full.error?.message.includes("context_note")
+      ? await supabase
+          .from("investors")
+          .select(INVESTOR_SELECT_LEGACY)
+          .eq("is_published", true)
+          .order("sort_order", { ascending: true })
+          .order("name", { ascending: true })
+      : null;
   const list = await getPublishedInvestors(sort);
 
   return {
     ...debug,
     publishedCountSimple: base.count ?? 0,
     publishedCountSimpleError: base.error?.message ?? null,
-    publishedCountListSelect: (full.data ?? []).length,
-    publishedCountListSelectError: full.error?.message ?? null,
+    publishedCountListSelect: (fullLegacy?.data ?? full.data ?? []).length,
+    publishedCountListSelectError: fullLegacy?.error?.message ?? full.error?.message ?? null,
     finalRenderedCount: list.length,
     sampleSlugs: list.slice(0, 8).map((row) => row.slug),
   };
@@ -327,16 +355,27 @@ export const getInvestorDetail = cache(async (slug: string): Promise<InvestorDet
   const supabase = getAnonClient();
   if (!supabase) return null;
 
-  const { data: investorRaw } = await supabase
+  const withContext = await supabase
     .from("investors")
-    .select(
-      "id, slug, name, investor_type, title_role, bio, photo_url, website, website_url, cik, focus_note, context_note, sort_order, is_published",
-    )
+    .select(INVESTOR_SELECT_WITH_CONTEXT)
     .eq("slug", slug)
     .eq("is_published", true)
     .maybeSingle();
-  if (!investorRaw) return null;
-  const investor = mapInvestor(investorRaw as InvestorRow);
+  let investor: InvestorProfile | null = null;
+  if (!withContext.error && withContext.data) {
+    investor = mapInvestor(withContext.data as InvestorRow);
+  } else if (withContext.error?.message.includes("context_note")) {
+    const legacy = await supabase
+      .from("investors")
+      .select(INVESTOR_SELECT_LEGACY)
+      .eq("slug", slug)
+      .eq("is_published", true)
+      .maybeSingle();
+    if (legacy.error || !legacy.data) return null;
+    investor = mapInvestorLegacy(legacy.data as InvestorRowLegacy);
+  } else {
+    return null;
+  }
 
   const { data: manualRaw } = await supabase
     .from("investor_positions")

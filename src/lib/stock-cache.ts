@@ -1,7 +1,9 @@
 import { unstable_cache } from "next/cache";
 import { formatDisplayCompanyName } from "@/lib/format-company-name";
+import { getTrackedFundHolderCount } from "@/lib/funds/holder-count";
 import { preferredListLogoUrl } from "@/lib/stock-branding";
-import { normalizeTicker } from "@/lib/polygon";
+import { getTickerDetails, normalizeTicker } from "@/lib/polygon";
+import { resolveStockPeRatios } from "@/lib/stock-pe-ratios";
 import { createSupabaseServiceClient } from "@/lib/supabase";
 import { loadTrackedStocksSync } from "@/lib/tracked-stocks-load";
 
@@ -39,9 +41,15 @@ type StockListRow = {
 };
 
 function positiveNum(value: unknown): number | null {
-  return typeof value === "number" && Number.isFinite(value) && value > 0 ? value : null;
+  const n = typeof value === "string" ? Number(value) : value;
+  return typeof n === "number" && Number.isFinite(n) && n > 0 ? n : null;
 }
 
+/** True when Supabase returned usable quote fields for the list. */
+function cacheHasListMetrics(stocks: CachedDisplayStock[]): boolean {
+  const withCap = stocks.filter((s) => s.marketCap != null && s.marketCap > 0).length;
+  return withCap >= Math.min(3, stocks.length);
+}
 
 function fallbackFromTrackedFile(): CachedDisplayStock[] {
   const deduped = new Map<string, ReturnType<typeof loadTrackedStocksSync>[number]>();
@@ -89,9 +97,18 @@ function rowToDisplay(stock: CachedDisplayStock, row: StockListRow): CachedDispl
   };
 }
 
-/**
- * Loads the /stocks table from Supabase only (one query). Polygon/Yahoo run via refresh-stocks cron.
- */
+function mergeSeedWithDbRows(seed: CachedDisplayStock[], data: StockListRow[] | null): CachedDisplayStock[] {
+  const rowByTicker = new Map<string, StockListRow>();
+  for (const raw of data ?? []) {
+    const sym = normalizeTicker(raw.ticker);
+    if (sym) rowByTicker.set(sym, raw);
+  }
+  return seed.map((stock) => {
+    const row = rowByTicker.get(stock.ticker);
+    return row ? rowToDisplay(stock, row) : stock;
+  });
+}
+
 async function loadStocksListFromSupabase(): Promise<CachedDisplayStock[]> {
   const seed = fallbackFromTrackedFile();
   const supabase = createSupabaseServiceClient();
@@ -99,29 +116,65 @@ async function loadStocksListFromSupabase(): Promise<CachedDisplayStock[]> {
 
   const { data, error } = await supabase.from("stock_data_cache").select(STOCKS_LIST_COLUMNS);
   if (error) {
-    console.warn("[stock-cache] Supabase read failed, using tracked-stocks seed:", error.message);
+    console.warn("[stock-cache] Supabase read failed:", error.message);
     return seed;
   }
-
-  const rowByTicker = new Map<string, StockListRow>();
-  for (const raw of data ?? []) {
-    const sym = normalizeTicker((raw as StockListRow).ticker);
-    if (sym) rowByTicker.set(sym, raw as StockListRow);
-  }
-
-  return seed.map((stock) => {
-    const row = rowByTicker.get(stock.ticker);
-    return row ? rowToDisplay(stock, row) : stock;
-  });
+  return mergeSeedWithDbRows(seed, data as StockListRow[]);
 }
 
-const loadStocksListCached = unstable_cache(
+const loadStocksListFromSupabaseCached = unstable_cache(
   loadStocksListFromSupabase,
-  ["stocks-list-display-v2"],
+  ["stocks-list-display-db"],
+  { revalidate: 3600, tags: ["stocks-list"] },
+);
+
+async function peRatiosForStock(stock: CachedDisplayStock) {
+  if (stock.peRatio != null && stock.forwardPeRatio != null) {
+    return { peRatio: stock.peRatio, forwardPeRatio: stock.forwardPeRatio };
+  }
+  const live = await resolveStockPeRatios(stock.ticker);
+  return {
+    peRatio: stock.peRatio ?? live.peRatio,
+    forwardPeRatio: stock.forwardPeRatio ?? live.forwardPeRatio,
+  };
+}
+
+/** Live Polygon/Yahoo + holder count — used when stock_data_cache is missing or empty. */
+async function enrichStockLive(stock: CachedDisplayStock): Promise<CachedDisplayStock> {
+  const [details, holderCount, peRatios] = await Promise.all([
+    getTickerDetails(stock.ticker),
+    getTrackedFundHolderCount(stock.ticker),
+    peRatiosForStock(stock),
+  ]);
+
+  return {
+    ...stock,
+    name: formatDisplayCompanyName(details.ok ? details.data.name : stock.name),
+    marketCap:
+      stock.marketCap ??
+      (details.ok && details.data.marketCap && details.data.marketCap > 0 ? details.data.marketCap : null),
+    peRatio: peRatios.peRatio,
+    forwardPeRatio: peRatios.forwardPeRatio,
+    famousHolderCount: holderCount,
+    logoUrl: preferredListLogoUrl(stock.ticker, stock.logoUrl),
+    dataStatus: details.ok ? "healthy" : stock.dataStatus,
+  };
+}
+
+const enrichLiveCached = unstable_cache(
+  async () => {
+    const seed = fallbackFromTrackedFile();
+    console.warn(
+      "[stock-cache] stock_data_cache missing or empty — enriching list from Polygon (run migration 008 + npm run sync:stock-cache)",
+    );
+    return Promise.all(seed.map((s) => enrichStockLive(s)));
+  },
+  ["stocks-list-live-fallback"],
   { revalidate: 3600, tags: ["stocks-list"] },
 );
 
 export async function getCachedDisplayStocks(): Promise<CachedDisplayStock[]> {
-  const rows = await loadStocksListCached();
-  return [...rows].sort((a, b) => a.ticker.localeCompare(b.ticker));
+  const fromDb = await loadStocksListFromSupabaseCached();
+  const stocks = cacheHasListMetrics(fromDb) ? fromDb : await enrichLiveCached();
+  return [...stocks].sort((a, b) => a.ticker.localeCompare(b.ticker));
 }

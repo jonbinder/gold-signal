@@ -16,7 +16,7 @@ import type {
   HomeRecentInvestorRow,
 } from "@/lib/home/types";
 
-const INSIDER_CAP = 35;
+const INSIDER_CAP = 40;
 const MOST_HELD_CAP = 12;
 const BIGGEST_CAP = 8;
 const RECENT_INVESTORS_CAP = 6;

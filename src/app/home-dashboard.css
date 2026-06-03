@@ -174,16 +174,31 @@
 }
 
 .home-dashboard__grid {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 1.25rem;
   padding-top: 1rem;
 }
 
+.home-feed {
+  order: 1;
+}
+
+.home-panels {
+  order: 2;
+}
+
 @media (min-width: 900px) {
   .home-dashboard__grid {
+    display: grid;
     grid-template-columns: minmax(0, 1.55fr) minmax(280px, 1fr);
     gap: 1.5rem;
     align-items: start;
+  }
+
+  .home-feed,
+  .home-panels {
+    order: unset;
   }
 }
 

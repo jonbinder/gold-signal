@@ -60,6 +60,12 @@ function Panel({
 }
 
 export function HomeDashboard({ model }: { model: HomeDashboardModel }) {
+  const showSidePanels =
+    model.panels.mostHeld ||
+    model.panels.biggestPositions ||
+    model.panels.recentInvestors ||
+    model.panels.topInsiderBuys;
+
   return (
     <>
       <header className="home-masthead" aria-label="GoldSignal overview">
@@ -98,80 +104,82 @@ export function HomeDashboard({ model }: { model: HomeDashboardModel }) {
             )}
           </section>
 
-          <aside className="home-panels" aria-label="Market intelligence panels">
-            {model.panels.mostHeld ? (
-              <Panel title="Most-held stocks" className="home-panel--featured">
-                <ol className="home-panel-list home-panel-list--ranked">
-                  {model.mostHeld.map((row) => (
-                    <li key={row.ticker} className="home-panel-list__item">
-                      <Link href={stockPath(row.ticker)} className="home-panel-list__link">
-                        <span className="home-panel-list__primary mono">{row.ticker}</span>
-                        <span className="home-panel-list__secondary">
-                          held by {row.holderCount} tracked investor
-                          {row.holderCount === 1 ? "" : "s"}
-                        </span>
-                      </Link>
-                    </li>
-                  ))}
-                </ol>
-              </Panel>
-            ) : null}
-
-            {model.panels.biggestPositions ? (
-              <Panel title="Biggest tracked positions">
-                <ul className="home-panel-list">
-                  {model.biggestPositions.map((row) => (
-                    <li key={`${row.investorSlug}-${row.ticker}`} className="home-panel-list__item">
-                      <p className="home-panel-list__row">
-                        <Link href={investorPath(row.investorSlug)} className="home-panel-list__investor">
-                          {row.investorName}
+          {showSidePanels ? (
+            <aside className="home-panels" aria-label="Market intelligence panels">
+              {model.panels.mostHeld ? (
+                <Panel title="Most-held stocks" className="home-panel--featured">
+                  <ol className="home-panel-list home-panel-list--ranked">
+                    {model.mostHeld.map((row) => (
+                      <li key={row.ticker} className="home-panel-list__item">
+                        <Link href={stockPath(row.ticker)} className="home-panel-list__link">
+                          <span className="home-panel-list__primary mono">{row.ticker}</span>
+                          <span className="home-panel-list__secondary">
+                            held by {row.holderCount} tracked investor
+                            {row.holderCount === 1 ? "" : "s"}
+                          </span>
                         </Link>
-                        <span className="home-panel-list__sep">→</span>
-                        <Link href={stockPath(row.ticker)} className="home-panel-list__primary mono">
-                          {row.ticker}
+                      </li>
+                    ))}
+                  </ol>
+                </Panel>
+              ) : null}
+
+              {model.panels.biggestPositions ? (
+                <Panel title="Biggest tracked positions">
+                  <ul className="home-panel-list">
+                    {model.biggestPositions.map((row) => (
+                      <li key={`${row.investorSlug}-${row.ticker}`} className="home-panel-list__item">
+                        <p className="home-panel-list__row">
+                          <Link href={investorPath(row.investorSlug)} className="home-panel-list__investor">
+                            {row.investorName}
+                          </Link>
+                          <span className="home-panel-list__sep">→</span>
+                          <Link href={stockPath(row.ticker)} className="home-panel-list__primary mono">
+                            {row.ticker}
+                          </Link>
+                        </p>
+                        <p className="home-panel-list__meta">{row.sizeLabel}</p>
+                      </li>
+                    ))}
+                  </ul>
+                </Panel>
+              ) : null}
+
+              {model.panels.recentInvestors ? (
+                <Panel title="Recently updated investors">
+                  <ul className="home-panel-list">
+                    {model.recentInvestors.map((row) => (
+                      <li key={row.slug} className="home-panel-list__item">
+                        <Link href={investorPath(row.slug)} className="home-panel-list__link">
+                          <span className="home-panel-list__primary">{row.name}</span>
+                          {row.updatedLabel ? (
+                            <span className="home-panel-list__secondary mono">{row.updatedLabel}</span>
+                          ) : null}
                         </Link>
-                      </p>
-                      <p className="home-panel-list__meta">{row.sizeLabel}</p>
-                    </li>
-                  ))}
-                </ul>
-              </Panel>
-            ) : null}
+                        <p className="home-panel-list__meta">{row.subtitle}</p>
+                      </li>
+                    ))}
+                  </ul>
+                </Panel>
+              ) : null}
 
-            {model.panels.topInsiderBuys ? (
-              <Panel title="Largest insider buys">
-                <ul className="home-panel-list">
-                  {model.topInsiderBuys.map((row) => (
-                    <li key={`buy-${row.id}`} className="home-panel-list__item home-panel-list__item--buy">
-                      <Link href={stockPath(row.ticker)} className="home-panel-list__link">
-                        <span className="home-panel-list__primary mono">{row.ticker}</span>
-                        <span className="home-panel-list__secondary">{row.sizeLabel}</span>
-                      </Link>
-                      <p className="home-panel-list__meta">{row.insiderLabel}</p>
-                    </li>
-                  ))}
-                </ul>
-              </Panel>
-            ) : null}
-
-            {model.panels.recentInvestors ? (
-              <Panel title="Recently updated investors">
-                <ul className="home-panel-list">
-                  {model.recentInvestors.map((row) => (
-                    <li key={row.slug} className="home-panel-list__item">
-                      <Link href={investorPath(row.slug)} className="home-panel-list__link">
-                        <span className="home-panel-list__primary">{row.name}</span>
-                        {row.updatedLabel ? (
-                          <span className="home-panel-list__secondary mono">{row.updatedLabel}</span>
-                        ) : null}
-                      </Link>
-                      <p className="home-panel-list__meta">{row.subtitle}</p>
-                    </li>
-                  ))}
-                </ul>
-              </Panel>
-            ) : null}
-          </aside>
+              {model.panels.topInsiderBuys ? (
+                <Panel title="Largest insider buys">
+                  <ul className="home-panel-list">
+                    {model.topInsiderBuys.map((row) => (
+                      <li key={`buy-${row.id}`} className="home-panel-list__item home-panel-list__item--buy">
+                        <Link href={stockPath(row.ticker)} className="home-panel-list__link">
+                          <span className="home-panel-list__primary mono">{row.ticker}</span>
+                          <span className="home-panel-list__secondary">{row.sizeLabel}</span>
+                        </Link>
+                        <p className="home-panel-list__meta">{row.insiderLabel}</p>
+                      </li>
+                    ))}
+                  </ul>
+                </Panel>
+              ) : null}
+            </aside>
+          ) : null}
         </div>
 
         <section className="home-capture-band" aria-labelledby="home-capture-heading">

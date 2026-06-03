@@ -2,7 +2,11 @@
 
 import { useState } from "react";
 
-export function WatchlistCaptureForm() {
+type WatchlistCaptureFormProps = {
+  variant?: "hero" | "footer";
+};
+
+export function WatchlistCaptureForm({ variant = "hero" }: WatchlistCaptureFormProps) {
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
 
@@ -46,8 +50,11 @@ export function WatchlistCaptureForm() {
     }
   }
 
+  const formClass =
+    variant === "footer" ? "home-capture-form home-capture-form--footer" : "whats-new-capture";
+
   return (
-    <form id="portfolio-review" className="whats-new-capture" onSubmit={onSubmit} noValidate>
+    <form id="portfolio-review" className={formClass} onSubmit={onSubmit} noValidate>
       <div className="whats-new-capture__fields">
         <label className="whats-new-capture__field">
           <span className="whats-new-capture__label">Name</span>

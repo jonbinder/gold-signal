@@ -1,8 +1,9 @@
 {
+  "FNV": "/stock-logos/FNV.png",
+  "GROY": "/stock-logos/GROY.png",
   "MTA": "/stock-logos/MTA.png",
   "RGLD": "/stock-logos/RGLD.svg",
   "TFPM": "/stock-logos/TFPM.svg",
   "VOXR": "/stock-logos/VOXR.png",
-  "WPM": "/stock-logos/WPM.png",
-  "FNV": "/stock-logos/FNV.png"
+  "WPM": "/stock-logos/WPM.png"
 }

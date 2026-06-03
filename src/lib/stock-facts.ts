@@ -5,6 +5,11 @@ import { normalizeInsiderTicker } from "@/lib/form4-insider";
 import { formatStockSectorLabel } from "@/lib/stock-category-labels";
 import { normalizeClientLogoUrl, stockLogoServePath } from "@/lib/stock-branding";
 import { parseCachedPriceHistory, type CachedPricePoint } from "@/lib/charts/price-series";
+import {
+  isMissingPriceHistoryColumn,
+  STOCK_FACTS_CACHE_SELECT_BASE,
+  STOCK_FACTS_CACHE_SELECT_WITH_PRICE,
+} from "@/lib/stock-cache-columns";
 import { loadTrackedStocksSync } from "@/lib/tracked-stocks-load";
 
 export {
@@ -90,16 +95,30 @@ async function fetchFactsRow(ticker: string): Promise<FactsCacheRow | null> {
 
   const sym = normalizeInsiderTicker(ticker);
   const supabase = createClient(url, key);
-  const { data, error } = await supabase
+
+  let result = await supabase
     .from("stock_data_cache")
-    .select(
-      "ticker, name, category, sub_category, exchange, logo_url, market_cap, company_description, ceo, insider_transactions, insider_net_90d_usd, insider_as_of, price_history_12m, data_status, last_updated",
-    )
+    .select(STOCK_FACTS_CACHE_SELECT_WITH_PRICE)
     .eq("ticker", sym)
     .maybeSingle();
 
-  if (error || !data) return null;
-  return data as FactsCacheRow;
+  if (result.error && isMissingPriceHistoryColumn(result.error)) {
+    result = await supabase
+      .from("stock_data_cache")
+      .select(STOCK_FACTS_CACHE_SELECT_BASE)
+      .eq("ticker", sym)
+      .maybeSingle();
+    if (result.data) {
+      return { ...(result.data as FactsCacheRow), price_history_12m: null };
+    }
+  }
+
+  if (result.error) {
+    console.error("[stock-facts] cache read failed", sym, result.error.message);
+    return null;
+  }
+  if (!result.data) return null;
+  return result.data as FactsCacheRow;
 }
 
 function resolveFactsLogoUrl(

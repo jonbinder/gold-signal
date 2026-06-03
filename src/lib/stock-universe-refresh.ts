@@ -7,6 +7,7 @@ import {
 import { getTrackedFundHolderCount } from "@/lib/funds/holder-count";
 import { getStockPrice, getTickerDetails, normalizeTicker } from "@/lib/polygon";
 import { resolvePctAbove52WeekLow } from "@/lib/stock-52w-metrics";
+import { isMissingPriceHistoryColumn } from "@/lib/stock-cache-columns";
 import { fetchCompactPriceHistory12m } from "@/lib/stock-price-history-cache";
 import { formatDisplayCompanyName } from "@/lib/format-company-name";
 import { resolveStockPeRatios } from "@/lib/stock-pe-ratios";
@@ -178,7 +179,11 @@ export async function refreshOneStock(tracked: TrackedStock): Promise<{ ok: bool
       error_message: !priceRes.ok ? priceRes.error : null,
     };
 
-    const { error } = await supabase.from("stock_data_cache").upsert(row, { onConflict: "ticker" });
+    let { error } = await supabase.from("stock_data_cache").upsert(row, { onConflict: "ticker" });
+    if (error && isMissingPriceHistoryColumn(error)) {
+      const { price_history_12m: _omit, ...rowWithoutPrice } = row;
+      ({ error } = await supabase.from("stock_data_cache").upsert(rowWithoutPrice, { onConflict: "ticker" }));
+    }
     if (error) return { ok: false, error: error.message };
     return { ok: true };
   } catch (err) {

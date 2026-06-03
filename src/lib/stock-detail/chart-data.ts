@@ -9,6 +9,7 @@ import {
 } from "@/lib/charts/price-series";
 import type { InsiderTransactionRow } from "@/lib/form4-insider";
 import { getTrackedFundSlugs } from "@/lib/funds/config";
+import { fetchLatestReportingPeriod } from "@/lib/reporting-periods";
 
 export type InstitutionalTrendPoint = {
   periodLabel: string;
@@ -106,9 +107,15 @@ async function loadChartData(
     return { ...EMPTY_CHARTS, ...priceCharts, insiderTimeline, hasInsiderChart };
   }
 
+  const latestPeriod = await fetchLatestReportingPeriod(supabase);
+  if (!latestPeriod?.id) {
+    return { ...EMPTY_CHARTS, ...priceCharts, insiderTimeline, hasInsiderChart };
+  }
+
   const { data: periods } = await supabase
     .from("reporting_periods")
     .select("id, label, period_end")
+    .lte("period_end", latestPeriod.period_end)
     .order("period_end", { ascending: false })
     .limit(8);
 

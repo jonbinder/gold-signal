@@ -1,6 +1,7 @@
 import { cache } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { getTrackedFundSlugs } from "@/lib/funds/config";
+import { fetchLatestReportingPeriod } from "@/lib/reporting-periods";
 import type { InstitutionalSummary, TrackedFundHolder } from "@/lib/stock-detail/types";
 
 type HoldingRow = {
@@ -63,11 +64,7 @@ async function loadInstitutionalData(ticker: string): Promise<{
 
   const supabase = createClient(url, key);
 
-  const { data: period } = await supabase
-    .from("reporting_periods")
-    .select("id, label, period_end")
-    .eq("is_latest", true)
-    .maybeSingle();
+  const period = await fetchLatestReportingPeriod(supabase);
 
   if (!period?.id) {
     return { institutional: EMPTY_INSTITUTIONAL, fundHolders: [] };

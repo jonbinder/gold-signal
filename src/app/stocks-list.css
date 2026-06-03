@@ -359,34 +359,57 @@
   font-size: 0.9rem;
 }
 
+/* Column share: ticker + company flex; numeric cols get readable min widths */
+.stocks-list-table__col--ticker {
+  width: 7%;
+}
+
+.stocks-list-table__col--company {
+  width: 30%;
+}
+
+.stocks-list-table__col--cap {
+  width: 14%;
+}
+
+.stocks-list-table__col--pct52 {
+  width: 13%;
+}
+
+.stocks-list-table__col--pe {
+  width: 9%;
+}
+
+.stocks-list-table__col--fpe {
+  width: 10%;
+}
+
+.stocks-list-table__col--holders {
+  width: 11%;
+}
+
 .stocks-list-table__row td {
-  padding: 0.85rem 0.65rem;
+  padding: 0.85rem 0.75rem;
   border-bottom: 1px solid rgba(15, 23, 42, 0.06);
 }
 
+.stocks-list-table .stocks-table__th {
+  padding: 0.7rem 0.75rem;
+}
+
+.stocks-list-table__th--ticker,
+.stocks-list-table__th--company,
+.stocks-list-table__ticker,
+.stocks-list-table__company {
+  text-align: left;
+}
+
 .stocks-list-table__th--cap,
-.stocks-list-table__num--cap {
-  width: 5.25rem;
-}
-
 .stocks-list-table__th--pct52,
-.stocks-list-table__num--pct52 {
-  width: 6.25rem;
-}
-
 .stocks-list-table__th--pe,
-.stocks-list-table__num--pe {
-  width: 4.25rem;
-}
-
 .stocks-list-table__th--fpe,
-.stocks-list-table__num--fpe {
-  width: 5.5rem;
-}
-
-.stocks-list-table__th--holders,
-.stocks-list-table__num--holders {
-  width: 5.75rem;
+.stocks-list-table__th--holders {
+  text-align: right;
 }
 
 .stocks-list-table__row:last-child td {
@@ -394,16 +417,15 @@
 }
 
 .stocks-list-table__ticker {
-  width: 90px;
   font-family: var(--font-mono);
   font-weight: 700;
   letter-spacing: 0.04em;
+  white-space: nowrap;
 }
 
 .stocks-list-table__company {
-  width: 11rem;
-  max-width: 11rem;
   color: var(--text-secondary);
+  min-width: 0;
 }
 
 .stocks-list-table__company .stocks-list-company-cell > span:last-child {
@@ -469,9 +491,23 @@
   color: var(--gold-600);
 }
 
-.stocks-table__sort-btn {
-  font-size: 0.72rem;
+.stocks-list-table .stocks-table__sort-btn {
+  font-size: 0.7rem;
   white-space: nowrap;
+  letter-spacing: 0.04em;
+}
+
+@media (min-width: 900px) {
+  .stocks-list-table .stocks-table__sort-btn {
+    font-size: 0.72rem;
+  }
+}
+
+/* Narrow desktop: scroll instead of squishing headers */
+@media (min-width: 700px) and (max-width: 959px) {
+  .stocks-list-table {
+    min-width: 52rem;
+  }
 }
 
 .stocks-list-cards {

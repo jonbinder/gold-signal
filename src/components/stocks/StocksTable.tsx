@@ -22,11 +22,11 @@ interface StocksTableProps {
 
 const MOBILE_SORT_OPTIONS: Array<{ key: SortKey; label: string }> = [
   { key: "name", label: "Company" },
-  { key: "marketCap", label: "Market Cap" },
-  { key: "pctAbove52WeekLow", label: "% Above 52W Low" },
-  { key: "peRatio", label: "PE Ratio" },
-  { key: "forwardPeRatio", label: "Forward PE Ratio" },
-  { key: "holderCount", label: "Tracked Investors" },
+  { key: "marketCap", label: "Mkt Cap" },
+  { key: "pctAbove52WeekLow", label: "% Off 52W Low" },
+  { key: "peRatio", label: "PE" },
+  { key: "forwardPeRatio", label: "Fwd PE" },
+  { key: "holderCount", label: "Investors" },
   { key: "ticker", label: "Ticker A-Z" },
 ];
 
@@ -136,6 +136,15 @@ export function StocksTable({ stocks }: StocksTableProps) {
 
             <div className="stocks-list-table-wrap">
               <table className="stocks-table stocks-table--facts stocks-list-table">
+                <colgroup>
+                  <col className="stocks-list-table__col--ticker" />
+                  <col className="stocks-list-table__col--company" />
+                  <col className="stocks-list-table__col--cap" />
+                  <col className="stocks-list-table__col--pct52" />
+                  <col className="stocks-list-table__col--pe" />
+                  <col className="stocks-list-table__col--fpe" />
+                  <col className="stocks-list-table__col--holders" />
+                </colgroup>
                 <thead>
                   <tr>
                     <SortHeader
@@ -144,6 +153,7 @@ export function StocksTable({ stocks }: StocksTableProps) {
                       active={sortKey}
                       dir={sortDir}
                       onSort={setSort}
+                      className="stocks-list-table__th--ticker"
                     />
                     <SortHeader
                       label="Company"
@@ -151,9 +161,10 @@ export function StocksTable({ stocks }: StocksTableProps) {
                       active={sortKey}
                       dir={sortDir}
                       onSort={setSort}
+                      className="stocks-list-table__th--company"
                     />
                     <SortHeader
-                      label="Market Cap"
+                      label="Mkt Cap"
                       sortKey="marketCap"
                       active={sortKey}
                       dir={sortDir}
@@ -161,7 +172,7 @@ export function StocksTable({ stocks }: StocksTableProps) {
                       className="stocks-list-table__th--cap"
                     />
                     <SortHeader
-                      label="% Above 52W Low"
+                      label="% Off 52W Low"
                       sortKey="pctAbove52WeekLow"
                       active={sortKey}
                       dir={sortDir}
@@ -169,7 +180,7 @@ export function StocksTable({ stocks }: StocksTableProps) {
                       className="stocks-list-table__th--pct52"
                     />
                     <SortHeader
-                      label="PE Ratio"
+                      label="PE"
                       sortKey="peRatio"
                       active={sortKey}
                       dir={sortDir}
@@ -177,7 +188,7 @@ export function StocksTable({ stocks }: StocksTableProps) {
                       className="stocks-list-table__th--pe"
                     />
                     <SortHeader
-                      label="Forward PE Ratio"
+                      label="Fwd PE"
                       sortKey="forwardPeRatio"
                       active={sortKey}
                       dir={sortDir}
@@ -185,7 +196,7 @@ export function StocksTable({ stocks }: StocksTableProps) {
                       className="stocks-list-table__th--fpe"
                     />
                     <SortHeader
-                      label="# Tracked Investors"
+                      label="Investors"
                       sortKey="holderCount"
                       active={sortKey}
                       dir={sortDir}
@@ -310,7 +321,7 @@ function StockCard({ stock }: { stock: CachedDisplayStock }) {
           <dd>{cap}</dd>
         </div>
         <div className="stocks-list-card__stat">
-          <dt>% Above 52W Low</dt>
+          <dt>% Off 52W Low</dt>
           <dd>{formatPctAbove52WeekLow(stock.pctAbove52WeekLow)}</dd>
         </div>
         <div className="stocks-list-card__stat">
@@ -318,11 +329,11 @@ function StockCard({ stock }: { stock: CachedDisplayStock }) {
           <dd>{formatRatio(stock.peRatio)}</dd>
         </div>
         <div className="stocks-list-card__stat">
-          <dt>Forward PE</dt>
+          <dt>Fwd PE</dt>
           <dd>{formatRatio(stock.forwardPeRatio)}</dd>
         </div>
         <div className="stocks-list-card__stat">
-          <dt># Tracked Investors</dt>
+          <dt>Investors</dt>
           <dd>{holders}</dd>
         </div>
       </dl>

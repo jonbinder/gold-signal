@@ -181,7 +181,8 @@ export async function refreshOneStock(tracked: TrackedStock): Promise<{ ok: bool
 
     let { error } = await supabase.from("stock_data_cache").upsert(row, { onConflict: "ticker" });
     if (error && isMissingPriceHistoryColumn(error)) {
-      const { price_history_12m: _omit, ...rowWithoutPrice } = row;
+      const { price_history_12m: _priceHistory, ...rowWithoutPrice } = row;
+      void _priceHistory;
       ({ error } = await supabase.from("stock_data_cache").upsert(rowWithoutPrice, { onConflict: "ticker" }));
     }
     if (error) return { ok: false, error: error.message };

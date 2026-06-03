@@ -3,7 +3,13 @@ import { createClient } from "@supabase/supabase-js";
 import type { InsiderEmptyReason, InsiderTransactionRow } from "@/lib/form4-insider";
 import { normalizeInsiderTicker } from "@/lib/form4-insider";
 import { formatStockSectorLabel } from "@/lib/stock-category-labels";
-import { normalizeClientLogoUrl } from "@/lib/stock-branding";
+import {
+  extractPolygonBranding,
+  normalizeClientLogoUrl,
+  pickPolygonBrandingImageUrl,
+  stockLogoServePath,
+} from "@/lib/stock-branding";
+import { getTickerDetails } from "@/lib/polygon";
 import { loadTrackedStocksSync } from "@/lib/tracked-stocks-load";
 
 export {
@@ -99,7 +105,24 @@ async function fetchFactsRow(ticker: string): Promise<FactsCacheRow | null> {
   return data as FactsCacheRow;
 }
 
-function buildModel(ticker: string, row: FactsCacheRow | null): StockFactsModel | null {
+async function resolveFactsLogoUrl(
+  sym: string,
+  row: FactsCacheRow | null,
+  trackedLogo: string | null,
+): Promise<string | null> {
+  const fromStore =
+    normalizeClientLogoUrl(row?.logo_url, sym) ?? normalizeClientLogoUrl(trackedLogo, sym);
+  if (fromStore) return fromStore;
+
+  const details = await getTickerDetails(sym);
+  const branding = details.ok ? extractPolygonBranding(details.data.raw) : null;
+  if (pickPolygonBrandingImageUrl(branding)) {
+    return stockLogoServePath(sym);
+  }
+  return null;
+}
+
+async function buildModel(ticker: string, row: FactsCacheRow | null): Promise<StockFactsModel | null> {
   const sym = normalizeInsiderTicker(ticker);
   const tracked = trackedMeta(sym);
   if (!row && !tracked) return null;
@@ -124,10 +147,7 @@ function buildModel(ticker: string, row: FactsCacheRow | null): StockFactsModel 
     marketCap: row?.market_cap ?? null,
     description: row?.company_description ?? null,
     ceo: row?.ceo ?? null,
-    logoUrl:
-      normalizeClientLogoUrl(row?.logo_url, sym) ??
-      normalizeClientLogoUrl(tracked?.logoUrl ?? null, sym) ??
-      null,
+    logoUrl: await resolveFactsLogoUrl(sym, row, tracked?.logoUrl ?? null),
     insider,
     insiderNet90dUsd: row?.insider_net_90d_usd ?? null,
     insiderAsOf: row?.insider_as_of ?? row?.last_updated ?? null,

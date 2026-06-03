@@ -1,9 +1,5 @@
 import { NextResponse } from "next/server";
-import {
-  appendPolygonApiKey,
-  extractPolygonBranding,
-  pickPolygonBrandingImageUrl,
-} from "@/lib/stock-branding";
+import { appendPolygonApiKey, extractPolygonBranding } from "@/lib/stock-branding";
 import { getTickerDetails, normalizeTicker } from "@/lib/polygon";
 
 export const runtime = "nodejs";
@@ -51,18 +47,31 @@ export async function GET(
 
   const details = await getTickerDetails(sym);
   const branding = details.ok ? extractPolygonBranding(details.data.raw) : null;
-  const sourceUrl = pickPolygonBrandingImageUrl(branding);
-  if (!sourceUrl) {
+  if (!branding) {
     return new NextResponse(null, { status: 404 });
   }
 
-  const fetchUrl = appendPolygonApiKey(sourceUrl, apiKey);
-  const imageRes = await fetch(fetchUrl, {
-    headers: { Accept: "image/*" },
-    next: { revalidate: 86400 },
-  });
+  const candidates = [branding.icon_url, branding.logo_url].filter(
+    (u): u is string => typeof u === "string" && u.trim().length > 0,
+  );
+  if (candidates.length === 0) {
+    return new NextResponse(null, { status: 404 });
+  }
 
-  if (!imageRes.ok) {
+  let imageRes: Response | null = null;
+  for (const candidate of candidates) {
+    const fetchUrl = appendPolygonApiKey(candidate.trim(), apiKey);
+    const attempt = await fetch(fetchUrl, {
+      headers: { Accept: "image/*" },
+      next: { revalidate: 86400 },
+    });
+    if (attempt.ok) {
+      imageRes = attempt;
+      break;
+    }
+  }
+
+  if (!imageRes) {
     return new NextResponse(null, { status: 404 });
   }
 

@@ -1,14 +1,19 @@
+import stockLogosManifest from "../../data/stock-logos-manifest.json";
 import type { PolygonTickerDetails } from "@/lib/stock-profile";
 import { normalizeTicker } from "@/lib/polygon";
+
+const STATIC_LOGO_PATHS: Record<string, string> = stockLogosManifest;
 
 export type PolygonBranding = {
   logo_url?: string | null;
   icon_url?: string | null;
 };
 
-/** Public path served by `/api/stock-logo/[ticker]` (Polygon key stays server-side). */
+/** Public URL for a ticker logo (static file if downloaded, else API proxy). */
 export function stockLogoServePath(ticker: string): string {
   const sym = normalizeTicker(ticker);
+  const staticPath = STATIC_LOGO_PATHS[sym];
+  if (staticPath) return staticPath;
   return `/api/stock-logo/${encodeURIComponent(sym)}`;
 }
 
@@ -68,5 +73,7 @@ export function normalizeClientLogoUrl(
   if (!trimmed) return null;
   if (trimmed.startsWith("/api/stock-logo/")) return trimmed;
   if (/polygon\.io/i.test(trimmed)) return stockLogoServePath(sym);
+  // Legacy Clearbit URLs in seed data — use Polygon proxy instead.
+  if (/clearbit\.com/i.test(trimmed)) return null;
   return trimmed;
 }

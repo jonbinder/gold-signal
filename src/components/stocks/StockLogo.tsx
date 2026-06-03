@@ -2,7 +2,6 @@
 
 import "./StockLogo.css";
 import { useState } from "react";
-import Image from "next/image";
 import { normalizeClientLogoUrl, stockLogoServePath } from "@/lib/stock-branding";
 
 interface StockLogoProps {
@@ -21,8 +20,9 @@ function resolveSrc(
   tryServe: boolean,
 ): string | null {
   const normalized = normalizeClientLogoUrl(logoUrl, ticker);
-  if (normalized) return normalized;
+  if (normalized?.startsWith("/api/stock-logo/")) return normalized;
   if (tryServe) return stockLogoServePath(ticker);
+  if (normalized) return normalized;
   return null;
 }
 
@@ -58,12 +58,14 @@ export function StockLogo({
       style={{ width: size, height: size }}
       aria-hidden="true"
     >
-      <Image
+      {/* Native img — reliable for same-origin /api/stock-logo proxy routes */}
+      <img
         src={src}
         alt=""
         width={size}
         height={size}
-        unoptimized
+        loading="lazy"
+        decoding="async"
         onError={() => setFailed(true)}
         style={{ objectFit: "contain", width: "100%", height: "100%" }}
       />

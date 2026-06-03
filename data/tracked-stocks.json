@@ -34,7 +34,7 @@
       "category": "royalty",
       "sub_category": "diversified",
       "exchange": "NYSE",
-      "logo_url": "https://logo.clearbit.com/franco-nevada.com"
+      "logo_url": null
     },
     {
       "ticker": "GROY",
@@ -82,7 +82,7 @@
       "category": "royalty",
       "sub_category": "diversified",
       "exchange": "NYSE",
-      "logo_url": "https://logo.clearbit.com/royalgold.com"
+      "logo_url": null
     },
     {
       "ticker": "SAND",
@@ -114,7 +114,7 @@
       "category": "royalty",
       "sub_category": "diversified",
       "exchange": "NYSE",
-      "logo_url": "https://logo.clearbit.com/wheatonpm.com"
+      "logo_url": null
     }
   ]
 }

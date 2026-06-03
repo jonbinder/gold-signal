@@ -17,6 +17,8 @@
     "seed:investors": "npx tsx scripts/seed-investors.ts",
     "sync:stock-logos": "npx tsx scripts/sync-stock-logos.ts",
     "sync:stock-pe": "npx tsx scripts/sync-stock-pe-ratios.ts",
+    "sync:stock-cache": "npx tsx scripts/refresh-all-stocks-local.ts",
+    "verify:stock-cache": "npx tsx scripts/verify-stock-cache.ts",
     "download:stock-logos": "npx tsx scripts/download-stock-logos.ts",
     "investors:images:download": "node scripts/download-investor-images.mjs",
     "investors:images:process": "node scripts/process-investor-images.js",

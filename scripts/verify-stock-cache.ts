@@ -15,7 +15,9 @@ async function main() {
 
   const { data, error } = await supabase
     .from("stock_data_cache")
-    .select("ticker, name, market_cap, pe_ratio, forward_pe_ratio, famous_holder_count, last_updated")
+    .select(
+      "ticker, name, market_cap, pct_above_52_week_low, pe_ratio, forward_pe_ratio, famous_holder_count, last_updated",
+    )
     .in("ticker", expected);
 
   if (error) {
@@ -27,8 +29,8 @@ async function main() {
   const found = new Set(rows.map((r) => normalizeTicker(r.ticker)));
 
   console.log(`Expected ${expected.length} tickers, found ${rows.length} rows.\n`);
-  console.log("ticker | market_cap | pe | fwd_pe | holders | updated");
-  console.log("-".repeat(72));
+  console.log("ticker | market_cap | pct52 | pe | fwd_pe | holders | updated");
+  console.log("-".repeat(80));
 
   let complete = 0;
   for (const t of expected) {
@@ -38,16 +40,18 @@ async function main() {
       continue;
     }
     const cap = row.market_cap != null && row.market_cap > 0;
+    const pct52 = row.pct_above_52_week_low != null && Number.isFinite(Number(row.pct_above_52_week_low));
     const pe = row.pe_ratio != null && row.pe_ratio > 0;
     const fpe = row.forward_pe_ratio != null && row.forward_pe_ratio > 0;
     const holders = row.famous_holder_count != null;
-    const ok = cap && pe && fpe && holders;
+    const ok = cap && pct52 && pe && fpe && holders;
     if (ok) complete++;
 
     console.log(
       [
         t.padEnd(6),
         cap ? `$${Math.round(row.market_cap! / 1e6)}M`.padStart(8) : "—".padStart(8),
+        pct52 ? `${Math.round(Number(row.pct_above_52_week_low))}%`.padStart(6) : "—".padStart(6),
         pe ? String(row.pe_ratio).padStart(6) : "—".padStart(6),
         fpe ? String(row.forward_pe_ratio).padStart(7) : "—".padStart(7),
         holders ? String(row.famous_holder_count).padStart(7) : "—".padStart(7),
@@ -59,7 +63,7 @@ async function main() {
   const missing = expected.filter((t) => !found.has(t));
   if (missing.length) console.log("\nMissing tickers:", missing.join(", "));
 
-  console.log(`\nFully populated (cap+PE+fwd+holders): ${complete}/${expected.length}`);
+  console.log(`\nFully populated (cap+pct52+PE+fwd+holders): ${complete}/${expected.length}`);
   process.exit(complete === expected.length && missing.length === 0 ? 0 : 1);
 }
 

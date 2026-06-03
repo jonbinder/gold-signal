@@ -1,6 +1,7 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
+import { INVESTORS_LIST_CACHE_TAG } from "@/lib/investors/queries";
 import { redirect } from "next/navigation";
 import { createSupabaseServiceClient } from "@/lib/supabase";
 import { loginAdmin, logoutAdmin, requireAdminPage } from "@/lib/admin-auth";
@@ -76,6 +77,7 @@ export async function saveInvestorAction(formData: FormData) {
 
   revalidatePath("/admin");
   revalidatePath("/investors");
+  revalidateTag(INVESTORS_LIST_CACHE_TAG);
   revalidatePath("/stocks");
 }
 
@@ -88,6 +90,7 @@ export async function deleteInvestorAction(formData: FormData) {
   if (error) throw new Error(error.message);
   revalidatePath("/admin");
   revalidatePath("/investors");
+  revalidateTag(INVESTORS_LIST_CACHE_TAG);
 }
 
 export async function savePositionAction(formData: FormData) {
@@ -140,6 +143,7 @@ export async function savePositionAction(formData: FormData) {
 
   revalidatePath("/admin");
   revalidatePath("/investors");
+  revalidateTag(INVESTORS_LIST_CACHE_TAG);
   revalidatePath("/stocks");
 }
 
@@ -166,6 +170,7 @@ export async function bulkPublishDraftsAction(formData: FormData) {
 
   revalidatePath("/admin");
   revalidatePath("/investors");
+  revalidateTag(INVESTORS_LIST_CACHE_TAG);
   revalidatePath("/stocks");
 }
 
@@ -178,5 +183,6 @@ export async function deletePositionAction(formData: FormData) {
   if (error) throw new Error(error.message);
   revalidatePath("/admin");
   revalidatePath("/investors");
+  revalidateTag(INVESTORS_LIST_CACHE_TAG);
   revalidatePath("/stocks");
 }

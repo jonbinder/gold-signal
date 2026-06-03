@@ -6,6 +6,7 @@ import {
 } from "@/lib/form4-insider";
 import { getTrackedFundHolderCount } from "@/lib/funds/holder-count";
 import { getStockPrice, getTickerDetails, normalizeTicker } from "@/lib/polygon";
+import { resolvePctAbove52WeekLow } from "@/lib/stock-52w-metrics";
 import { formatDisplayCompanyName } from "@/lib/format-company-name";
 import { resolveStockPeRatios } from "@/lib/stock-pe-ratios";
 import { resolveStockLogoServePath } from "@/lib/stock-branding";
@@ -116,11 +117,17 @@ export async function refreshOneStock(tracked: TrackedStock): Promise<{ ok: bool
     const supportInputs = inputs as {
       support?: { currentPrice?: number; fiftyTwoWeekLow?: number };
     } | undefined;
-    if (supportInputs?.support?.currentPrice != null && supportInputs?.support?.fiftyTwoWeekLow != null) {
+    if (
+      SCORING_ENABLED &&
+      supportInputs?.support?.currentPrice != null &&
+      supportInputs?.support?.fiftyTwoWeekLow != null
+    ) {
       pctAbove52 = pctAbove52WeekLow(
         supportInputs.support.currentPrice,
         supportInputs.support.fiftyTwoWeekLow,
       );
+    } else if (price != null) {
+      pctAbove52 = await resolvePctAbove52WeekLow(sym, price);
     }
 
     const marketCap =

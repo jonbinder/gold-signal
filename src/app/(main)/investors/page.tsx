@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { PageCompliance } from "@/components/layout/PageCompliance";
 import { InvestorsList } from "@/components/investors/InvestorsList";
-import { getPublishedInvestors, type InvestorSort } from "@/lib/investors/queries";
+import { getPublishedInvestorsList } from "@/lib/investors/queries";
 import { SITE_TAGLINE } from "@/lib/site";
 import "@/app/funds.css";
 
@@ -26,21 +27,11 @@ export const metadata: Metadata = {
   },
 };
 
+/** ISR: list data from unstable_cache; sort is client-side via URL. */
 export const revalidate = 3600;
-export const dynamic = "force-dynamic";
 
-type SearchParams = Promise<{ sort?: string }>;
-
-function parseSort(raw: string | undefined): InvestorSort {
-  if (raw === "positions") return "positions";
-  if (raw === "type") return "type";
-  return "name";
-}
-
-export default async function InvestorsPage({ searchParams }: { searchParams: SearchParams }) {
-  const params = await searchParams;
-  const sort = parseSort(params.sort);
-  const investors = await getPublishedInvestors(sort);
+export default async function InvestorsPage() {
+  const investors = await getPublishedInvestorsList();
 
   return (
     <main className="funds-page">
@@ -57,7 +48,9 @@ export default async function InvestorsPage({ searchParams }: { searchParams: Se
           Notable gold &amp; silver positions held by leading investors and funds — sourced from SEC filings and
           public statements. Not complete portfolios.
         </p>
-        <InvestorsList investors={investors} sort={sort} />
+        <Suspense fallback={<p className="funds-empty">Loading investors…</p>}>
+          <InvestorsList investors={investors} />
+        </Suspense>
         <PageCompliance />
       </div>
     </main>

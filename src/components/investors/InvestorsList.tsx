@@ -1,13 +1,29 @@
+"use client";
+
 import Link from "next/link";
+import { useMemo } from "react";
+import { useSearchParams } from "next/navigation";
+import { InvestorImage } from "@/components/investors/InvestorImage";
 import { investorPath } from "@/lib/paths";
+import { sortPublishedInvestors, type InvestorSort } from "@/lib/investors/queries";
 import type { InvestorListItem } from "@/lib/investors/types";
 
 type Props = {
   investors: InvestorListItem[];
-  sort: "name" | "positions" | "type";
 };
 
-export function InvestorsList({ investors, sort }: Props) {
+function parseSort(raw: string | null): InvestorSort {
+  if (raw === "positions") return "positions";
+  if (raw === "type") return "type";
+  return "name";
+}
+
+export function InvestorsList({ investors }: Props) {
+  const searchParams = useSearchParams();
+  const sort = parseSort(searchParams.get("sort"));
+
+  const sorted = useMemo(() => sortPublishedInvestors(investors, sort), [investors, sort]);
+
   return (
     <>
       <div className="funds-toolbar">
@@ -36,17 +52,23 @@ export function InvestorsList({ investors, sort }: Props) {
         </div>
       </div>
 
-      {investors.length === 0 ? (
+      {sorted.length === 0 ? (
         <p className="funds-empty">No published investors yet.</p>
       ) : (
         <ul className="funds-grid">
-          {investors.map((inv) => (
+          {sorted.map((inv) => (
             <li key={inv.id}>
               <Link href={investorPath(inv.slug)} className="funds-card">
                 <div className="investor-card__head">
                   {inv.photoUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={inv.photoUrl} alt="" className="investor-card__photo" />
+                    <InvestorImage
+                      src={inv.photoUrl}
+                      alt=""
+                      width={56}
+                      height={56}
+                      sizes="56px"
+                      className="investor-card__photo"
+                    />
                   ) : (
                     <span className="investor-card__photo investor-card__photo--placeholder" aria-hidden>
                       {inv.name

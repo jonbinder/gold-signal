@@ -1,3 +1,4 @@
+import { unstable_cache } from "next/cache";
 import { cache } from "react";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { normalizeTicker } from "@/lib/polygon";
@@ -9,6 +10,8 @@ import type {
   InvestorProfile,
   InvestorType,
 } from "@/lib/investors/types";
+
+export const INVESTORS_LIST_CACHE_TAG = "investors-list";
 
 type InvestorRow = {
   id: string;
@@ -26,7 +29,11 @@ type InvestorRow = {
   sort_order: number | null;
   is_published: boolean | null;
 };
-type InvestorRowLegacy = Omit<InvestorRow, "context_note">;
+
+type InvestorListRow = Pick<
+  InvestorRow,
+  "id" | "slug" | "name" | "investor_type" | "title_role" | "photo_url" | "focus_note" | "sort_order"
+>;
 
 type PositionRow = {
   id: string;
@@ -57,6 +64,12 @@ type HoldingAutoRow = {
 };
 
 type InvestorsClientMode = "service_role" | "anon" | "none";
+
+const INVESTOR_SELECT =
+  "id, slug, name, investor_type, title_role, bio, photo_url, website, website_url, cik, focus_note, context_note, sort_order, is_published";
+
+const INVESTOR_LIST_SELECT =
+  "id, slug, name, investor_type, title_role, photo_url, focus_note, sort_order";
 
 function getInvestorsClient(): {
   client: SupabaseClient | null;
@@ -109,14 +122,23 @@ function mapInvestor(row: InvestorRow): InvestorProfile {
   };
 }
 
-function mapInvestorLegacy(row: InvestorRowLegacy): InvestorProfile {
-  return mapInvestor({ ...row, context_note: null });
+function mapListInvestor(row: InvestorListRow): InvestorProfile {
+  return {
+    id: row.id,
+    slug: row.slug,
+    name: row.name,
+    type: row.investor_type ?? "fund",
+    titleRole: row.title_role,
+    bio: null,
+    photoUrl: row.photo_url,
+    website: null,
+    cik: null,
+    focusNote: row.focus_note,
+    contextNote: null,
+    sortOrder: row.sort_order ?? 100,
+    isPublished: true,
+  };
 }
-
-const INVESTOR_SELECT_WITH_CONTEXT =
-  "id, slug, name, investor_type, title_role, bio, photo_url, website, website_url, cik, focus_note, context_note, sort_order, is_published";
-const INVESTOR_SELECT_LEGACY =
-  "id, slug, name, investor_type, title_role, bio, photo_url, website, website_url, cik, focus_note, sort_order, is_published";
 
 function mapManualPosition(row: PositionRow): InvestorPosition {
   const clean = (value: string | null): string | null => {
@@ -160,6 +182,39 @@ function formatValueUsd(value: number | null): string | null {
   if (value >= 1_000_000) return `$${(value / 1_000_000).toFixed(1)}M`;
   if (value >= 1_000) return `$${(value / 1_000).toFixed(0)}K`;
   return `$${Math.round(value)}`;
+}
+
+/** One query: latest 13F period + all holdings for fund investor ids. */
+async function countFund13fPositionsByInvestor(
+  supabase: SupabaseClient,
+  fundInvestorIds: string[],
+): Promise<Map<string, number>> {
+  const counts = new Map<string, number>();
+  if (fundInvestorIds.length === 0) return counts;
+
+  const { data: period } = await supabase
+    .from("reporting_periods")
+    .select("id")
+    .eq("is_latest", true)
+    .maybeSingle();
+  if (!period?.id) return counts;
+
+  const { data: holdings, error } = await supabase
+    .from("holdings")
+    .select("investor_id")
+    .in("investor_id", fundInvestorIds)
+    .eq("period_id", period.id);
+
+  if (error) {
+    console.error("[investors] batch 13F count failed", error);
+    return counts;
+  }
+
+  for (const row of holdings ?? []) {
+    const id = (row as { investor_id: string }).investor_id;
+    counts.set(id, (counts.get(id) ?? 0) + 1);
+  }
+  return counts;
 }
 
 async function loadAuto13fPositions(
@@ -229,110 +284,97 @@ async function loadAuto13fPositions(
 
 export type InvestorSort = "name" | "positions" | "type";
 
-export const getPublishedInvestors = cache(
-  async (sort: InvestorSort = "name"): Promise<InvestorListItem[]> => {
-    const supabase = getAnonClient();
-    if (!supabase) return [];
+export function sortPublishedInvestors(
+  list: InvestorListItem[],
+  sort: InvestorSort = "name",
+): InvestorListItem[] {
+  const copy = [...list];
+  if (sort === "positions") {
+    return copy.sort((a, b) => b.positionCount - a.positionCount || a.name.localeCompare(b.name));
+  }
+  if (sort === "type") {
+    return copy.sort((a, b) => a.type.localeCompare(b.type) || a.name.localeCompare(b.name));
+  }
+  return copy.sort((a, b) => a.name.localeCompare(b.name));
+}
 
-    const withContext = await supabase
-      .from("investors")
-      .select(INVESTOR_SELECT_WITH_CONTEXT)
-      .eq("is_published", true)
-      .order("sort_order", { ascending: true })
-      .order("name", { ascending: true });
-    let investors: InvestorProfile[] = [];
-    if (!withContext.error) {
-      investors = ((withContext.data ?? []) as InvestorRow[]).map(mapInvestor);
-    } else if (withContext.error.message.includes("context_note")) {
-      const legacy = await supabase
-        .from("investors")
-        .select(INVESTOR_SELECT_LEGACY)
-        .eq("is_published", true)
-        .order("sort_order", { ascending: true })
-        .order("name", { ascending: true });
-      if (legacy.error) {
-        console.error("[investors] list query failed (legacy fallback also failed)", legacy.error);
-        return [];
-      }
-      investors = ((legacy.data ?? []) as InvestorRowLegacy[]).map(mapInvestorLegacy);
-    } else {
-      console.error("[investors] list query failed", withContext.error);
-      return [];
-    }
-    if (investors.length === 0) return [];
+async function loadPublishedInvestorsList(): Promise<InvestorListItem[]> {
+  const supabase = getAnonClient();
+  if (!supabase) return [];
 
-    const ids = investors.map((i) => i.id);
-    const { data: manualCounts, error: manualCountsError } = await supabase
-      .from("investor_positions")
-      .select("investor_id")
-      .in("investor_id", ids)
-      .eq("is_published", true);
-    if (manualCountsError) {
-      console.error("[investors] manual counts query failed", manualCountsError);
-    }
+  const { data, error } = await supabase
+    .from("investors")
+    .select(INVESTOR_LIST_SELECT)
+    .eq("is_published", true)
+    .order("sort_order", { ascending: true })
+    .order("name", { ascending: true });
 
-    const manualById = new Map<string, number>();
-    for (const row of manualCounts ?? []) {
-      const id = (row as { investor_id: string }).investor_id;
-      manualById.set(id, (manualById.get(id) ?? 0) + 1);
-    }
+  if (error) {
+    console.error("[investors] list query failed", error);
+    return [];
+  }
 
-    const autoCountById = new Map<string, number>();
-    await Promise.all(
-      investors
-        .filter((i) => i.type === "fund")
-        .map(async (i) => {
-          const { count } = await loadAuto13fPositions(i.id);
-          autoCountById.set(i.id, count);
-        }),
-    );
+  const investors = ((data ?? []) as InvestorListRow[]).map(mapListInvestor);
+  if (investors.length === 0) return [];
 
-    const list = investors.map((investor) => {
-      const manualPositionCount = manualById.get(investor.id) ?? 0;
-      const auto13fPositionCount = autoCountById.get(investor.id) ?? 0;
-      return {
-        ...investor,
-        manualPositionCount,
-        auto13fPositionCount,
-        positionCount: manualPositionCount + auto13fPositionCount,
-      };
-    });
+  const ids = investors.map((i) => i.id);
+  const fundIds = investors.filter((i) => i.type === "fund").map((i) => i.id);
 
-    if (sort === "positions") {
-      return list.sort((a, b) => b.positionCount - a.positionCount || a.name.localeCompare(b.name));
-    }
-    if (sort === "type") {
-      return list.sort((a, b) => a.type.localeCompare(b.type) || a.name.localeCompare(b.name));
-    }
-    return list.sort((a, b) => a.name.localeCompare(b.name));
-  },
+  const [manualResult, auto13fCounts] = await Promise.all([
+    supabase.from("investor_positions").select("investor_id").in("investor_id", ids).eq("is_published", true),
+    countFund13fPositionsByInvestor(supabase, fundIds),
+  ]);
+
+  if (manualResult.error) {
+    console.error("[investors] manual counts query failed", manualResult.error);
+  }
+
+  const manualById = new Map<string, number>();
+  for (const row of manualResult.data ?? []) {
+    const id = (row as { investor_id: string }).investor_id;
+    manualById.set(id, (manualById.get(id) ?? 0) + 1);
+  }
+
+  return investors.map((investor) => {
+    const manualPositionCount = manualById.get(investor.id) ?? 0;
+    const auto13fPositionCount = auto13fCounts.get(investor.id) ?? 0;
+    return {
+      ...investor,
+      manualPositionCount,
+      auto13fPositionCount,
+      positionCount: manualPositionCount + auto13fPositionCount,
+    };
+  });
+}
+
+const loadPublishedInvestorsListCached = unstable_cache(
+  loadPublishedInvestorsList,
+  ["investors-list-published-v1"],
+  { revalidate: 3600, tags: [INVESTORS_LIST_CACHE_TAG] },
 );
 
-export const getInvestorDetail = cache(async (slug: string): Promise<InvestorDetailModel | null> => {
+export async function getPublishedInvestorsList(): Promise<InvestorListItem[]> {
+  return loadPublishedInvestorsListCached();
+}
+
+/** @deprecated Prefer getPublishedInvestorsList + client sort for ISR. */
+export async function getPublishedInvestors(sort: InvestorSort = "name"): Promise<InvestorListItem[]> {
+  return sortPublishedInvestors(await getPublishedInvestorsList(), sort);
+}
+
+async function loadInvestorDetail(slug: string): Promise<InvestorDetailModel | null> {
   const supabase = getAnonClient();
   if (!supabase) return null;
 
-  const withContext = await supabase
+  const { data, error } = await supabase
     .from("investors")
-    .select(INVESTOR_SELECT_WITH_CONTEXT)
+    .select(INVESTOR_SELECT)
     .eq("slug", slug)
     .eq("is_published", true)
     .maybeSingle();
-  let investor: InvestorProfile | null = null;
-  if (!withContext.error && withContext.data) {
-    investor = mapInvestor(withContext.data as InvestorRow);
-  } else if (withContext.error?.message.includes("context_note")) {
-    const legacy = await supabase
-      .from("investors")
-      .select(INVESTOR_SELECT_LEGACY)
-      .eq("slug", slug)
-      .eq("is_published", true)
-      .maybeSingle();
-    if (legacy.error || !legacy.data) return null;
-    investor = mapInvestorLegacy(legacy.data as InvestorRowLegacy);
-  } else {
-    return null;
-  }
+
+  if (error || !data) return null;
+  const investor = mapInvestor(data as InvestorRow);
 
   const { data: manualRaw } = await supabase
     .from("investor_positions")
@@ -355,7 +397,16 @@ export const getInvestorDetail = cache(async (slug: string): Promise<InvestorDet
     manualPositionCount: manualPositions.length,
     auto13fPositionCount: auto.count,
   };
-});
+}
+
+export async function getInvestorDetail(slug: string): Promise<InvestorDetailModel | null> {
+  const normalized = slug.trim().toLowerCase();
+  return unstable_cache(
+    () => loadInvestorDetail(normalized),
+    ["investor-detail", normalized],
+    { revalidate: 3600, tags: [INVESTORS_LIST_CACHE_TAG, `investor-${normalized}`] },
+  )();
+}
 
 export const getPublishedInvestorsForTicker = cache(
   async (ticker: string): Promise<Array<{ slug: string; name: string; type: InvestorType }>> => {

@@ -16,6 +16,7 @@ export type CachedDisplayStock = {
   marketCap: number | null;
   peRatio: number | null;
   forwardPeRatio: number | null;
+  pctAbove52WeekLow: number | null;
   insiderNet90dUsd: number | null;
   famousHolderCount: number | null;
   logoUrl: string;
@@ -23,7 +24,7 @@ export type CachedDisplayStock = {
 };
 
 const STOCKS_LIST_COLUMNS =
-  "ticker, name, category, sub_category, exchange, logo_url, market_cap, pe_ratio, forward_pe_ratio, famous_holder_count, insider_net_90d_usd, data_status";
+  "ticker, name, category, sub_category, exchange, logo_url, market_cap, pct_above_52_week_low, pe_ratio, forward_pe_ratio, famous_holder_count, insider_net_90d_usd, data_status";
 
 type StockListRow = {
   ticker: string;
@@ -33,6 +34,7 @@ type StockListRow = {
   exchange: string | null;
   logo_url: string | null;
   market_cap: number | null;
+  pct_above_52_week_low: number | null;
   pe_ratio: number | null;
   forward_pe_ratio: number | null;
   famous_holder_count: number | null;
@@ -43,6 +45,11 @@ type StockListRow = {
 function positiveNum(value: unknown): number | null {
   const n = typeof value === "string" ? Number(value) : value;
   return typeof n === "number" && Number.isFinite(n) && n > 0 ? n : null;
+}
+
+function finiteNum(value: unknown): number | null {
+  const n = typeof value === "string" ? Number(value) : value;
+  return typeof n === "number" && Number.isFinite(n) ? n : null;
 }
 
 /** True when Supabase returned usable quote fields for the list. */
@@ -67,6 +74,7 @@ function fallbackFromTrackedFile(): CachedDisplayStock[] {
     marketCap: null,
     peRatio: null,
     forwardPeRatio: null,
+    pctAbove52WeekLow: null,
     insiderNet90dUsd: null,
     famousHolderCount: null,
     logoUrl: preferredListLogoUrl(ticker),
@@ -82,6 +90,7 @@ function rowToDisplay(stock: CachedDisplayStock, row: StockListRow): CachedDispl
     subCategory: row.sub_category || stock.subCategory,
     exchange: row.exchange ?? stock.exchange,
     marketCap: positiveNum(row.market_cap) ?? stock.marketCap,
+    pctAbove52WeekLow: finiteNum(row.pct_above_52_week_low) ?? stock.pctAbove52WeekLow,
     peRatio: positiveNum(row.pe_ratio) ?? stock.peRatio,
     forwardPeRatio: positiveNum(row.forward_pe_ratio) ?? stock.forwardPeRatio,
     insiderNet90dUsd:
@@ -124,7 +133,7 @@ async function loadStocksListFromSupabase(): Promise<CachedDisplayStock[]> {
 
 const loadStocksListFromSupabaseCached = unstable_cache(
   loadStocksListFromSupabase,
-  ["stocks-list-display-db"],
+  ["stocks-list-display-db-v3"],
   { revalidate: 3600, tags: ["stocks-list"] },
 );
 

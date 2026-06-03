@@ -5,9 +5,16 @@ import Link from "next/link";
 import { StockLogo } from "@/components/stocks/StockLogo";
 import { stockPath } from "@/lib/paths";
 import type { CachedDisplayStock } from "@/lib/stock-cache";
-import { formatHolderCount } from "@/lib/stock-facts-format";
+import { formatHolderCount, formatPctAbove52WeekLow } from "@/lib/stock-facts-format";
 
-type SortKey = "ticker" | "name" | "holderCount" | "marketCap" | "peRatio" | "forwardPeRatio";
+type SortKey =
+  | "ticker"
+  | "name"
+  | "holderCount"
+  | "marketCap"
+  | "pctAbove52WeekLow"
+  | "peRatio"
+  | "forwardPeRatio";
 
 interface StocksTableProps {
   stocks: CachedDisplayStock[];
@@ -16,6 +23,7 @@ interface StocksTableProps {
 const MOBILE_SORT_OPTIONS: Array<{ key: SortKey; label: string }> = [
   { key: "name", label: "Company" },
   { key: "marketCap", label: "Market Cap" },
+  { key: "pctAbove52WeekLow", label: "% Above 52W Low" },
   { key: "peRatio", label: "PE Ratio" },
   { key: "forwardPeRatio", label: "Forward PE Ratio" },
   { key: "holderCount", label: "Tracked Investors" },
@@ -39,6 +47,7 @@ function sortValue(stock: CachedDisplayStock, key: SortKey): number | string {
   if (key === "ticker") return stock.ticker;
   if (key === "name") return stock.name;
   if (key === "holderCount") return stock.famousHolderCount ?? -1;
+  if (key === "pctAbove52WeekLow") return stock.pctAbove52WeekLow ?? -1;
   if (key === "peRatio") return stock.peRatio ?? -1;
   if (key === "forwardPeRatio") return stock.forwardPeRatio ?? -1;
   return stock.marketCap ?? -1;
@@ -149,6 +158,15 @@ export function StocksTable({ stocks }: StocksTableProps) {
                       active={sortKey}
                       dir={sortDir}
                       onSort={setSort}
+                      className="stocks-list-table__th--cap"
+                    />
+                    <SortHeader
+                      label="% Above 52W Low"
+                      sortKey="pctAbove52WeekLow"
+                      active={sortKey}
+                      dir={sortDir}
+                      onSort={setSort}
+                      className="stocks-list-table__th--pct52"
                     />
                     <SortHeader
                       label="PE Ratio"
@@ -156,6 +174,7 @@ export function StocksTable({ stocks }: StocksTableProps) {
                       active={sortKey}
                       dir={sortDir}
                       onSort={setSort}
+                      className="stocks-list-table__th--pe"
                     />
                     <SortHeader
                       label="Forward PE Ratio"
@@ -163,6 +182,7 @@ export function StocksTable({ stocks }: StocksTableProps) {
                       active={sortKey}
                       dir={sortDir}
                       onSort={setSort}
+                      className="stocks-list-table__th--fpe"
                     />
                     <SortHeader
                       label="# Tracked Investors"
@@ -170,6 +190,7 @@ export function StocksTable({ stocks }: StocksTableProps) {
                       active={sortKey}
                       dir={sortDir}
                       onSort={setSort}
+                      className="stocks-list-table__th--holders"
                     />
                   </tr>
                 </thead>
@@ -201,17 +222,19 @@ function SortHeader({
   active,
   dir,
   onSort,
+  className = "",
 }: {
   label: string;
   sortKey: SortKey;
   active: SortKey;
   dir: "asc" | "desc";
   onSort: (key: SortKey) => void;
+  className?: string;
 }) {
   const isActive = active === sortKey;
   return (
     <th
-      className={`stocks-table__th stocks-table__th--sort ${isActive ? "stocks-table__th--active" : ""}`}
+      className={`stocks-table__th stocks-table__th--sort ${className} ${isActive ? "stocks-table__th--active" : ""}`.trim()}
       scope="col"
     >
       <button type="button" className="stocks-table__sort-btn" onClick={() => onSort(sortKey)}>
@@ -246,10 +269,15 @@ function StockTableRow({ stock }: { stock: CachedDisplayStock }) {
           </span>
         </Link>
       </td>
-      <td className="stocks-list-table__num">{marketCap}</td>
-      <td className="stocks-list-table__num">{formatRatio(stock.peRatio)}</td>
-      <td className="stocks-list-table__num">{formatRatio(stock.forwardPeRatio)}</td>
-      <td className="stocks-list-table__num">
+      <td className="stocks-list-table__num stocks-list-table__num--cap">{marketCap}</td>
+      <td className="stocks-list-table__num stocks-list-table__num--pct52">
+        {formatPctAbove52WeekLow(stock.pctAbove52WeekLow)}
+      </td>
+      <td className="stocks-list-table__num stocks-list-table__num--pe">{formatRatio(stock.peRatio)}</td>
+      <td className="stocks-list-table__num stocks-list-table__num--fpe">
+        {formatRatio(stock.forwardPeRatio)}
+      </td>
+      <td className="stocks-list-table__num stocks-list-table__num--holders">
         {holders === "—" ? <span className="stocks-table__na">—</span> : holders}
       </td>
     </tr>
@@ -280,6 +308,10 @@ function StockCard({ stock }: { stock: CachedDisplayStock }) {
         <div className="stocks-list-card__stat">
           <dt>Market Cap</dt>
           <dd>{cap}</dd>
+        </div>
+        <div className="stocks-list-card__stat">
+          <dt>% Above 52W Low</dt>
+          <dd>{formatPctAbove52WeekLow(stock.pctAbove52WeekLow)}</dd>
         </div>
         <div className="stocks-list-card__stat">
           <dt>PE</dt>

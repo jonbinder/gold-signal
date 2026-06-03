@@ -354,13 +354,39 @@
 }
 
 .stocks-list-table {
-  min-width: 100%;
+  width: 100%;
+  table-layout: fixed;
   font-size: 0.9rem;
 }
 
 .stocks-list-table__row td {
-  padding: 0.95rem 0.95rem;
+  padding: 0.85rem 0.65rem;
   border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.stocks-list-table__th--cap,
+.stocks-list-table__num--cap {
+  width: 5.25rem;
+}
+
+.stocks-list-table__th--pct52,
+.stocks-list-table__num--pct52 {
+  width: 6.25rem;
+}
+
+.stocks-list-table__th--pe,
+.stocks-list-table__num--pe {
+  width: 4.25rem;
+}
+
+.stocks-list-table__th--fpe,
+.stocks-list-table__num--fpe {
+  width: 5.5rem;
+}
+
+.stocks-list-table__th--holders,
+.stocks-list-table__num--holders {
+  width: 5.75rem;
 }
 
 .stocks-list-table__row:last-child td {
@@ -418,6 +444,11 @@
   text-align: right !important;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
+  color: var(--text-primary);
+}
+
+.stocks-list-table__num--pct52 {
+  color: var(--text-secondary);
 }
 
 .stocks-list-table__link {

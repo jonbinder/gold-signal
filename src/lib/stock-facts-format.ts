@@ -24,6 +24,14 @@ export function formatMarketCapDisplay(value: number | null): string {
   return `$${Math.round(value).toLocaleString("en-US")}`;
 }
 
+/** Neutral position-in-range label, e.g. "+30%" or "-5%". */
+export function formatPctAbove52WeekLow(value: number | null): string {
+  if (value == null || !Number.isFinite(value)) return "—";
+  const rounded = Math.round(value);
+  const sign = rounded > 0 ? "+" : "";
+  return `${sign}${rounded}%`;
+}
+
 export function formatHolderCount(count: number | null): string {
   if (count == null || !Number.isFinite(count)) return "—";
   if (count === 0) return "—";

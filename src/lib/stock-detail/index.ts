@@ -31,7 +31,7 @@ export const getStockDetailPage = cache(async (ticker: string): Promise<StockDet
   const [{ institutional, fundHolders }, largeStakes, charts, trackedInvestors] = await Promise.all([
     getInstitutionalForTicker(facts.ticker),
     Promise.resolve(loadLargeStakesForTicker(facts.ticker)),
-    getStockDetailCharts(facts.ticker, facts.insider),
+    getStockDetailCharts(facts.ticker, facts.insider, facts.priceHistory12m),
     getPublishedInvestorsForTicker(facts.ticker),
   ]);
 

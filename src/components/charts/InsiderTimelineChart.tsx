@@ -8,9 +8,9 @@ import {
   ReferenceLine,
   ResponsiveContainer,
   Tooltip,
-  XAxis,
   YAxis,
 } from "recharts";
+import { TwelveMonthXAxis } from "@/components/charts/TwelveMonthXAxis";
 import type { MonthlyInsiderBar } from "@/lib/charts/insider-series";
 import { CHART } from "@/components/charts/chart-theme";
 import { ChartCaption } from "@/components/charts/ChartCaption";
@@ -59,13 +59,7 @@ export function InsiderTimelineChart({ data }: { data: MonthlyInsiderBar[] }) {
         <BarChart data={chartData} margin={{ top: 8, right: 4, left: 0, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke={CHART.grid} vertical={false} />
           <ReferenceLine y={0} stroke={CHART.axis} strokeWidth={1} />
-          <XAxis
-            dataKey="monthLabel"
-            tick={{ fill: CHART.label, fontSize: 11 }}
-            tickLine={false}
-            axisLine={{ stroke: CHART.grid }}
-            interval="preserveStartEnd"
-          />
+          <TwelveMonthXAxis />
           <YAxis
             tickFormatter={formatAxis}
             tick={{ fill: CHART.label, fontSize: 11 }}

@@ -7,6 +7,7 @@ import {
 import { getTrackedFundHolderCount } from "@/lib/funds/holder-count";
 import { getStockPrice, getTickerDetails, normalizeTicker } from "@/lib/polygon";
 import { resolvePctAbove52WeekLow } from "@/lib/stock-52w-metrics";
+import { fetchCompactPriceHistory12m } from "@/lib/stock-price-history-cache";
 import { formatDisplayCompanyName } from "@/lib/format-company-name";
 import { resolveStockPeRatios } from "@/lib/stock-pe-ratios";
 import { resolveStockLogoServePath } from "@/lib/stock-branding";
@@ -70,11 +71,12 @@ export async function refreshOneStock(tracked: TrackedStock): Promise<{ ok: bool
       dailyChangePct = ((price - previousClose) / previousClose) * 100;
     }
 
-    const [polygonDetails, insiderResult, yahoo, trackedFundCount] = await Promise.all([
+    const [polygonDetails, insiderResult, yahoo, trackedFundCount, priceHistory12m] = await Promise.all([
       getPolygonTickerDetails(sym),
       fetchForm4Transactions(sym),
       fetchYahooSupplement(sym),
       getTrackedFundHolderCount(sym),
+      fetchCompactPriceHistory12m(sym),
     ]);
     const insiderRows = insiderResult.rows;
     const insiderNet90d = computeInsiderNet90dUsd(insiderRows);
@@ -166,6 +168,7 @@ export async function refreshOneStock(tracked: TrackedStock): Promise<{ ok: bool
       insider_transactions: insiderRows,
       insider_net_90d_usd: insiderNet90d,
       insider_as_of: nowIso,
+      price_history_12m: priceHistory12m,
       signal_score: signalScore,
       ...subScoreColumns,
       signal_coverage: signalCoverage,

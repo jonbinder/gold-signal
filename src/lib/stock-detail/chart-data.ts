@@ -1,6 +1,12 @@
 import { cache } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { buildMonthlyInsiderBars, type MonthlyInsiderBar } from "@/lib/charts/insider-series";
+import {
+  buildPriceTimeline12m,
+  MIN_PRICE_CHART_POINTS,
+  type CachedPricePoint,
+  type PriceTimelinePoint,
+} from "@/lib/charts/price-series";
 import type { InsiderTransactionRow } from "@/lib/form4-insider";
 import { getTrackedFundSlugs } from "@/lib/funds/config";
 
@@ -27,6 +33,8 @@ export type ConcentrationSlice = {
 };
 
 export type StockDetailChartsModel = {
+  priceTimeline: PriceTimelinePoint[];
+  hasPriceChart: boolean;
   insiderTimeline: MonthlyInsiderBar[];
   hasInsiderChart: boolean;
   holderCount: HolderCountSnapshot | null;
@@ -36,6 +44,8 @@ export type StockDetailChartsModel = {
 };
 
 const EMPTY_CHARTS: StockDetailChartsModel = {
+  priceTimeline: [],
+  hasPriceChart: false,
   insiderTimeline: [],
   hasInsiderChart: false,
   holderCount: null,
@@ -43,6 +53,17 @@ const EMPTY_CHARTS: StockDetailChartsModel = {
   hasInstitutionalTrend: false,
   concentration: null,
 };
+
+function priceChartsFromCache(cached: CachedPricePoint[]): Pick<
+  StockDetailChartsModel,
+  "priceTimeline" | "hasPriceChart"
+> {
+  const priceTimeline = buildPriceTimeline12m(cached, 12);
+  return {
+    priceTimeline,
+    hasPriceChart: priceTimeline.length >= MIN_PRICE_CHART_POINTS,
+  };
+}
 
 type HoldingPeriodRow = {
   period_id: string;
@@ -60,14 +81,16 @@ function investorSlug(
 async function loadChartData(
   ticker: string,
   insider: InsiderTransactionRow[],
+  priceHistory12m: CachedPricePoint[],
 ): Promise<StockDetailChartsModel> {
   const insiderTimeline = buildMonthlyInsiderBars(insider, 12);
   const hasInsiderChart = insiderTimeline.some((m) => m.buyUsd > 0 || m.sellUsd > 0);
+  const priceCharts = priceChartsFromCache(priceHistory12m);
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim();
   if (!url || !key) {
-    return { ...EMPTY_CHARTS, insiderTimeline, hasInsiderChart };
+    return { ...EMPTY_CHARTS, ...priceCharts, insiderTimeline, hasInsiderChart };
   }
 
   const supabase = createClient(url, key);
@@ -80,7 +103,7 @@ async function loadChartData(
     .maybeSingle();
 
   if (!security?.id) {
-    return { ...EMPTY_CHARTS, insiderTimeline, hasInsiderChart };
+    return { ...EMPTY_CHARTS, ...priceCharts, insiderTimeline, hasInsiderChart };
   }
 
   const { data: periods } = await supabase
@@ -90,7 +113,7 @@ async function loadChartData(
     .limit(8);
 
   if (!periods?.length) {
-    return { ...EMPTY_CHARTS, insiderTimeline, hasInsiderChart };
+    return { ...EMPTY_CHARTS, ...priceCharts, insiderTimeline, hasInsiderChart };
   }
 
   const periodIds = periods.map((p) => p.id);
@@ -186,6 +209,7 @@ async function loadChartData(
   }
 
   return {
+    ...priceCharts,
     insiderTimeline,
     hasInsiderChart,
     holderCount,
@@ -195,4 +219,7 @@ async function loadChartData(
   };
 }
 
-export const getStockDetailCharts = cache(loadChartData);
+export const getStockDetailCharts = cache(
+  (ticker: string, insider: InsiderTransactionRow[], priceHistory12m: CachedPricePoint[]) =>
+    loadChartData(ticker, insider, priceHistory12m),
+);

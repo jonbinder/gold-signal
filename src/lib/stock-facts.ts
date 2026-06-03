@@ -4,6 +4,7 @@ import type { InsiderEmptyReason, InsiderTransactionRow } from "@/lib/form4-insi
 import { normalizeInsiderTicker } from "@/lib/form4-insider";
 import { formatStockSectorLabel } from "@/lib/stock-category-labels";
 import { normalizeClientLogoUrl, stockLogoServePath } from "@/lib/stock-branding";
+import { parseCachedPriceHistory, type CachedPricePoint } from "@/lib/charts/price-series";
 import { loadTrackedStocksSync } from "@/lib/tracked-stocks-load";
 
 export {
@@ -29,6 +30,7 @@ export type StockFactsModel = {
   insiderNet90dUsd: number | null;
   insiderAsOf: string | null;
   insiderEmptyReason: InsiderEmptyReason | null;
+  priceHistory12m: CachedPricePoint[];
   dataStatus: string;
   lastUpdated: string | null;
 };
@@ -46,6 +48,7 @@ type FactsCacheRow = {
   insider_transactions: InsiderTransactionRow[] | null;
   insider_net_90d_usd: number | null;
   insider_as_of: string | null;
+  price_history_12m: unknown;
   data_status: string | null;
   last_updated: string | null;
 };
@@ -90,7 +93,7 @@ async function fetchFactsRow(ticker: string): Promise<FactsCacheRow | null> {
   const { data, error } = await supabase
     .from("stock_data_cache")
     .select(
-      "ticker, name, category, sub_category, exchange, logo_url, market_cap, company_description, ceo, insider_transactions, insider_net_90d_usd, insider_as_of, data_status, last_updated",
+      "ticker, name, category, sub_category, exchange, logo_url, market_cap, company_description, ceo, insider_transactions, insider_net_90d_usd, insider_as_of, price_history_12m, data_status, last_updated",
     )
     .eq("ticker", sym)
     .maybeSingle();
@@ -141,6 +144,7 @@ async function buildModel(ticker: string, row: FactsCacheRow | null): Promise<St
     insiderNet90dUsd: row?.insider_net_90d_usd ?? null,
     insiderAsOf: row?.insider_as_of ?? row?.last_updated ?? null,
     insiderEmptyReason,
+    priceHistory12m: row ? parseCachedPriceHistory(row.price_history_12m) : [],
     dataStatus: row?.data_status ?? "pending",
     lastUpdated: row?.last_updated ?? null,
   };

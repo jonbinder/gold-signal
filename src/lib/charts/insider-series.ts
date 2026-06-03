@@ -3,6 +3,8 @@ import type { InsiderTransactionRow } from "@/lib/form4-insider";
 export type MonthlyInsiderBar = {
   monthKey: string;
   monthLabel: string;
+  /** Center of month on 0–12 axis (aligned with price line chart). */
+  monthIndex: number;
   buyUsd: number;
   sellUsd: number;
   /** Signed net for bar chart: buys positive, sells negative */
@@ -70,11 +72,12 @@ export function buildMonthlyInsiderBars(
     else b.sellUsd += amt;
   }
 
-  return keys.map((monthKey) => {
+  return keys.map((monthKey, i) => {
     const { buyUsd, sellUsd } = buckets.get(monthKey)!;
     return {
       monthKey,
       monthLabel: labelForMonthKey(monthKey),
+      monthIndex: i + 0.5,
       buyUsd,
       sellUsd,
       netUsd: buyUsd - sellUsd,

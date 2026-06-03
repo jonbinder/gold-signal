@@ -47,4 +47,5 @@ ALTER TABLE stock_data_cache
   ADD COLUMN IF NOT EXISTS insider_as_of TIMESTAMPTZ,
   ADD COLUMN IF NOT EXISTS company_description TEXT,
   ADD COLUMN IF NOT EXISTS ceo TEXT,
-  ADD COLUMN IF NOT EXISTS forward_pe_ratio NUMERIC;
+  ADD COLUMN IF NOT EXISTS forward_pe_ratio NUMERIC,
+  ADD COLUMN IF NOT EXISTS price_history_12m JSONB;

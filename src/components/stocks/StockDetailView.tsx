@@ -4,6 +4,7 @@ import { ChevronLeft } from "lucide-react";
 import { StockLogo } from "@/components/stocks/StockLogo";
 import { InsiderActivityList } from "@/components/stocks/InsiderActivityList";
 import { InsiderTimelineChart } from "@/components/charts/InsiderTimelineChart";
+import { SharePriceTimelineChart } from "@/components/charts/SharePriceTimelineChart";
 import { HolderCountCard } from "@/components/charts/HolderCountCard";
 import { InstitutionalTrendChart } from "@/components/charts/InstitutionalTrendChart";
 import { InstitutionalConcentrationDonut } from "@/components/charts/InstitutionalConcentrationDonut";
@@ -111,6 +112,13 @@ export function StockDetailView({ model }: { model: StockDetailPageModel }) {
           title="Recent insider activity"
           subtitle={`SEC Form 4 · non-derivative common stock${asOf ? ` · as of ${asOf}` : ""}`}
         >
+          {charts.hasPriceChart ? (
+            <div className="stock-detail-viz-block">
+              <h3 className="stock-detail-viz-label">Share price (12 mo)</h3>
+              <SharePriceTimelineChart data={charts.priceTimeline} />
+            </div>
+          ) : null}
+
           <div className="stock-detail-viz-block stock-detail-viz-block--hero">
             <h3 className="stock-detail-viz-label">Buy / sell timeline (12 months)</h3>
             {charts.hasInsiderChart ? (

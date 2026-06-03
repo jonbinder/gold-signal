@@ -24,13 +24,19 @@ async function main() {
     process.exit(1);
   }
 
-  const tickers = [...new Set(loadTrackedStocksSync().map((s) => normalizeTicker(s.ticker)).filter(Boolean))];
+  const tracked = loadTrackedStocksSync();
+  const byTicker = new Map(
+    tracked.map((s) => [normalizeTicker(s.ticker), s]).filter(([t]) => Boolean(t)),
+  );
+  const tickers = [...byTicker.keys()];
   console.log(`Syncing PE ratios for ${tickers.length} tickers…`);
 
   let ok = 0;
   let fail = 0;
 
   for (const ticker of tickers) {
+    const seed = byTicker.get(ticker);
+    if (!seed) continue;
     try {
       const { peRatio, forwardPeRatio } = await resolveStockPeRatios(ticker);
       const { error } = await supabase
@@ -38,8 +44,13 @@ async function main() {
         .upsert(
           {
             ticker,
+            name: seed.name,
+            category: seed.category,
+            sub_category: seed.sub_category,
+            exchange: seed.exchange,
             pe_ratio: peRatio,
             forward_pe_ratio: forwardPeRatio,
+            data_status: "healthy",
             last_updated: new Date().toISOString(),
           },
           { onConflict: "ticker" },

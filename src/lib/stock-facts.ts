@@ -3,13 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import type { InsiderEmptyReason, InsiderTransactionRow } from "@/lib/form4-insider";
 import { normalizeInsiderTicker } from "@/lib/form4-insider";
 import { formatStockSectorLabel } from "@/lib/stock-category-labels";
-import {
-  extractPolygonBranding,
-  normalizeClientLogoUrl,
-  pickPolygonBrandingImageUrl,
-  stockLogoServePath,
-} from "@/lib/stock-branding";
-import { getTickerDetails } from "@/lib/polygon";
+import { normalizeClientLogoUrl, stockLogoServePath } from "@/lib/stock-branding";
 import { loadTrackedStocksSync } from "@/lib/tracked-stocks-load";
 
 export {
@@ -105,21 +99,16 @@ async function fetchFactsRow(ticker: string): Promise<FactsCacheRow | null> {
   return data as FactsCacheRow;
 }
 
-async function resolveFactsLogoUrl(
+function resolveFactsLogoUrl(
   sym: string,
   row: FactsCacheRow | null,
   trackedLogo: string | null,
-): Promise<string | null> {
-  const fromStore =
-    normalizeClientLogoUrl(row?.logo_url, sym) ?? normalizeClientLogoUrl(trackedLogo, sym);
-  if (fromStore) return fromStore;
-
-  const details = await getTickerDetails(sym);
-  const branding = details.ok ? extractPolygonBranding(details.data.raw) : null;
-  if (pickPolygonBrandingImageUrl(branding)) {
-    return stockLogoServePath(sym);
-  }
-  return null;
+): string | null {
+  return (
+    normalizeClientLogoUrl(row?.logo_url, sym) ??
+    normalizeClientLogoUrl(trackedLogo, sym) ??
+    stockLogoServePath(sym)
+  );
 }
 
 async function buildModel(ticker: string, row: FactsCacheRow | null): Promise<StockFactsModel | null> {
@@ -147,7 +136,7 @@ async function buildModel(ticker: string, row: FactsCacheRow | null): Promise<St
     marketCap: row?.market_cap ?? null,
     description: row?.company_description ?? null,
     ceo: row?.ceo ?? null,
-    logoUrl: await resolveFactsLogoUrl(sym, row, tracked?.logoUrl ?? null),
+    logoUrl: resolveFactsLogoUrl(sym, row, tracked?.logoUrl ?? null),
     insider,
     insiderNet90dUsd: row?.insider_net_90d_usd ?? null,
     insiderAsOf: row?.insider_as_of ?? row?.last_updated ?? null,

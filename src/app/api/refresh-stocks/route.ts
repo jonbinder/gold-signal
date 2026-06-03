@@ -1,3 +1,4 @@
+import { revalidatePath, revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 import { processRefreshBatch } from "@/lib/stock-universe-refresh";
 import { getDeploymentOrigin, isValidProcessSecret, triggerRefreshStocks } from "@/lib/trigger-process-one";
@@ -32,6 +33,9 @@ export async function GET(req: Request) {
       console.info("[refresh-stocks] Chaining to next batch", { nextBatch: batch + 1 });
     } else {
       console.info("[refresh-stocks] All batches complete");
+      revalidateTag("stocks-list");
+      revalidatePath("/stocks");
+      revalidatePath("/");
     }
 
     return NextResponse.json({ ok: true, ...result });

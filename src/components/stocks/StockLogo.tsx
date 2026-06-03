@@ -1,13 +1,14 @@
 "use client";
 
 import "./StockLogo.css";
+import Image from "next/image";
 import { useState } from "react";
 import { normalizeClientLogoUrl, stockLogoServePath } from "@/lib/stock-branding";
 
 interface StockLogoProps {
   ticker: string;
   logoUrl?: string | null;
-  /** When set, tries proxied logo even if logoUrl is empty (use sparingly). */
+  /** When set, tries proxied logo even if logoUrl is empty (detail pages only). */
   tryServe?: boolean;
   subCategory?: string;
   size?: number;
@@ -20,6 +21,7 @@ function resolveSrc(
   tryServe: boolean,
 ): string | null {
   const normalized = normalizeClientLogoUrl(logoUrl, ticker);
+  if (normalized?.startsWith("/stock-logos/")) return normalized;
   if (normalized?.startsWith("/api/stock-logo/")) return normalized;
   if (tryServe) return stockLogoServePath(ticker);
   if (normalized) return normalized;
@@ -52,20 +54,21 @@ export function StockLogo({
     );
   }
 
+  const unoptimized = src.endsWith(".svg");
+
   return (
     <div
       className={`stock-logo stock-logo__frame ${className}`.trim()}
       style={{ width: size, height: size }}
       aria-hidden="true"
     >
-      {/* Native img — reliable for same-origin /api/stock-logo proxy routes */}
-      <img
+      <Image
         src={src}
         alt=""
         width={size}
         height={size}
         loading="lazy"
-        decoding="async"
+        unoptimized={unoptimized}
         onError={() => setFailed(true)}
         style={{ objectFit: "contain", width: "100%", height: "100%" }}
       />

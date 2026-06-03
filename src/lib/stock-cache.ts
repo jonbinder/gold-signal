@@ -1,15 +1,8 @@
-import { cache } from "react";
-import { getTrackedFundHolderCount } from "@/lib/funds/holder-count";
-import {
-  extractPolygonBranding,
-  normalizeClientLogoUrl,
-  pickPolygonBrandingImageUrl,
-  stockLogoServePath,
-} from "@/lib/stock-branding";
-import { createSupabaseServiceClient } from "@/lib/supabase";
+import { unstable_cache } from "next/cache";
 import { formatDisplayCompanyName } from "@/lib/format-company-name";
-import { getStockPrice, getTickerDetails, normalizeTicker } from "@/lib/polygon";
-import { resolveStockPeRatios } from "@/lib/stock-pe-ratios";
+import { preferredListLogoUrl } from "@/lib/stock-branding";
+import { normalizeTicker } from "@/lib/polygon";
+import { createSupabaseServiceClient } from "@/lib/supabase";
 import { loadTrackedStocksSync } from "@/lib/tracked-stocks-load";
 
 export type CachedDisplayStock = {
@@ -27,13 +20,28 @@ export type CachedDisplayStock = {
   dataStatus: string;
 };
 
-type StocksListCache = {
-  value: CachedDisplayStock[];
-  expiresAt: number;
+const STOCKS_LIST_COLUMNS =
+  "ticker, name, category, sub_category, exchange, logo_url, market_cap, pe_ratio, forward_pe_ratio, famous_holder_count, insider_net_90d_usd, data_status";
+
+type StockListRow = {
+  ticker: string;
+  name: string;
+  category: string;
+  sub_category: string;
+  exchange: string | null;
+  logo_url: string | null;
+  market_cap: number | null;
+  pe_ratio: number | null;
+  forward_pe_ratio: number | null;
+  famous_holder_count: number | null;
+  insider_net_90d_usd: number | null;
+  data_status: string | null;
 };
 
-const DAILY_CACHE_MS = 24 * 60 * 60 * 1000;
-let stocksListCache: StocksListCache | null = null;
+function positiveNum(value: unknown): number | null {
+  return typeof value === "number" && Number.isFinite(value) && value > 0 ? value : null;
+}
+
 
 function fallbackFromTrackedFile(): CachedDisplayStock[] {
   const deduped = new Map<string, ReturnType<typeof loadTrackedStocksSync>[number]>();
@@ -44,7 +52,7 @@ function fallbackFromTrackedFile(): CachedDisplayStock[] {
   }
   return [...deduped.entries()].map(([ticker, s]) => ({
     ticker,
-    name: s.name,
+    name: formatDisplayCompanyName(s.name),
     category: s.category,
     subCategory: s.sub_category,
     exchange: s.exchange,
@@ -53,105 +61,67 @@ function fallbackFromTrackedFile(): CachedDisplayStock[] {
     forwardPeRatio: null,
     insiderNet90dUsd: null,
     famousHolderCount: null,
-    logoUrl: "",
+    logoUrl: preferredListLogoUrl(ticker),
     dataStatus: "pending",
   }));
 }
 
-async function loadCachedPeRatios(tickers: string[]): Promise<
-  Map<string, { peRatio: number | null; forwardPeRatio: number | null }>
-> {
-  const supabase = createSupabaseServiceClient();
-  const map = new Map<string, { peRatio: number | null; forwardPeRatio: number | null }>();
-  if (!supabase || tickers.length === 0) return map;
-
-  const { data, error } = await supabase
-    .from("stock_data_cache")
-    .select("ticker, pe_ratio, forward_pe_ratio")
-    .in("ticker", tickers);
-  if (error) return map;
-
-  for (const row of data ?? []) {
-    const sym = normalizeTicker((row as { ticker: string }).ticker);
-    const pe = (row as { pe_ratio: number | null }).pe_ratio;
-    const fpe = (row as { forward_pe_ratio: number | null }).forward_pe_ratio;
-    map.set(sym, {
-      peRatio: typeof pe === "number" && pe > 0 ? pe : null,
-      forwardPeRatio: typeof fpe === "number" && fpe > 0 ? fpe : null,
-    });
-  }
-  return map;
-}
-
-async function peRatiosForSeed(seed: CachedDisplayStock) {
-  if (seed.peRatio != null && seed.forwardPeRatio != null) {
-    return { peRatio: seed.peRatio, forwardPeRatio: seed.forwardPeRatio };
-  }
-  const live = await resolveStockPeRatios(seed.ticker);
+function rowToDisplay(stock: CachedDisplayStock, row: StockListRow): CachedDisplayStock {
   return {
-    peRatio: seed.peRatio ?? live.peRatio,
-    forwardPeRatio: seed.forwardPeRatio ?? live.forwardPeRatio,
+    ticker: stock.ticker,
+    name: formatDisplayCompanyName(row.name || stock.name),
+    category: row.category || stock.category,
+    subCategory: row.sub_category || stock.subCategory,
+    exchange: row.exchange ?? stock.exchange,
+    marketCap: positiveNum(row.market_cap) ?? stock.marketCap,
+    peRatio: positiveNum(row.pe_ratio) ?? stock.peRatio,
+    forwardPeRatio: positiveNum(row.forward_pe_ratio) ?? stock.forwardPeRatio,
+    insiderNet90dUsd:
+      typeof row.insider_net_90d_usd === "number" && Number.isFinite(row.insider_net_90d_usd)
+        ? row.insider_net_90d_usd
+        : stock.insiderNet90dUsd,
+    famousHolderCount:
+      typeof row.famous_holder_count === "number" && row.famous_holder_count >= 0
+        ? row.famous_holder_count
+        : stock.famousHolderCount,
+    logoUrl: preferredListLogoUrl(stock.ticker, row.logo_url),
+    dataStatus: row.data_status ?? stock.dataStatus,
   };
 }
 
-async function enrichFromPolygon(seed: CachedDisplayStock): Promise<CachedDisplayStock> {
-  const [details, holderCount, peRatios] = await Promise.all([
-    getTickerDetails(seed.ticker),
-    getTrackedFundHolderCount(seed.ticker),
-    peRatiosForSeed(seed),
-  ]);
-  const { peRatio, forwardPeRatio } = peRatios;
-  const branding = details.ok ? extractPolygonBranding(details.data.raw) : null;
-  const polygonLogo = pickPolygonBrandingImageUrl(branding)
-    ? stockLogoServePath(seed.ticker)
-    : null;
-  const cachedLogo = normalizeClientLogoUrl(seed.logoUrl, seed.ticker);
-  const displayName = formatDisplayCompanyName(details.ok ? details.data.name : seed.name);
-
-  return {
-    ...seed,
-    name: displayName,
-    marketCap: details.ok && details.data.marketCap && details.data.marketCap > 0 ? details.data.marketCap : null,
-    peRatio,
-    forwardPeRatio,
-    famousHolderCount: holderCount,
-    logoUrl: polygonLogo ?? cachedLogo ?? "",
-    dataStatus: details.ok ? "healthy" : "partial",
-  };
-}
-
-async function loadCachedLogoUrls(tickers: string[]): Promise<Map<string, string>> {
-  const supabase = createSupabaseServiceClient();
-  if (!supabase || tickers.length === 0) return new Map();
-
-  const { data } = await supabase.from("stock_data_cache").select("ticker, logo_url").in("ticker", tickers);
-  const map = new Map<string, string>();
-  for (const row of data ?? []) {
-    const sym = normalizeTicker((row as { ticker: string }).ticker);
-    const url = normalizeClientLogoUrl((row as { logo_url: string | null }).logo_url, sym);
-    if (url) map.set(sym, url);
-  }
-  return map;
-}
-
-export const getCachedDisplayStocks = cache(async (): Promise<CachedDisplayStock[]> => {
-  if (stocksListCache && Date.now() < stocksListCache.expiresAt) {
-    return stocksListCache.value;
-  }
+/**
+ * Loads the /stocks table from Supabase only (one query). Polygon/Yahoo run via refresh-stocks cron.
+ */
+async function loadStocksListFromSupabase(): Promise<CachedDisplayStock[]> {
   const seed = fallbackFromTrackedFile();
-  const tickers = seed.map((s) => s.ticker);
-  const [logoMap, peMap] = await Promise.all([loadCachedLogoUrls(tickers), loadCachedPeRatios(tickers)]);
-  const seedWithLogos = seed.map((stock) => {
-    const cachedPe = peMap.get(stock.ticker);
-    return {
-      ...stock,
-      logoUrl: logoMap.get(stock.ticker) ?? stock.logoUrl,
-      peRatio: cachedPe?.peRatio ?? stock.peRatio,
-      forwardPeRatio: cachedPe?.forwardPeRatio ?? stock.forwardPeRatio,
-    };
+  const supabase = createSupabaseServiceClient();
+  if (!supabase) return seed;
+
+  const { data, error } = await supabase.from("stock_data_cache").select(STOCKS_LIST_COLUMNS);
+  if (error) {
+    console.warn("[stock-cache] Supabase read failed, using tracked-stocks seed:", error.message);
+    return seed;
+  }
+
+  const rowByTicker = new Map<string, StockListRow>();
+  for (const raw of data ?? []) {
+    const sym = normalizeTicker((raw as StockListRow).ticker);
+    if (sym) rowByTicker.set(sym, raw as StockListRow);
+  }
+
+  return seed.map((stock) => {
+    const row = rowByTicker.get(stock.ticker);
+    return row ? rowToDisplay(stock, row) : stock;
   });
-  const enriched = await Promise.all(seedWithLogos.map((stock) => enrichFromPolygon(stock)));
-  const sorted = enriched.sort((a, b) => a.ticker.localeCompare(b.ticker));
-  stocksListCache = { value: sorted, expiresAt: Date.now() + DAILY_CACHE_MS };
-  return sorted;
-});
+}
+
+const loadStocksListCached = unstable_cache(
+  loadStocksListFromSupabase,
+  ["stocks-list-display-v2"],
+  { revalidate: 3600, tags: ["stocks-list"] },
+);
+
+export async function getCachedDisplayStocks(): Promise<CachedDisplayStock[]> {
+  const rows = await loadStocksListCached();
+  return [...rows].sort((a, b) => a.ticker.localeCompare(b.ticker));
+}

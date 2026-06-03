@@ -7,6 +7,7 @@
 import * as dotenv from "dotenv";
 dotenv.config({ path: ".env.local" });
 
+import { formatDisplayCompanyName } from "../src/lib/format-company-name";
 import { loadTrackedStocksSync } from "../src/lib/tracked-stocks-load";
 import { normalizeTicker } from "../src/lib/polygon";
 import { resolveStockPeRatios } from "../src/lib/stock-pe-ratios";
@@ -25,9 +26,11 @@ async function main() {
   }
 
   const tracked = loadTrackedStocksSync();
-  const byTicker = new Map(
-    tracked.map((s) => [normalizeTicker(s.ticker), s]).filter(([t]) => Boolean(t)),
-  );
+  const byTicker = new Map<string, (typeof tracked)[number]>();
+  for (const s of tracked) {
+    const t = normalizeTicker(s.ticker);
+    if (t) byTicker.set(t, s);
+  }
   const tickers = [...byTicker.keys()];
   console.log(`Syncing PE ratios for ${tickers.length} tickers…`);
 
@@ -44,7 +47,7 @@ async function main() {
         .upsert(
           {
             ticker,
-            name: seed.name,
+            name: formatDisplayCompanyName(seed.name),
             category: seed.category,
             sub_category: seed.sub_category,
             exchange: seed.exchange,

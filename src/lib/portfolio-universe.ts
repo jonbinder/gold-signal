@@ -1,5 +1,4 @@
 import { cache } from "react";
-import { getCachedDisplayStocks } from "@/lib/stock-cache";
 import { normalizeTicker } from "@/lib/polygon";
 import { getTrackedStocks, loadTrackedStocksSync } from "@/lib/tracked-stocks-load";
 
@@ -11,9 +10,5 @@ export const getTrackedTickerSymbols = cache(async (): Promise<string[]> => {
 
 export async function isTrackedTicker(ticker: string): Promise<boolean> {
   const sym = normalizeTicker(ticker);
-  const fromFile = loadTrackedStocksSync().some((s) => s.ticker === sym);
-  if (fromFile) return true;
-
-  const cached = await getCachedDisplayStocks();
-  return cached.some((s) => s.ticker === sym);
+  return loadTrackedStocksSync().some((s) => normalizeTicker(s.ticker) === sym);
 }

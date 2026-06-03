@@ -239,7 +239,6 @@ function StockTableRow({ stock }: { stock: CachedDisplayStock }) {
             <StockLogo
               ticker={stock.ticker}
               logoUrl={stock.logoUrl}
-              tryServe
               subCategory={stock.subCategory}
               size={34}
             />
@@ -267,7 +266,6 @@ function StockCard({ stock }: { stock: CachedDisplayStock }) {
         <StockLogo
           ticker={stock.ticker}
           logoUrl={stock.logoUrl}
-          tryServe
           subCategory={stock.subCategory}
           size={32}
         />

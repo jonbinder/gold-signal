@@ -28,6 +28,7 @@ export const metadata: Metadata = {
   },
 };
 
+/** ISR: cached HTML + Supabase-backed rows; refresh-stocks cron updates data (~daily). */
 export const revalidate = 3600;
 
 export default async function StocksPage() {

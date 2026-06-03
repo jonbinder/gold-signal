@@ -6,6 +6,7 @@ import {
 } from "@/lib/form4-insider";
 import { getTrackedFundHolderCount } from "@/lib/funds/holder-count";
 import { getStockPrice, getTickerDetails, normalizeTicker } from "@/lib/polygon";
+import { formatDisplayCompanyName } from "@/lib/format-company-name";
 import { resolveStockPeRatios } from "@/lib/stock-pe-ratios";
 import { resolveStockLogoServePath } from "@/lib/stock-branding";
 import { fetchYahooSupplement, getPolygonTickerDetails } from "@/lib/stock-profile";
@@ -137,7 +138,9 @@ export async function refreshOneStock(tracked: TrackedStock): Promise<{ ok: bool
 
     const row = {
       ticker: sym,
-      name: tracked.name || polygonDetails?.name || rankingCompanyName || sym,
+      name: formatDisplayCompanyName(
+        tracked.name || polygonDetails?.name || rankingCompanyName || sym,
+      ),
       category: tracked.category,
       sub_category: tracked.sub_category,
       exchange: tracked.exchange,

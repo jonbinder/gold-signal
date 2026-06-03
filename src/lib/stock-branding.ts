@@ -9,12 +9,26 @@ export type PolygonBranding = {
   icon_url?: string | null;
 };
 
+/** Local static logo path when we have a downloaded asset; otherwise null. */
+export function staticStockLogoPath(ticker: string): string | null {
+  const sym = normalizeTicker(ticker);
+  return STATIC_LOGO_PATHS[sym] ?? null;
+}
+
 /** Public URL for a ticker logo (static file if downloaded, else API proxy). */
 export function stockLogoServePath(ticker: string): string {
   const sym = normalizeTicker(ticker);
+  return staticStockLogoPath(ticker) ?? `/api/stock-logo/${encodeURIComponent(sym)}`;
+}
+
+/** Prefer local /stock-logos for list UIs; avoids proxy fetches when no asset exists. */
+export function preferredListLogoUrl(ticker: string, logoUrl?: string | null): string {
+  const sym = normalizeTicker(ticker);
   const staticPath = STATIC_LOGO_PATHS[sym];
   if (staticPath) return staticPath;
-  return `/api/stock-logo/${encodeURIComponent(sym)}`;
+  const normalized = normalizeClientLogoUrl(logoUrl, sym);
+  if (normalized?.startsWith("/stock-logos/")) return normalized;
+  return "";
 }
 
 export function extractPolygonBranding(raw: unknown): PolygonBranding | null {

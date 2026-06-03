@@ -7,7 +7,9 @@ import {
   stockLogoServePath,
 } from "@/lib/stock-branding";
 import { createSupabaseServiceClient } from "@/lib/supabase";
-import { getFinancials, getStockPrice, getTickerDetails, normalizeTicker } from "@/lib/polygon";
+import { formatDisplayCompanyName } from "@/lib/format-company-name";
+import { getStockPrice, getTickerDetails, normalizeTicker } from "@/lib/polygon";
+import { resolveStockPeRatios } from "@/lib/stock-pe-ratios";
 import { loadTrackedStocksSync } from "@/lib/tracked-stocks-load";
 
 export type CachedDisplayStock = {
@@ -56,72 +58,59 @@ function fallbackFromTrackedFile(): CachedDisplayStock[] {
   }));
 }
 
-function roundRatio(value: number | null): number | null {
-  if (value == null || !Number.isFinite(value) || value <= 0) return null;
-  const rounded = Math.round(value * 10) / 10;
-  return rounded > 0 ? rounded : null;
+async function loadCachedPeRatios(tickers: string[]): Promise<
+  Map<string, { peRatio: number | null; forwardPeRatio: number | null }>
+> {
+  const supabase = createSupabaseServiceClient();
+  const map = new Map<string, { peRatio: number | null; forwardPeRatio: number | null }>();
+  if (!supabase || tickers.length === 0) return map;
+
+  const { data, error } = await supabase
+    .from("stock_data_cache")
+    .select("ticker, pe_ratio, forward_pe_ratio")
+    .in("ticker", tickers);
+  if (error) return map;
+
+  for (const row of data ?? []) {
+    const sym = normalizeTicker((row as { ticker: string }).ticker);
+    const pe = (row as { pe_ratio: number | null }).pe_ratio;
+    const fpe = (row as { forward_pe_ratio: number | null }).forward_pe_ratio;
+    map.set(sym, {
+      peRatio: typeof pe === "number" && pe > 0 ? pe : null,
+      forwardPeRatio: typeof fpe === "number" && fpe > 0 ? fpe : null,
+    });
+  }
+  return map;
 }
 
-function computePeRatios(input: {
-  price: number | null;
-  ttmEps: number | null;
-  forwardEps: number | null;
-}): { peRatio: number | null; forwardPeRatio: number | null } {
-  const peRatio =
-    input.price != null && input.price > 0 && input.ttmEps != null && input.ttmEps > 0
-      ? roundRatio(input.price / input.ttmEps)
-      : null;
-  const forwardPeRatio =
-    input.price != null && input.price > 0 && input.forwardEps != null && input.forwardEps > 0
-      ? roundRatio(input.price / input.forwardEps)
-      : null;
-  return { peRatio, forwardPeRatio };
+async function peRatiosForSeed(seed: CachedDisplayStock) {
+  if (seed.peRatio != null && seed.forwardPeRatio != null) {
+    return { peRatio: seed.peRatio, forwardPeRatio: seed.forwardPeRatio };
+  }
+  const live = await resolveStockPeRatios(seed.ticker);
+  return {
+    peRatio: seed.peRatio ?? live.peRatio,
+    forwardPeRatio: seed.forwardPeRatio ?? live.forwardPeRatio,
+  };
 }
 
 async function enrichFromPolygon(seed: CachedDisplayStock): Promise<CachedDisplayStock> {
-  const [details, holderCount, financials, price] = await Promise.all([
+  const [details, holderCount, peRatios] = await Promise.all([
     getTickerDetails(seed.ticker),
     getTrackedFundHolderCount(seed.ticker),
-    getFinancials(seed.ticker),
-    getStockPrice(seed.ticker),
+    peRatiosForSeed(seed),
   ]);
-  const latestClose = price.ok ? price.data.close : null;
-  const quarters = financials.ok ? financials.data.quarters : [];
-  const ttmEps = (() => {
-    const epsRows = quarters
-      .map((q) => q.epsDiluted ?? q.epsBasic)
-      .filter((v): v is number => typeof v === "number" && Number.isFinite(v));
-    if (epsRows.length >= 4) return epsRows.slice(0, 4).reduce((sum, v) => sum + v, 0);
-    const shares = details.ok ? details.data.sharesOutstanding : null;
-    const niRows = quarters
-      .map((q) => q.netIncome)
-      .filter((v): v is number => typeof v === "number" && Number.isFinite(v));
-    if (niRows.length >= 4 && shares && shares > 0) {
-      return niRows.slice(0, 4).reduce((sum, v) => sum + v, 0) / shares;
-    }
-    return null;
-  })();
-  // Polygon plans rarely expose forward EPS directly. We use annualized latest quarter EPS
-  // as a conservative forward proxy; if unavailable/non-positive, we render "—".
-  const forwardEpsProxy = (() => {
-    const latestQuarter = quarters[0];
-    const latestEps = latestQuarter?.epsDiluted ?? latestQuarter?.epsBasic ?? null;
-    if (latestEps != null && Number.isFinite(latestEps) && latestEps > 0) return latestEps * 4;
-    return null;
-  })();
-  const { peRatio, forwardPeRatio } = computePeRatios({
-    price: latestClose,
-    ttmEps,
-    forwardEps: forwardEpsProxy,
-  });
+  const { peRatio, forwardPeRatio } = peRatios;
   const branding = details.ok ? extractPolygonBranding(details.data.raw) : null;
   const polygonLogo = pickPolygonBrandingImageUrl(branding)
     ? stockLogoServePath(seed.ticker)
     : null;
   const cachedLogo = normalizeClientLogoUrl(seed.logoUrl, seed.ticker);
+  const displayName = formatDisplayCompanyName(details.ok ? details.data.name : seed.name);
+
   return {
     ...seed,
-    name: details.ok ? details.data.name : seed.name,
+    name: displayName,
     marketCap: details.ok && details.data.marketCap && details.data.marketCap > 0 ? details.data.marketCap : null,
     peRatio,
     forwardPeRatio,
@@ -150,11 +139,17 @@ export const getCachedDisplayStocks = cache(async (): Promise<CachedDisplayStock
     return stocksListCache.value;
   }
   const seed = fallbackFromTrackedFile();
-  const logoMap = await loadCachedLogoUrls(seed.map((s) => s.ticker));
-  const seedWithLogos = seed.map((stock) => ({
-    ...stock,
-    logoUrl: logoMap.get(stock.ticker) ?? stock.logoUrl,
-  }));
+  const tickers = seed.map((s) => s.ticker);
+  const [logoMap, peMap] = await Promise.all([loadCachedLogoUrls(tickers), loadCachedPeRatios(tickers)]);
+  const seedWithLogos = seed.map((stock) => {
+    const cachedPe = peMap.get(stock.ticker);
+    return {
+      ...stock,
+      logoUrl: logoMap.get(stock.ticker) ?? stock.logoUrl,
+      peRatio: cachedPe?.peRatio ?? stock.peRatio,
+      forwardPeRatio: cachedPe?.forwardPeRatio ?? stock.forwardPeRatio,
+    };
+  });
   const enriched = await Promise.all(seedWithLogos.map((stock) => enrichFromPolygon(stock)));
   const sorted = enriched.sort((a, b) => a.ticker.localeCompare(b.ticker));
   stocksListCache = { value: sorted, expiresAt: Date.now() + DAILY_CACHE_MS };

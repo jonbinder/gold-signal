@@ -313,26 +313,60 @@ export async function getTickerDetails(ticker: string): Promise<ApiResult<Ticker
   });
 }
 
+function isQuarterlyFiscalPeriod(period: string | null): boolean {
+  return period != null && /^Q[1-4]$/i.test(period.trim());
+}
+
+function quartersFromFinancialRows(rows: Record<string, unknown>[]): QuarterlyFinancials[] {
+  return rows
+    .filter((row): row is Record<string, unknown> => !!row && typeof row === "object")
+    .filter((row) => isQuarterlyFiscalPeriod(typeof row.fiscal_period === "string" ? row.fiscal_period : null))
+    .map(parseQuarter)
+    .sort((a, b) => {
+      const ad = a.endDate ?? "";
+      const bd = b.endDate ?? "";
+      return bd.localeCompare(ad);
+    })
+    .slice(0, 4);
+}
+
+async function fetchFinancialRows(
+  sym: string,
+  params: Record<string, string | number | undefined>,
+  cacheKey: string,
+): Promise<ApiResult<Record<string, unknown>[]>> {
+  type FinResponse = { results?: Record<string, unknown>[] };
+  const res = await polygonFetch<FinResponse>("/vX/reference/financials", params, {
+    cacheKey,
+    cacheTtlMs: 24 * 60 * 60 * 1000,
+  });
+  if (!res.ok) return res;
+  return ok(res.data.results ?? []);
+}
+
 /**
  * Fetches the latest quarterly financial statements (up to four periods).
  */
 export async function getFinancials(ticker: string): Promise<ApiResult<FinancialsBundle>> {
   const sym = normalizeTicker(ticker);
-  const cacheKey = `polygon:financials:${sym}`;
-  type FinResponse = { results?: Record<string, unknown>[] };
-  const res = await polygonFetch<FinResponse>(
-    "/vX/reference/financials",
-    { ticker: sym, limit: 4, sort: "period_of_report_date.desc" },
-    { cacheKey, cacheTtlMs: 24 * 60 * 60 * 1000 },
-  );
-  if (!res.ok) return res;
+  const cacheKey = `polygon:financials:${sym}:q`;
 
-  const rows = res.data.results ?? [];
-  const quarters = rows
-    .filter((row): row is Record<string, unknown> => !!row && typeof row === "object")
-    .map(parseQuarter);
+  let rowsRes = await fetchFinancialRows(sym, { ticker: sym, limit: 12, timeframe: "quarterly" }, cacheKey);
+  if (!rowsRes.ok) return rowsRes;
 
-  return ok({ ticker: sym, quarters, raw: res.data });
+  let rows = rowsRes.data;
+  if (rows.length === 0) {
+    rowsRes = await fetchFinancialRows(
+      sym,
+      { ticker: sym, limit: 16 },
+      `${cacheKey}:fallback`,
+    );
+    if (!rowsRes.ok) return rowsRes;
+    rows = rowsRes.data;
+  }
+
+  const quarters = quartersFromFinancialRows(rows);
+  return ok({ ticker: sym, quarters, raw: { results: rows } });
 }
 
 /**

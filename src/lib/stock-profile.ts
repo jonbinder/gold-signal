@@ -46,6 +46,14 @@ export type YahooSupplement = {
   nextEarningsDate: string | null;
 };
 
+export type YahooPeMetrics = {
+  trailingPe: number | null;
+  forwardPe: number | null;
+  trailingEps: number | null;
+  forwardEps: number | null;
+  currentPrice: number | null;
+};
+
 function polygonBaseUrl(): string {
   const raw = process.env.POLYGON_REST_BASE_URL?.trim();
   if (raw) return raw.replace(/\/$/, "");
@@ -603,6 +611,59 @@ async function yahooQuoteSummary(sym: string): Promise<unknown | null> {
     return JSON.parse(text);
   } catch {
     return null;
+  }
+}
+
+function readYahooRaw(node: { raw?: number } | undefined): number | null {
+  const v = node?.raw;
+  return typeof v === "number" && Number.isFinite(v) && v > 0 ? v : null;
+}
+
+export async function fetchYahooPeMetrics(ticker: string): Promise<YahooPeMetrics> {
+  const empty: YahooPeMetrics = {
+    trailingPe: null,
+    forwardPe: null,
+    trailingEps: null,
+    forwardEps: null,
+    currentPrice: null,
+  };
+  const sym = normalizeTicker(ticker);
+  try {
+    const handshake = await getYahooHandshake();
+    if (!handshake) return empty;
+    const url = new URL(`https://query2.finance.yahoo.com/v10/finance/quoteSummary/${encodeURIComponent(sym)}`);
+    url.searchParams.set("modules", "defaultKeyStatistics,financialData");
+    url.searchParams.set("crumb", handshake.crumb);
+    const res = await fetch(url.toString(), {
+      method: "GET",
+      headers: {
+        "User-Agent": YAHOO_USER_AGENT,
+        Accept: "application/json",
+        Cookie: handshake.cookie,
+      },
+      next: { revalidate: 3600 },
+    });
+    if (res.status === 401 || res.status === 403) {
+      invalidateYahooHandshake();
+      return empty;
+    }
+    if (!res.ok) return empty;
+    const json = (await res.json()) as {
+      quoteSummary?: { result?: { defaultKeyStatistics?: Record<string, { raw?: number }>; financialData?: Record<string, { raw?: number }> }[] };
+    };
+    const row = json.quoteSummary?.result?.[0];
+    if (!row) return empty;
+    const stats = row.defaultKeyStatistics;
+    const fin = row.financialData;
+    return {
+      trailingPe: readYahooRaw(stats?.trailingPE),
+      forwardPe: readYahooRaw(stats?.forwardPE),
+      trailingEps: readYahooRaw(stats?.trailingEps),
+      forwardEps: readYahooRaw(stats?.forwardEps),
+      currentPrice: readYahooRaw(fin?.currentPrice),
+    };
+  } catch {
+    return empty;
   }
 }
 

@@ -6,6 +6,7 @@ import {
 } from "@/lib/form4-insider";
 import { getTrackedFundHolderCount } from "@/lib/funds/holder-count";
 import { getStockPrice, getTickerDetails, normalizeTicker } from "@/lib/polygon";
+import { resolveStockPeRatios } from "@/lib/stock-pe-ratios";
 import { resolveStockLogoServePath } from "@/lib/stock-branding";
 import { fetchYahooSupplement, getPolygonTickerDetails } from "@/lib/stock-profile";
 import { createSupabaseServiceClient } from "@/lib/supabase";
@@ -93,10 +94,21 @@ export async function refreshOneStock(tracked: TrackedStock): Promise<{ ok: bool
       subScoreColumns = scored.subScoreColumns;
     }
 
+    const inputs = rawMetrics.inputs as {
+      pe?: { trailingPe?: number | null };
+      support?: { currentPrice?: number; fiftyTwoWeekLow?: number };
+    } | undefined;
+
     let peRatio: number | null = null;
-    const inputs = rawMetrics.inputs as { pe?: { trailingPe?: number | null } } | undefined;
-    if (inputs?.pe?.trailingPe != null && inputs.pe.trailingPe > 0) {
-      peRatio = inputs.pe.trailingPe;
+    let forwardPeRatio: number | null = null;
+    if (SCORING_ENABLED) {
+      if (inputs?.pe?.trailingPe != null && inputs.pe.trailingPe > 0) {
+        peRatio = inputs.pe.trailingPe;
+      }
+    } else {
+      const pe = await resolveStockPeRatios(sym);
+      peRatio = pe.peRatio;
+      forwardPeRatio = pe.forwardPeRatio;
     }
 
     let pctAbove52: number | null = null;
@@ -135,6 +147,7 @@ export async function refreshOneStock(tracked: TrackedStock): Promise<{ ok: bool
       daily_change_pct: dailyChangePct,
       market_cap: marketCap,
       pe_ratio: peRatio,
+      forward_pe_ratio: forwardPeRatio,
       pct_above_52_week_low: pctAbove52,
       company_description: polygonDetails?.description ?? null,
       ceo: yahoo.ceo,

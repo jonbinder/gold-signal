@@ -7,13 +7,14 @@ import { stockPath } from "@/lib/paths";
 import type { CachedDisplayStock } from "@/lib/stock-cache";
 import { formatHolderCount } from "@/lib/stock-facts-format";
 
-type SortKey = "ticker" | "holderCount" | "marketCap" | "peRatio" | "forwardPeRatio";
+type SortKey = "ticker" | "name" | "holderCount" | "marketCap" | "peRatio" | "forwardPeRatio";
 
 interface StocksTableProps {
   stocks: CachedDisplayStock[];
 }
 
 const MOBILE_SORT_OPTIONS: Array<{ key: SortKey; label: string }> = [
+  { key: "name", label: "Company" },
   { key: "marketCap", label: "Market Cap" },
   { key: "peRatio", label: "PE Ratio" },
   { key: "forwardPeRatio", label: "Forward PE Ratio" },
@@ -36,6 +37,7 @@ function formatRatio(value: number | null): string {
 
 function sortValue(stock: CachedDisplayStock, key: SortKey): number | string {
   if (key === "ticker") return stock.ticker;
+  if (key === "name") return stock.name;
   if (key === "holderCount") return stock.famousHolderCount ?? -1;
   if (key === "peRatio") return stock.peRatio ?? -1;
   if (key === "forwardPeRatio") return stock.forwardPeRatio ?? -1;
@@ -66,7 +68,7 @@ export function StocksTable({ stocks }: StocksTableProps) {
       setSortDir((d) => (d === "desc" ? "asc" : "desc"));
     } else {
       setSortKey(key);
-      setSortDir(key === "ticker" ? "asc" : "desc");
+      setSortDir(key === "ticker" || key === "name" ? "asc" : "desc");
     }
   };
 
@@ -103,7 +105,7 @@ export function StocksTable({ stocks }: StocksTableProps) {
                   onChange={(event) => {
                     const nextKey = event.target.value as SortKey;
                     setSortKey(nextKey);
-                    setSortDir(nextKey === "ticker" ? "asc" : "desc");
+                    setSortDir(nextKey === "ticker" || nextKey === "name" ? "asc" : "desc");
                   }}
                 >
                   {MOBILE_SORT_OPTIONS.map((option) => (
@@ -134,9 +136,13 @@ export function StocksTable({ stocks }: StocksTableProps) {
                       dir={sortDir}
                       onSort={setSort}
                     />
-                    <th className="stocks-table__th" scope="col">
-                      Company
-                    </th>
+                    <SortHeader
+                      label="Company"
+                      sortKey="name"
+                      active={sortKey}
+                      dir={sortDir}
+                      onSort={setSort}
+                    />
                     <SortHeader
                       label="Market Cap"
                       sortKey="marketCap"

@@ -375,8 +375,15 @@
 }
 
 .stocks-list-table__company {
-  min-width: 250px;
+  width: 11rem;
+  max-width: 11rem;
   color: var(--text-secondary);
+}
+
+.stocks-list-table__company .stocks-list-company-cell > span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .stocks-list-company-cell {

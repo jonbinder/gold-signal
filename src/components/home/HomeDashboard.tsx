@@ -70,12 +70,16 @@ export function HomeDashboard({ model }: { model: HomeDashboardModel }) {
     <>
       <header className="home-masthead" aria-label="GoldSignal overview">
         <div className="home-masthead__inner">
-          <h1 className="home-masthead__title">The smart money in gold &amp; silver</h1>
-          <p className="home-masthead__desc">
-            Recent SEC Form 4 insider trades and tracked investor holdings across our precious-metals
-            stock universe — sourced from public filings.
-          </p>
-          <GoldWisdomQuote />
+          <div className="home-masthead__lead">
+            <h1 className="home-masthead__title">The smart money in gold &amp; silver</h1>
+            <p className="home-masthead__desc">
+              Recent SEC Form 4 insider trades and tracked investor holdings across our precious-metals
+              stock universe — sourced from public filings.
+            </p>
+          </div>
+          <div className="home-masthead__quote-slot">
+            <GoldWisdomQuote />
+          </div>
         </div>
       </header>
 

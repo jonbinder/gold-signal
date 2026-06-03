@@ -71,6 +71,12 @@
   text-decoration: underline;
 }
 
+.funds-table__ticker-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .funds-table__ticker-muted {
   color: var(--text-muted);
 }

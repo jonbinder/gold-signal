@@ -35,7 +35,7 @@ export function InvestorHoldingsTable({ holdings }: InvestorHoldingsTableProps) 
               <td className="stocks-table__td stocks-table__td--weight">{h.estWeight}</td>
               <td className="stocks-table__td stocks-table__td--name">
                 <div className="stocks-table__name-cell">
-                  <StockLogo ticker={h.ticker} logoUrl={h.logoUrl} size={44} />
+                  <StockLogo ticker={h.ticker} logoUrl={h.logoUrl} tryServe size={44} />
                   <div>
                     {h.ticker !== "—" ? (
                       <Link href={`/stocks/${h.ticker}`} className="stocks-table__ticker stocks-table__name-link">

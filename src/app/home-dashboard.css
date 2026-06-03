@@ -430,6 +430,20 @@
   color: inherit;
 }
 
+.home-panel-list__link--with-logo {
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 0.55rem;
+}
+
+.home-panel-list__link-text {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem 0.5rem;
+  min-width: 0;
+}
+
 .home-panel-list__link:hover .home-panel-list__primary {
   color: var(--gold-600);
 }

@@ -1,5 +1,12 @@
 import { cache } from "react";
 import { getTrackedFundHolderCount } from "@/lib/funds/holder-count";
+import {
+  extractPolygonBranding,
+  normalizeClientLogoUrl,
+  pickPolygonBrandingImageUrl,
+  stockLogoServePath,
+} from "@/lib/stock-branding";
+import { createSupabaseServiceClient } from "@/lib/supabase";
 import { getFinancials, getStockPrice, getTickerDetails, normalizeTicker } from "@/lib/polygon";
 import { loadTrackedStocksSync } from "@/lib/tracked-stocks-load";
 
@@ -107,10 +114,11 @@ async function enrichFromPolygon(seed: CachedDisplayStock): Promise<CachedDispla
     ttmEps,
     forwardEps: forwardEpsProxy,
   });
-  const branding =
-    details.ok && details.data.raw && typeof details.data.raw === "object"
-      ? ((details.data.raw as { branding?: { logo_url?: string | null } }).branding ?? null)
-      : null;
+  const branding = details.ok ? extractPolygonBranding(details.data.raw) : null;
+  const polygonLogo = pickPolygonBrandingImageUrl(branding)
+    ? stockLogoServePath(seed.ticker)
+    : null;
+  const cachedLogo = normalizeClientLogoUrl(seed.logoUrl, seed.ticker);
   return {
     ...seed,
     name: details.ok ? details.data.name : seed.name,
@@ -118,9 +126,23 @@ async function enrichFromPolygon(seed: CachedDisplayStock): Promise<CachedDispla
     peRatio,
     forwardPeRatio,
     famousHolderCount: holderCount,
-    logoUrl: branding?.logo_url?.trim() ?? "",
+    logoUrl: polygonLogo ?? cachedLogo ?? "",
     dataStatus: details.ok ? "healthy" : "partial",
   };
+}
+
+async function loadCachedLogoUrls(tickers: string[]): Promise<Map<string, string>> {
+  const supabase = createSupabaseServiceClient();
+  if (!supabase || tickers.length === 0) return new Map();
+
+  const { data } = await supabase.from("stock_data_cache").select("ticker, logo_url").in("ticker", tickers);
+  const map = new Map<string, string>();
+  for (const row of data ?? []) {
+    const sym = normalizeTicker((row as { ticker: string }).ticker);
+    const url = normalizeClientLogoUrl((row as { logo_url: string | null }).logo_url, sym);
+    if (url) map.set(sym, url);
+  }
+  return map;
 }
 
 export const getCachedDisplayStocks = cache(async (): Promise<CachedDisplayStock[]> => {
@@ -128,7 +150,12 @@ export const getCachedDisplayStocks = cache(async (): Promise<CachedDisplayStock
     return stocksListCache.value;
   }
   const seed = fallbackFromTrackedFile();
-  const enriched = await Promise.all(seed.map((stock) => enrichFromPolygon(stock)));
+  const logoMap = await loadCachedLogoUrls(seed.map((s) => s.ticker));
+  const seedWithLogos = seed.map((stock) => ({
+    ...stock,
+    logoUrl: logoMap.get(stock.ticker) ?? stock.logoUrl,
+  }));
+  const enriched = await Promise.all(seedWithLogos.map((stock) => enrichFromPolygon(stock)));
   const sorted = enriched.sort((a, b) => a.ticker.localeCompare(b.ticker));
   stocksListCache = { value: sorted, expiresAt: Date.now() + DAILY_CACHE_MS };
   return sorted;

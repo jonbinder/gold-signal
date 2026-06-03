@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { StockLogo } from "@/components/stocks/StockLogo";
 import { stockPath } from "@/lib/paths";
 import type { InvestorDetailModel } from "@/lib/investors/types";
 import { loadTrackedStocksSync } from "@/lib/tracked-stocks-load";
@@ -86,13 +87,16 @@ export function InvestorDetailView({ model }: { model: InvestorDetailModel }) {
                 {positions.map((row) => (
                   <tr key={row.id}>
                     <td>
-                      {tracked.has(row.ticker.toUpperCase()) ? (
-                        <Link href={stockPath(row.ticker)}>{row.ticker}</Link>
-                      ) : (
-                        <span className="mono funds-table__ticker-muted" title="Stock page not in tracked universe yet">
-                          {row.ticker}
-                        </span>
-                      )}
+                      <div className="funds-table__ticker-cell">
+                        <StockLogo ticker={row.ticker} tryServe size={30} />
+                        {tracked.has(row.ticker.toUpperCase()) ? (
+                          <Link href={stockPath(row.ticker)}>{row.ticker}</Link>
+                        ) : (
+                          <span className="mono funds-table__ticker-muted" title="Stock page not in tracked universe yet">
+                            {row.ticker}
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td>{row.companyName}</td>
                     <td>

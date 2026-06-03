@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import type { InsiderEmptyReason, InsiderTransactionRow } from "@/lib/form4-insider";
 import { normalizeInsiderTicker } from "@/lib/form4-insider";
 import { formatStockSectorLabel } from "@/lib/stock-category-labels";
+import { normalizeClientLogoUrl } from "@/lib/stock-branding";
 import { loadTrackedStocksSync } from "@/lib/tracked-stocks-load";
 
 export {
@@ -123,7 +124,10 @@ function buildModel(ticker: string, row: FactsCacheRow | null): StockFactsModel 
     marketCap: row?.market_cap ?? null,
     description: row?.company_description ?? null,
     ceo: row?.ceo ?? null,
-    logoUrl: row?.logo_url ?? tracked?.logoUrl ?? null,
+    logoUrl:
+      normalizeClientLogoUrl(row?.logo_url, sym) ??
+      normalizeClientLogoUrl(tracked?.logoUrl ?? null, sym) ??
+      null,
     insider,
     insiderNet90dUsd: row?.insider_net_90d_usd ?? null,
     insiderAsOf: row?.insider_as_of ?? row?.last_updated ?? null,

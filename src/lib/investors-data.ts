@@ -3,7 +3,7 @@ import { getInvestorBySlug, getInvestors } from "@/lib/goldsignal/data";
 import { investorImages } from "@/lib/investor-images";
 import { INVESTOR_PROFILES } from "@/lib/investor-profiles";
 import { getEnrichmentForTicker } from "@/lib/stocks-data";
-import { stockLogoUrl } from "@/lib/stock-logos";
+import { normalizeClientLogoUrl } from "@/lib/stock-branding";
 
 export type EnrichedHolding = {
   ticker: string;
@@ -45,7 +45,8 @@ function enrichHolding(holding: InvestorHolding): EnrichedHolding {
     notes: holding.notes,
     marketCap: enrichment?.marketCap ?? null,
     priceHistory: enrichment?.priceHistory ?? [],
-    logoUrl: enrichment?.logoUrl ?? (ticker ? stockLogoUrl(ticker) : ""),
+    logoUrl:
+      normalizeClientLogoUrl(enrichment?.logoUrl ?? null, ticker) ?? "",
   };
 }
 

@@ -1,4 +1,5 @@
 import { cache } from "react";
+import { resolveStockLogoServePath } from "@/lib/stock-branding";
 import { getStockMarketSnapshot, type StockMarketSnapshot } from "@/lib/stocks";
 
 const DEFAULT_POLYGON_BASE = "https://api.polygon.io";
@@ -110,10 +111,12 @@ function clearbitLogoFromUrl(homepage: string | null): string | null {
   }
 }
 
-/** Logo URL for tables/cards (Polygon branding, then Clearbit from homepage). */
-export function resolveStockLogoUrl(details: PolygonTickerDetails | null): string | null {
-  if (!details) return null;
-  return details.branding?.logo_url ?? clearbitLogoFromUrl(details.homepage_url);
+/** Client-safe logo path (proxied via /api/stock-logo) when Polygon branding exists. */
+export function resolveStockLogoUrl(
+  ticker: string,
+  details: PolygonTickerDetails | null,
+): string | null {
+  return resolveStockLogoServePath(ticker, details);
 }
 
 async function polygonJson<T>(path: string, params: Record<string, string | undefined>): Promise<T | null> {
@@ -680,7 +683,7 @@ export const getStockPageModel = cache(async (ticker: string): Promise<StockPage
     pctAbove52WeekLow = Math.round(((price - week52.low) / week52.low) * 100);
   }
 
-  const logoUrl = resolveStockLogoUrl(details);
+  const logoUrl = resolveStockLogoUrl(sym, details);
 
   const ceo = yahoo.ceo;
   const nextEarnings = yahoo.nextEarningsDate;

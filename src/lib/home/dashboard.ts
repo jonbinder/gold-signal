@@ -1,6 +1,7 @@
 import { cache } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { InsiderTransactionRow } from "@/lib/form4-insider";
+import { normalizeClientLogoUrl } from "@/lib/stock-branding";
 import { normalizeTicker } from "@/lib/polygon";
 import { createSupabasePublicClient, createSupabaseServiceClient } from "@/lib/supabase";
 import {
@@ -184,7 +185,7 @@ async function loadMostHeld(supabase: SupabaseClient): Promise<HomeMostHeldRow[]
     }
   }
 
-  return [...byTicker.entries()]
+  const ranked = [...byTicker.entries()]
     .map(([ticker, { companyName, investors }]) => ({
       ticker,
       companyName,
@@ -193,6 +194,32 @@ async function loadMostHeld(supabase: SupabaseClient): Promise<HomeMostHeldRow[]
     .filter((r) => r.holderCount > 0)
     .sort((a, b) => b.holderCount - a.holderCount || a.ticker.localeCompare(b.ticker))
     .slice(0, MOST_HELD_CAP);
+
+  if (ranked.length === 0) return [];
+
+  const tickers = ranked.map((r) => r.ticker);
+  const { data: cacheRows } = await supabase
+    .from("stock_data_cache")
+    .select("ticker, logo_url, sub_category")
+    .in("ticker", tickers);
+
+  const meta = new Map<string, { logoUrl: string; subCategory: string }>();
+  for (const row of cacheRows ?? []) {
+    const sym = normalizeTicker((row as { ticker: string }).ticker);
+    meta.set(sym, {
+      logoUrl: normalizeClientLogoUrl((row as { logo_url: string | null }).logo_url, sym) ?? "",
+      subCategory: (row as { sub_category?: string }).sub_category ?? "gold",
+    });
+  }
+
+  return ranked.map((row) => {
+    const m = meta.get(row.ticker);
+    return {
+      ...row,
+      logoUrl: m?.logoUrl ?? "",
+      subCategory: m?.subCategory ?? "gold",
+    };
+  });
 }
 
 async function loadBiggestPositions(supabase: SupabaseClient): Promise<HomeBiggestPositionRow[]> {

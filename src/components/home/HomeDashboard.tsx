@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { GoldWisdomQuote } from "@/components/home/GoldWisdomQuote";
+import { StockLogo } from "@/components/stocks/StockLogo";
 import { WatchlistCaptureForm } from "@/components/home/WatchlistCaptureForm";
 import { investorPath, stockPath } from "@/lib/paths";
 import type { HomeDashboardModel, HomeInsiderRow } from "@/lib/home/types";
@@ -115,11 +116,20 @@ export function HomeDashboard({ model }: { model: HomeDashboardModel }) {
                   <ol className="home-panel-list home-panel-list--ranked">
                     {model.mostHeld.map((row) => (
                       <li key={row.ticker} className="home-panel-list__item">
-                        <Link href={stockPath(row.ticker)} className="home-panel-list__link">
-                          <span className="home-panel-list__primary mono">{row.ticker}</span>
-                          <span className="home-panel-list__secondary">
-                            held by {row.holderCount} tracked investor
-                            {row.holderCount === 1 ? "" : "s"}
+                        <Link href={stockPath(row.ticker)} className="home-panel-list__link home-panel-list__link--with-logo">
+                          <StockLogo
+                            ticker={row.ticker}
+                            logoUrl={row.logoUrl}
+                            tryServe
+                            subCategory={row.subCategory}
+                            size={30}
+                          />
+                          <span className="home-panel-list__link-text">
+                            <span className="home-panel-list__primary mono">{row.ticker}</span>
+                            <span className="home-panel-list__secondary">
+                              held by {row.holderCount} tracked investor
+                              {row.holderCount === 1 ? "" : "s"}
+                            </span>
                           </span>
                         </Link>
                       </li>

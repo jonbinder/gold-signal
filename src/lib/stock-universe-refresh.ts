@@ -6,6 +6,7 @@ import {
 } from "@/lib/form4-insider";
 import { getTrackedFundHolderCount } from "@/lib/funds/holder-count";
 import { getStockPrice, getTickerDetails, normalizeTicker } from "@/lib/polygon";
+import { resolveStockLogoServePath } from "@/lib/stock-branding";
 import { fetchYahooSupplement, getPolygonTickerDetails } from "@/lib/stock-profile";
 import { createSupabaseServiceClient } from "@/lib/supabase";
 import type { TrackedStock, TrackedStocksFile } from "@/lib/tracked-stocks";
@@ -120,13 +121,15 @@ export async function refreshOneStock(tracked: TrackedStock): Promise<{ ok: bool
           ? "healthy"
           : "partial";
 
+    const logoUrl = resolveStockLogoServePath(sym, polygonDetails);
+
     const row = {
       ticker: sym,
       name: tracked.name || polygonDetails?.name || rankingCompanyName || sym,
       category: tracked.category,
       sub_category: tracked.sub_category,
       exchange: tracked.exchange,
-      logo_url: tracked.logo_url,
+      logo_url: logoUrl,
       price,
       previous_close: previousClose,
       daily_change_pct: dailyChangePct,

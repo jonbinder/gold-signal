@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { StockLogo } from "@/components/stocks/StockLogo";
 import { stockPath } from "@/lib/paths";
 import type { CachedDisplayStock } from "@/lib/stock-cache";
 import { formatHolderCount } from "@/lib/stock-facts-format";
@@ -31,11 +32,6 @@ function formatMarketCap(valueUsd: number | null): string {
 function formatRatio(value: number | null): string {
   if (value == null || !Number.isFinite(value) || value <= 0) return "—";
   return `${Math.round(value)}`;
-}
-
-function tileClass(subCategory: string): string {
-  if (subCategory === "silver") return "stocks-list-tile stocks-list-tile--silver";
-  return "stocks-list-tile stocks-list-tile--gold";
 }
 
 function sortValue(stock: CachedDisplayStock, key: SortKey): number | string {
@@ -234,9 +230,13 @@ function StockTableRow({ stock }: { stock: CachedDisplayStock }) {
       <td className="stocks-list-table__company">
         <Link href={stockPath(stock.ticker)} className="stocks-list-table__link-subtle">
           <span className="stocks-list-company-cell">
-            <span className={tileClass(stock.subCategory)} aria-hidden>
-              {stock.ticker.charAt(0)}
-            </span>
+            <StockLogo
+              ticker={stock.ticker}
+              logoUrl={stock.logoUrl}
+              tryServe
+              subCategory={stock.subCategory}
+              size={34}
+            />
             <span>{stock.name}</span>
           </span>
         </Link>
@@ -258,9 +258,13 @@ function StockCard({ stock }: { stock: CachedDisplayStock }) {
   return (
     <Link href={stockPath(stock.ticker)} className="stocks-list-card">
       <div className="stocks-list-card__head">
-        <span className={tileClass(stock.subCategory)} aria-hidden>
-          {stock.ticker.charAt(0)}
-        </span>
+        <StockLogo
+          ticker={stock.ticker}
+          logoUrl={stock.logoUrl}
+          tryServe
+          subCategory={stock.subCategory}
+          size={32}
+        />
         <div className="stocks-list-card__identity">
           <div className="stocks-list-card__ticker-row">
             <span className="stocks-list-card__ticker">{stock.ticker}</span>

@@ -14,6 +14,8 @@ export type HomeMostHeldRow = {
   ticker: string;
   companyName: string;
   holderCount: number;
+  logoUrl: string;
+  subCategory: string;
 };
 
 export type HomeBiggestPositionRow = {

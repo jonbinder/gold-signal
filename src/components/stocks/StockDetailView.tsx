@@ -1,5 +1,4 @@
 import type { ReactNode } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 import { StockLogo } from "@/components/stocks/StockLogo";
@@ -83,18 +82,13 @@ export function StockDetailView({ model }: { model: StockDetailPageModel }) {
 
           <div className="stock-detail-header__main">
             <div className="stock-detail-header__logo">
-              {model.logoUrl ? (
-                <Image
-                  src={model.logoUrl}
-                  alt=""
-                  width={88}
-                  height={88}
-                  className="stock-detail-header__logo-img"
-                  unoptimized={model.logoUrl.includes(".svg")}
-                />
-              ) : (
-                <StockLogo ticker={sym} logoUrl="" size={56} />
-              )}
+              <StockLogo
+                ticker={sym}
+                logoUrl={model.logoUrl}
+                tryServe
+                subCategory={model.subCategory}
+                size={72}
+              />
             </div>
             <div className="stock-detail-header__text">
               <div className="stock-detail-header__tags">

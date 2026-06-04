@@ -47,20 +47,20 @@
 
 .home-masthead__title {
   font-family: var(--font-display);
-  font-size: clamp(1.2rem, 3.8vw, 1.55rem);
+  font-size: clamp(1.28rem, 3.8vw, 1.55rem);
   font-weight: 700;
   letter-spacing: -0.02em;
-  margin: 0 0 0.25rem;
-  line-height: 1.12;
+  margin: 0 0 0.3rem;
+  line-height: 1.15;
   color: #f8fafc;
 }
 
 .home-masthead__desc {
   margin: 0;
   max-width: 36rem;
-  font-size: 0.84rem;
-  line-height: 1.45;
-  color: #94a3b8;
+  font-size: clamp(0.9rem, 2.4vw, 0.94rem);
+  line-height: 1.5;
+  color: #b8c5d6;
 }
 
 .home-masthead__quote-slot .home-gold-wisdom {
@@ -123,11 +123,11 @@
 .home-gold-wisdom__quote p {
   margin: 0;
   font-family: var(--font-reading, Georgia, serif);
-  font-size: clamp(0.78rem, 2.2vw, 0.9rem);
+  font-size: clamp(0.88rem, 2.4vw, 0.95rem);
   font-style: italic;
   font-weight: 400;
-  line-height: 1.42;
-  color: #e2e8f0;
+  line-height: 1.48;
+  color: #f1f5f9;
 }
 
 .home-gold-wisdom__quote p::before {
@@ -147,17 +147,17 @@
 
 .home-gold-wisdom__author {
   font-style: normal;
-  font-size: 0.6rem;
+  font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.09em;
   text-transform: uppercase;
-  color: #a8b8d0;
+  color: #c8d4e4;
 }
 
 .home-gold-wisdom__source {
-  font-size: 0.58rem;
-  line-height: 1.3;
-  color: #6b7f99;
+  font-size: 0.66rem;
+  line-height: 1.4;
+  color: #9eb0c8;
 }
 
 .home-gold-wisdom__another {
@@ -186,12 +186,61 @@
 }
 
 @media (max-width: 767px) {
+  .home-masthead {
+    padding: 0.7rem 1rem 0.75rem;
+  }
+
+  .home-masthead__inner {
+    gap: 0.65rem;
+  }
+
+  .home-masthead__title {
+    font-size: 1.35rem;
+    line-height: 1.18;
+  }
+
+  .home-masthead__desc {
+    font-size: 0.95rem;
+    line-height: 1.52;
+    color: #c5d0de;
+  }
+
   .home-masthead__quote-slot .home-gold-wisdom {
-    padding: 0.6rem 0.7rem 0.5rem;
+    padding: 0.85rem 0.95rem 0.75rem;
+  }
+
+  .home-gold-wisdom__head {
+    margin-bottom: 0.4rem;
+  }
+
+  .home-gold-wisdom__mark {
+    font-size: 1.35rem;
+  }
+
+  .home-gold-wisdom__quote p {
+    font-size: 1.08rem;
+    line-height: 1.55;
+    color: #f8fafc;
+  }
+
+  .home-gold-wisdom__attrib {
+    margin-top: 0.45rem;
+    gap: 0.12rem;
+  }
+
+  .home-gold-wisdom__author {
+    font-size: 0.74rem;
+    color: #d4deec;
+  }
+
+  .home-gold-wisdom__source {
+    font-size: 0.72rem;
+    color: #b4c4d8;
   }
 
   .home-gold-wisdom__another {
     min-height: 2.25rem;
+    font-size: 0.7rem;
   }
 }
 

@@ -44,6 +44,9 @@ env.local
 # vercel
 .vercel
 
+# supabase CLI link state (project ref is in GitHub secrets / env)
+.supabase
+
 # IDE
 .idea
 .vscode/*.log

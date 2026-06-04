@@ -31,6 +31,8 @@
     "deploy:status": "node -e \"require('child_process').execSync(process.platform==='win32'?'powershell -NoProfile -ExecutionPolicy Bypass -File scripts/check-deploy-status.ps1':'bash scripts/check-deploy-status.sh',{stdio:'inherit'})\"",
     "build:universe": "npx tsx scripts/build-stock-universe.ts",
     "db:generate-stocks-seed": "npx tsx scripts/generate-stocks-seed-sql.ts",
+    "db:migrate": "supabase db push",
+    "db:migrate:status": "supabase migration list",
     "db:generate": "supabase gen types typescript --project-id $SUPABASE_PROJECT_ID > src/types/supabase.ts"
   },
   "dependencies": {

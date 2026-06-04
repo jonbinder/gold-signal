@@ -18,11 +18,7 @@ End-to-end pipeline: homepage form → instant fire-and-forget processing → da
 
 ## Supabase setup
 
-1. Run migrations (SQL editor or CLI):
-   - `005_portfolio_review_submissions.sql`
-   - `006_reports_storage_bucket.sql` (or `010_create_reports_storage_bucket.sql`)
-   - `007_submission_queue_hardening.sql`
-   - `009_submissions_anon_insert.sql` (required if server uses anon fallback for form insert)
+1. **Migrations (production):** On push to `main`, GitHub Actions runs `supabase db push` automatically. One-time: add repo secrets `SUPABASE_ACCESS_TOKEN`, `SUPABASE_PROJECT_REF`, `SUPABASE_DB_PASSWORD` — see [SUPABASE_MIGRATIONS.md](./SUPABASE_MIGRATIONS.md). For a brand-new project with no history, you can still run `001`… in the SQL editor once, then use CLI `migration repair` if needed. All migration files live under `supabase/migrations/` (including `009` for anon form insert).
 2. Confirm Storage bucket **reports** exists (private, PDF only).
 3. Seed famous investors (optional but improves scores):
    ```bash

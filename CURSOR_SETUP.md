@@ -76,18 +76,15 @@ SUPABASE_PROJECT_ID=xxxxx
 
 ---
 
-## Step 5 — Run the database migration
+## Step 5 — Database migrations
 
-Option A — Supabase dashboard (easiest):
-1. Go to your project → SQL Editor
-2. Paste the entire contents of `supabase/migrations/001_initial_schema.sql`
-3. Click Run
+**Production (goldsignal.ai):** Push to `main` → GitHub Actions applies pending files in `supabase/migrations/`. Set up secrets once: see [docs/SUPABASE_MIGRATIONS.md](docs/SUPABASE_MIGRATIONS.md).
 
-Option B — Supabase CLI:
+**Local / new project:**
 ```bash
 npx supabase login
 npx supabase link --project-ref YOUR_PROJECT_ID
-npx supabase db push
+npm run db:migrate
 ```
 
 ---

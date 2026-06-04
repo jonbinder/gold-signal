@@ -7,6 +7,7 @@ dotenv.config({ path: ".env.local" });
 
 import { syncInvestorPositionsFromGoogleSheet } from "../src/lib/investor-sheet-sync";
 import { createSupabaseServiceClient } from "../src/lib/supabase";
+import { revalidateInvestorsRemote } from "./revalidate-investors-remote";
 
 async function main() {
   const supabase = createSupabaseServiceClient();
@@ -18,6 +19,15 @@ async function main() {
   const result = await syncInvestorPositionsFromGoogleSheet(supabase);
   console.log(JSON.stringify(result, null, 2));
   if (!result.ok) process.exit(1);
+
+  if (result.touchedSlugs?.length) {
+    const revalidated = await revalidateInvestorsRemote(result.touchedSlugs);
+    if (!revalidated) {
+      console.warn(
+        "Cache not busted remotely. Start dev server and re-run, or hit GET /api/sync-investor-sheet on production.",
+      );
+    }
+  }
 }
 
 main().catch((err) => {

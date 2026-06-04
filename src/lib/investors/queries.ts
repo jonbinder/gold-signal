@@ -349,7 +349,7 @@ async function loadPublishedInvestorsList(): Promise<InvestorListItem[]> {
 
 const loadPublishedInvestorsListCached = unstable_cache(
   loadPublishedInvestorsList,
-  ["investors-list-published-v1"],
+  ["investors-list-published-v2"],
   { revalidate: 3600, tags: [INVESTORS_LIST_CACHE_TAG] },
 );
 

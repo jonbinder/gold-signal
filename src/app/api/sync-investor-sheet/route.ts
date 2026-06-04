@@ -1,18 +1,8 @@
-import { revalidatePath, revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
-import { INVESTORS_LIST_CACHE_TAG } from "@/lib/investors/queries";
+import { revalidateInvestorPages } from "@/lib/investor-cache-revalidation";
 import { syncInvestorPositionsFromGoogleSheet } from "@/lib/investor-sheet-sync";
 import { createSupabaseServiceClient } from "@/lib/supabase";
 import { isValidProcessSecret } from "@/lib/trigger-process-one";
-
-function revalidateInvestorPages(slugs: string[]) {
-  revalidateTag(INVESTORS_LIST_CACHE_TAG);
-  revalidatePath("/investors");
-  for (const slug of slugs) {
-    revalidateTag(`investor-${slug}`);
-    revalidatePath(`/investors/${slug}`);
-  }
-}
 
 export const runtime = "nodejs";
 export const maxDuration = 60;

@@ -5,6 +5,7 @@
 import * as dotenv from "dotenv";
 dotenv.config({ path: ".env.local" });
 
+import { refreshMetalsMarketCache } from "../src/lib/metals-market-refresh";
 import { loadTrackedStocksFile, refreshOneStock } from "../src/lib/stock-universe-refresh";
 
 async function main() {
@@ -23,6 +24,8 @@ async function main() {
     }
   }
   console.log(`Done. ${ok} ok, ${fail} failed.`);
+  const metals = await refreshMetalsMarketCache();
+  console.log(metals.ok ? "metals_market_cache ok" : `metals_market_cache: ${metals.error}`);
   process.exit(fail > 0 ? 1 : 0);
 }
 

@@ -1,5 +1,6 @@
 import { revalidatePath, revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
+import { refreshMetalsMarketCache } from "@/lib/metals-market-refresh";
 import { processRefreshBatch } from "@/lib/stock-universe-refresh";
 import { getDeploymentOrigin, isValidProcessSecret, triggerRefreshStocks } from "@/lib/trigger-process-one";
 
@@ -33,7 +34,12 @@ export async function GET(req: Request) {
       console.info("[refresh-stocks] Chaining to next batch", { nextBatch: batch + 1 });
     } else {
       console.info("[refresh-stocks] All batches complete");
+      const metals = await refreshMetalsMarketCache();
+      if (!metals.ok) {
+        console.warn("[refresh-stocks] metals_market_cache refresh failed", metals.error);
+      }
       revalidateTag("stocks-list");
+      revalidateTag("metals-market");
       revalidatePath("/stocks");
       revalidatePath("/");
     }

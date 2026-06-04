@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import { SiteNav } from "@/components/goldsignal/SiteNav";
 import { SiteFooter } from "@/components/goldsignal/SiteFooter";
 import { HomeDashboard } from "@/components/home/HomeDashboard";
+import { HomeMetalsStrip } from "@/components/home/HomeMetalsStrip";
 import { getHomeDashboard } from "@/lib/home/dashboard";
+import { getCachedMetalsMarket } from "@/lib/metals-market-read";
 import { COMPLIANCE_LINE } from "@/lib/site";
 import "./home-dashboard.css";
 import "./whats-new.css";
@@ -42,7 +44,7 @@ const structuredData = {
 };
 
 export default async function HomePage() {
-  const dashboard = await getHomeDashboard();
+  const [dashboard, metals] = await Promise.all([getHomeDashboard(), getCachedMetalsMarket()]);
 
   return (
     <>
@@ -54,6 +56,7 @@ export default async function HomePage() {
       <SiteNav />
 
       <main className="home-page home-page--dashboard">
+        <HomeMetalsStrip metals={metals} />
         <HomeDashboard model={dashboard} />
         <p className="home-dashboard-footer-note">{COMPLIANCE_LINE}</p>
       </main>

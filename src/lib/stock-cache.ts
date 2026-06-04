@@ -5,6 +5,7 @@ import { preferredListLogoUrl } from "@/lib/stock-branding";
 import { getTickerDetails, normalizeTicker } from "@/lib/polygon";
 import { resolveStockPeRatios } from "@/lib/stock-pe-ratios";
 import { createSupabaseServiceClient } from "@/lib/supabase";
+import { isMissingReturnColumns } from "@/lib/stock-cache-columns";
 import { loadTrackedStocksSync } from "@/lib/tracked-stocks-load";
 
 export type CachedDisplayStock = {
@@ -17,14 +18,20 @@ export type CachedDisplayStock = {
   peRatio: number | null;
   forwardPeRatio: number | null;
   pctAbove52WeekLow: number | null;
+  return1mPct: number | null;
+  return3mPct: number | null;
+  return1yPct: number | null;
   insiderNet90dUsd: number | null;
   famousHolderCount: number | null;
   logoUrl: string;
   dataStatus: string;
 };
 
-const STOCKS_LIST_COLUMNS =
+const STOCKS_LIST_COLUMNS_BASE =
   "ticker, name, category, sub_category, exchange, logo_url, market_cap, pct_above_52_week_low, pe_ratio, forward_pe_ratio, famous_holder_count, insider_net_90d_usd, data_status";
+
+const STOCKS_LIST_COLUMNS =
+  `${STOCKS_LIST_COLUMNS_BASE}, return_1m_pct, return_3m_pct, return_1y_pct`;
 
 type StockListRow = {
   ticker: string;
@@ -37,6 +44,9 @@ type StockListRow = {
   pct_above_52_week_low: number | null;
   pe_ratio: number | null;
   forward_pe_ratio: number | null;
+  return_1m_pct: number | null;
+  return_3m_pct: number | null;
+  return_1y_pct: number | null;
   famous_holder_count: number | null;
   insider_net_90d_usd: number | null;
   data_status: string | null;
@@ -75,6 +85,9 @@ function fallbackFromTrackedFile(): CachedDisplayStock[] {
     peRatio: null,
     forwardPeRatio: null,
     pctAbove52WeekLow: null,
+    return1mPct: null,
+    return3mPct: null,
+    return1yPct: null,
     insiderNet90dUsd: null,
     famousHolderCount: null,
     logoUrl: preferredListLogoUrl(ticker),
@@ -93,6 +106,9 @@ function rowToDisplay(stock: CachedDisplayStock, row: StockListRow): CachedDispl
     pctAbove52WeekLow: finiteNum(row.pct_above_52_week_low) ?? stock.pctAbove52WeekLow,
     peRatio: positiveNum(row.pe_ratio) ?? stock.peRatio,
     forwardPeRatio: positiveNum(row.forward_pe_ratio) ?? stock.forwardPeRatio,
+    return1mPct: finiteNum(row.return_1m_pct) ?? stock.return1mPct,
+    return3mPct: finiteNum(row.return_3m_pct) ?? stock.return3mPct,
+    return1yPct: finiteNum(row.return_1y_pct) ?? stock.return1yPct,
     insiderNet90dUsd:
       typeof row.insider_net_90d_usd === "number" && Number.isFinite(row.insider_net_90d_usd)
         ? row.insider_net_90d_usd
@@ -123,7 +139,10 @@ async function loadStocksListFromSupabase(): Promise<CachedDisplayStock[]> {
   const supabase = createSupabaseServiceClient();
   if (!supabase) return seed;
 
-  const { data, error } = await supabase.from("stock_data_cache").select(STOCKS_LIST_COLUMNS);
+  let { data, error } = await supabase.from("stock_data_cache").select(STOCKS_LIST_COLUMNS);
+  if (error && isMissingReturnColumns(error)) {
+    ({ data, error } = await supabase.from("stock_data_cache").select(STOCKS_LIST_COLUMNS_BASE));
+  }
   if (error) {
     console.warn("[stock-cache] Supabase read failed:", error.message);
     return seed;
@@ -133,7 +152,7 @@ async function loadStocksListFromSupabase(): Promise<CachedDisplayStock[]> {
 
 const loadStocksListFromSupabaseCached = unstable_cache(
   loadStocksListFromSupabase,
-  ["stocks-list-display-db-v3"],
+  ["stocks-list-display-db-v4"],
   { revalidate: 3600, tags: ["stocks-list"] },
 );
 

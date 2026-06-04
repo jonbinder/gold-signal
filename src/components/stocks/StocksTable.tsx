@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { StockLogo } from "@/components/stocks/StockLogo";
+import { TopMoversPanel } from "@/components/stocks/TopMoversPanel";
 import { stockPath } from "@/lib/paths";
 import type { CachedDisplayStock } from "@/lib/stock-cache";
 import { formatHolderCount, formatPctAbove52WeekLow } from "@/lib/stock-facts-format";
@@ -16,8 +17,23 @@ type SortKey =
   | "peRatio"
   | "forwardPeRatio";
 
+type ListView = "universe" | "movers" | "value";
+
 interface StocksTableProps {
   stocks: CachedDisplayStock[];
+}
+
+const LIST_VIEWS: Array<{ key: ListView; label: string }> = [
+  { key: "universe", label: "All stocks" },
+  { key: "movers", label: "Top movers" },
+  { key: "value", label: "Value screen" },
+];
+
+/** Lower = cheaper / nearer 52w low (for value preset sort). */
+function valueScreenScore(stock: CachedDisplayStock): number {
+  const fpe = stock.forwardPeRatio ?? stock.peRatio ?? 9999;
+  const pct52 = stock.pctAbove52WeekLow ?? 9999;
+  return fpe * 0.65 + pct52 * 0.35;
 }
 
 const MOBILE_SORT_OPTIONS: Array<{ key: SortKey; label: string }> = [
@@ -54,31 +70,54 @@ function sortValue(stock: CachedDisplayStock, key: SortKey): number | string {
 }
 
 export function StocksTable({ stocks }: StocksTableProps) {
+  const [listView, setListView] = useState<ListView>("universe");
   const [sortKey, setSortKey] = useState<SortKey>("marketCap");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
 
   const sorted = useMemo(() => {
     const list = [...stocks];
+    if (listView === "value") {
+      list.sort((a, b) => valueScreenScore(a) - valueScreenScore(b));
+      return list;
+    }
     list.sort((a, b) => {
       const av = sortValue(a, sortKey);
       const bv = sortValue(b, sortKey);
       if (typeof av === "string" && typeof bv === "string") {
         return sortDir === "desc" ? bv.localeCompare(av) : av.localeCompare(bv);
       }
+      const metricKeys: SortKey[] = ["peRatio", "forwardPeRatio", "pctAbove52WeekLow"];
+      const lowerIsBetter = metricKeys.includes(sortKey);
+      if (lowerIsBetter) {
+        const aMissing = (av as number) < 0;
+        const bMissing = (bv as number) < 0;
+        if (aMissing !== bMissing) return aMissing ? 1 : -1;
+        return sortDir === "asc"
+          ? (av as number) - (bv as number)
+          : (bv as number) - (av as number);
+      }
       return sortDir === "desc"
         ? (bv as number) - (av as number)
         : (av as number) - (bv as number);
     });
     return list;
-  }, [stocks, sortKey, sortDir]);
+  }, [stocks, sortKey, sortDir, listView]);
 
   const setSort = (key: SortKey) => {
+    if (listView === "value") setListView("universe");
     if (key === sortKey) {
       setSortDir((d) => (d === "desc" ? "asc" : "desc"));
     } else {
       setSortKey(key);
-      setSortDir(key === "ticker" || key === "name" ? "asc" : "desc");
+      const lowFirst: SortKey[] = ["peRatio", "forwardPeRatio", "pctAbove52WeekLow"];
+      setSortDir(key === "ticker" || key === "name" ? "asc" : lowFirst.includes(key) ? "asc" : "desc");
     }
+  };
+
+  const applyValuePreset = () => {
+    setListView("value");
+    setSortKey("forwardPeRatio");
+    setSortDir("asc");
   };
 
   return (
@@ -98,10 +137,44 @@ export function StocksTable({ stocks }: StocksTableProps) {
       </section>
 
       <div className="stocks-list-main">
-        {sorted.length === 0 ? (
+        <div className="stocks-list-toolbar" role="navigation" aria-label="Stocks list views">
+          <div className="stocks-list-toolbar__group">
+            <span className="stocks-list-toolbar__label">View</span>
+            <div className="stocks-list-sort">
+              {LIST_VIEWS.map((v) => (
+                <button
+                  key={v.key}
+                  type="button"
+                  className={`stocks-list-sort__btn ${listView === v.key ? "stocks-list-sort__btn--active" : ""}`}
+                  onClick={() => {
+                    setListView(v.key);
+                    if (v.key === "value") applyValuePreset();
+                  }}
+                >
+                  {v.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          {listView === "universe" ? (
+            <button type="button" className="stocks-list-sort__btn" onClick={applyValuePreset}>
+              Value preset
+            </button>
+          ) : null}
+        </div>
+
+        {listView === "movers" ? (
+          <TopMoversPanel stocks={stocks} />
+        ) : sorted.length === 0 ? (
           <p className="stocks-list-empty">No tracked stocks yet.</p>
         ) : (
           <>
+            {listView === "value" ? (
+              <p className="stocks-value-note">
+                Sorted by lower forward PE (or trailing PE) and distance from 52-week low — cached
+                reference data only, not a rating.
+              </p>
+            ) : null}
             <div className="stocks-list-mobile-sort" aria-label="Mobile stock sorting controls">
               <label className="stocks-list-mobile-sort__label" htmlFor="stocks-mobile-sort">
                 Sort

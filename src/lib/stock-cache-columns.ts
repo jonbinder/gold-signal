@@ -7,6 +7,15 @@ export function isMissingPriceHistoryColumn(error: {
   return error.code === "42703" || /price_history_12m/i.test(error.message ?? "");
 }
 
+/** PostgREST / Postgres error when migration 023 return columns not applied yet. */
+export function isMissingReturnColumns(error: { code?: string; message?: string } | null): boolean {
+  if (!error) return false;
+  return (
+    error.code === "42703" ||
+    /return_1m_pct|return_3m_pct|return_1y_pct/i.test(error.message ?? "")
+  );
+}
+
 /** Literal select strings for typed Supabase client (do not build via template). */
 export const STOCK_FACTS_CACHE_SELECT_BASE =
   "ticker, name, category, sub_category, exchange, logo_url, market_cap, company_description, ceo, insider_transactions, insider_net_90d_usd, insider_as_of, data_status, last_updated" as const;

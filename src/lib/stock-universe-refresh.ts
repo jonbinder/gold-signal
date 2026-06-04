@@ -7,7 +7,9 @@ import {
 import { getTrackedFundHolderCount } from "@/lib/funds/holder-count";
 import { getStockPrice, getTickerDetails, normalizeTicker } from "@/lib/polygon";
 import { resolvePctAbove52WeekLow } from "@/lib/stock-52w-metrics";
-import { isMissingPriceHistoryColumn } from "@/lib/stock-cache-columns";
+import { isMissingPriceHistoryColumn, isMissingReturnColumns } from "@/lib/stock-cache-columns";
+import { parseCachedPriceHistory } from "@/lib/charts/price-series";
+import { computeTrailingReturns } from "@/lib/price-returns";
 import { fetchCompactPriceHistory12m } from "@/lib/stock-price-history-cache";
 import { formatDisplayCompanyName } from "@/lib/format-company-name";
 import { resolveStockPeRatios } from "@/lib/stock-pe-ratios";
@@ -146,6 +148,10 @@ export async function refreshOneStock(tracked: TrackedStock): Promise<{ ok: bool
 
     const logoUrl = resolveStockLogoServePath(sym, polygonDetails);
 
+    const returns = computeTrailingReturns(
+      priceHistory12m ? parseCachedPriceHistory(priceHistory12m) : [],
+    );
+
     const row = {
       ticker: sym,
       name: formatDisplayCompanyName(
@@ -170,6 +176,9 @@ export async function refreshOneStock(tracked: TrackedStock): Promise<{ ok: bool
       insider_net_90d_usd: insiderNet90d,
       insider_as_of: nowIso,
       price_history_12m: priceHistory12m,
+      return_1m_pct: returns.return1mPct,
+      return_3m_pct: returns.return3mPct,
+      return_1y_pct: returns.return1yPct,
       signal_score: signalScore,
       ...subScoreColumns,
       signal_coverage: signalCoverage,
@@ -181,9 +190,21 @@ export async function refreshOneStock(tracked: TrackedStock): Promise<{ ok: bool
 
     let { error } = await supabase.from("stock_data_cache").upsert(row, { onConflict: "ticker" });
     if (error && isMissingPriceHistoryColumn(error)) {
-      const { price_history_12m: _priceHistory, ...rowWithoutPrice } = row;
-      void _priceHistory;
+      const { price_history_12m: _ph, ...rowWithoutPrice } = row;
+      void _ph;
       ({ error } = await supabase.from("stock_data_cache").upsert(rowWithoutPrice, { onConflict: "ticker" }));
+    }
+    if (error && isMissingReturnColumns(error)) {
+      const {
+        return_1m_pct: _r1,
+        return_3m_pct: _r3,
+        return_1y_pct: _ry,
+        ...rowWithoutReturns
+      } = row;
+      void _r1;
+      void _r3;
+      void _ry;
+      ({ error } = await supabase.from("stock_data_cache").upsert(rowWithoutReturns, { onConflict: "ticker" }));
     }
     if (error) return { ok: false, error: error.message };
     return { ok: true };

@@ -14,6 +14,7 @@
     "sync-investors-data": "npx tsx scripts/sync-investors-data.ts",
     "sync:investors": "npx tsx scripts/sync-investors-data.ts",
     "sync:funds": "npx tsx scripts/sync-funds-13f.ts",
+    "sync:investor-sheet": "npx tsx scripts/sync-investor-sheet.ts",
     "seed:investors": "npx tsx scripts/seed-investors.ts",
     "sync:stock-logos": "npx tsx scripts/sync-stock-logos.ts",
     "sync:stock-pe": "npx tsx scripts/sync-stock-pe-ratios.ts",

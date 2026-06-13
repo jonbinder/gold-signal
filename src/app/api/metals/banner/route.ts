@@ -12,8 +12,8 @@ const TICKERS = {
 } as const;
 
 const FALLBACKS = {
-  gold: ["GC=F", "GLD"],
-  silver: ["SI=F", "SLV"],
+  gold: ["GC=F"],
+  silver: ["SI=F"],
 } as const;
 
 function toQuote(

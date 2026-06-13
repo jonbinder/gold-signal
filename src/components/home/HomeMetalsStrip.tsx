@@ -1,7 +1,8 @@
 import type { CachedMetalsMarket } from "@/lib/metals-market-read";
 
-function fmtUsd(value: number | null, digits = 2): string {
+function fmtUsd(value: number | null, kind: "gold" | "silver" | "default" = "default"): string {
   if (value == null || !Number.isFinite(value)) return "—";
+  const digits = kind === "gold" && value >= 1000 ? 0 : kind === "silver" ? 2 : 2;
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
@@ -52,26 +53,26 @@ export function HomeMetalsStrip({ metals }: { metals: CachedMetalsMarket | null 
     <section className="home-metals-strip" aria-label="Gold and silver market snapshot">
       <div className="home-metals-strip__inner">
         <Stat
-          label={metals?.goldLabel ?? "Gold (GLD)"}
-          value={fmtUsd(metals?.goldPrice ?? null)}
+          label={metals?.goldLabel ?? "Gold (USD/oz)"}
+          value={fmtUsd(metals?.goldPrice ?? null, "gold")}
           change={goldChg}
           labelClass="home-metals-strip__label--gold"
         />
         <Stat
-          label={metals?.silverLabel ?? "Silver (SLV)"}
-          value={fmtUsd(metals?.silverPrice ?? null)}
+          label={metals?.silverLabel ?? "Silver (USD/oz)"}
+          value={fmtUsd(metals?.silverPrice ?? null, "silver")}
           change={silverChg}
           labelClass="home-metals-strip__label--silver"
         />
         <Stat
-          label="Gold / Silver"
+          label="Gold / Silver ratio"
           value={fmtRatio(metals?.goldSilverRatio ?? null)}
           change={ratioChg}
           labelClass="home-metals-strip__label--ratio"
         />
       </div>
       <p className="home-metals-strip__note mono">
-        GLD &amp; SLV ETF proxies · updated from cache
+        Physical gold &amp; silver spot · ratio = gold ÷ silver
         {metals?.updatedAt ? ` · ${new Date(metals.updatedAt).toLocaleDateString("en-US")}` : ""}
       </p>
     </section>

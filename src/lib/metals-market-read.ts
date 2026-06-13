@@ -34,8 +34,8 @@ function mapRow(row: MetalsRow | null): CachedMetalsMarket | null {
     silverChangePct: finite(row.silver_change_pct),
     goldSilverRatio: finite(row.gold_silver_ratio),
     ratioChangePct: finite(row.ratio_change_pct),
-    goldLabel: row.gold_label?.trim() || "Gold (GLD)",
-    silverLabel: row.silver_label?.trim() || "Silver (SLV)",
+    goldLabel: row.gold_label?.trim() || "Gold (USD/oz)",
+    silverLabel: row.silver_label?.trim() || "Silver (USD/oz)",
     updatedAt: row.updated_at,
   };
 }

@@ -4,6 +4,7 @@ import {
   getDeploymentOrigin,
   invokeProcessOne,
   invokeRefreshStocks,
+  invokeSyncInvestorSheet,
 } from "@/lib/trigger-process-one";
 
 export const maxDuration = 60;
@@ -76,10 +77,14 @@ export async function GET(req: Request) {
   await invokeRefreshStocks(0, origin);
   console.info("[cron/cleanup] Invoked stock universe refresh batch 0");
 
+  await invokeSyncInvestorSheet(origin);
+  console.info("[cron/cleanup] Invoked investor sheet sync");
+
   return NextResponse.json({
     ok: true,
     triggered: ids.size,
     submissionIds: [...ids],
     stockRefreshStarted: true,
+    investorSheetSyncStarted: true,
   });
 }

@@ -3,10 +3,6 @@
     {
       "path": "/api/cron/cleanup",
       "schedule": "0 6 * * *"
-    },
-    {
-      "path": "/api/sync-investor-sheet",
-      "schedule": "*/5 * * * *"
     }
   ],
   "functions": {

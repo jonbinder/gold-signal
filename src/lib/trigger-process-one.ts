@@ -125,3 +125,33 @@ export function triggerRefreshStocks(batch: number, origin: string): void {
     await invokeRefreshStocks(batch, origin);
   });
 }
+
+/** Daily cron hook: sync Google Sheet → investor_positions (uses CRON_SECRET bearer). */
+export async function invokeSyncInvestorSheet(origin: string): Promise<void> {
+  const cronSecret = process.env.CRON_SECRET?.trim();
+  if (!cronSecret) {
+    console.warn("[trigger] CRON_SECRET not set; skipping sync-investor-sheet");
+    return;
+  }
+
+  const url = new URL("/api/sync-investor-sheet", origin);
+  try {
+    const res = await fetch(url.toString(), {
+      method: "GET",
+      headers: { authorization: `Bearer ${cronSecret}` },
+    });
+    if (!res.ok) {
+      const body = await res.text().catch(() => "");
+      console.warn("[trigger] sync-investor-sheet returned error", {
+        status: res.status,
+        body: body.slice(0, 300),
+      });
+      return;
+    }
+    console.info("[trigger] sync-investor-sheet ok", { status: res.status });
+  } catch (err) {
+    console.warn("[trigger] sync-investor-sheet fetch failed", {
+      message: err instanceof Error ? err.message : String(err),
+    });
+  }
+}

@@ -1,3 +1,10 @@
+export type HomePopularInvestorRow = {
+  slug: string;
+  name: string;
+  firm: string;
+  stockCount: number;
+};
+
 export type HomeInsiderRow = {
   id: string;
   ticker: string;
@@ -34,16 +41,10 @@ export type HomeRecentInvestorRow = {
 };
 
 export type HomeDashboardModel = {
-  insiderFeed: HomeInsiderRow[];
-  insiderFeedNote: string | null;
+  popularPortfolios: HomePopularInvestorRow[];
   mostHeld: HomeMostHeldRow[];
-  biggestPositions: HomeBiggestPositionRow[];
-  topInsiderBuys: HomeInsiderRow[];
-  recentInvestors: HomeRecentInvestorRow[];
   panels: {
+    popularPortfolios: boolean;
     mostHeld: boolean;
-    biggestPositions: boolean;
-    topInsiderBuys: boolean;
-    recentInvestors: boolean;
   };
 };

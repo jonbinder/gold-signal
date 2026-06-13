@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { InvestorPhoto } from "@/components/InvestorPhoto";
 import { StockLogo } from "@/components/stocks/StockLogo";
 import { stockPath } from "@/lib/paths";
 import type { InvestorDetailModel } from "@/lib/investors/types";
@@ -29,23 +30,33 @@ export function InvestorDetailView({ model }: { model: InvestorDetailModel }) {
   return (
     <main className="funds-page">
       <header className="funds-hero">
-        <div className="funds-hero__inner">
+        <div className="funds-hero__inner funds-hero__inner--with-photo">
           <Link href="/investors" className="funds-back" style={{ color: "#94a3b8" }}>
             ← All investors
           </Link>
-          <p className="funds-hero__eyebrow">
-            {investor.type === "fund" ? "Fund profile" : "Investor profile"}
-          </p>
-          <h1 className="funds-hero__title">{investor.name}</h1>
-          {investor.titleRole ? <p className="funds-hero__sub">{investor.titleRole}</p> : null}
-          {investor.bio ? <p className="funds-hero__sub">{investor.bio}</p> : null}
-          {investor.website ? (
-            <p className="funds-hero__sub" style={{ marginTop: "0.5rem" }}>
-              <a href={investor.website} target="_blank" rel="noopener noreferrer">
-                {investor.website.replace(/^https?:\/\//, "")}
-              </a>
-            </p>
-          ) : null}
+          <div className="funds-hero__profile">
+            <InvestorPhoto
+              investor={{ name: investor.name, slug: investor.slug }}
+              size="hero"
+              priority
+              className="funds-hero__photo"
+            />
+            <div className="funds-hero__copy">
+              <p className="funds-hero__eyebrow">
+                {investor.type === "fund" ? "Fund profile" : "Investor profile"}
+              </p>
+              <h1 className="funds-hero__title">{investor.name}</h1>
+              {investor.titleRole ? <p className="funds-hero__sub">{investor.titleRole}</p> : null}
+              {investor.bio ? <p className="funds-hero__sub">{investor.bio}</p> : null}
+              {investor.website ? (
+                <p className="funds-hero__sub" style={{ marginTop: "0.5rem" }}>
+                  <a href={investor.website} target="_blank" rel="noopener noreferrer">
+                    {investor.website.replace(/^https?:\/\//, "")}
+                  </a>
+                </p>
+              ) : null}
+            </div>
+          </div>
         </div>
       </header>
 

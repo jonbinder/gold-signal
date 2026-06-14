@@ -10,6 +10,7 @@ import type {
   InvestorProfile,
   InvestorType,
 } from "@/lib/investors/types";
+import { isTrackedInvestorSlug } from "@/lib/investors/tracked-roster";
 
 export const INVESTORS_LIST_CACHE_TAG = "investors-list";
 
@@ -335,7 +336,9 @@ async function loadPublishedInvestorsList(): Promise<InvestorListItem[]> {
     manualById.set(id, (manualById.get(id) ?? 0) + 1);
   }
 
-  return investors.map((investor) => {
+  return investors
+    .filter((investor) => isTrackedInvestorSlug(investor.slug))
+    .map((investor) => {
     const manualPositionCount = manualById.get(investor.id) ?? 0;
     const auto13fPositionCount = auto13fCounts.get(investor.id) ?? 0;
     return {
@@ -349,7 +352,7 @@ async function loadPublishedInvestorsList(): Promise<InvestorListItem[]> {
 
 const loadPublishedInvestorsListCached = unstable_cache(
   loadPublishedInvestorsList,
-  ["investors-list-published-v2"],
+  ["investors-list-published-v3"],
   { revalidate: 3600, tags: [INVESTORS_LIST_CACHE_TAG] },
 );
 
@@ -363,6 +366,8 @@ export async function getPublishedInvestors(sort: InvestorSort = "name"): Promis
 }
 
 async function loadInvestorDetail(slug: string): Promise<InvestorDetailModel | null> {
+  if (!isTrackedInvestorSlug(slug)) return null;
+
   const supabase = getAnonClient();
   if (!supabase) return null;
 

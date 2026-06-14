@@ -12,27 +12,19 @@ const UA = "GoldSignalBot/1.0 (https://goldsignal.ai; investor-images)";
 
 /** @type {{ file: string; wikidata?: string; commonsSearch: string; fallbacks?: string[] }[]} */
 const INVESTORS = [
+  { file: "garrett-goggin.jpg", commonsSearch: "Garrett Goggin CFA", fallbacks: [] },
+  { file: "adrian-day.jpg", commonsSearch: "Adrian Day asset management", fallbacks: [] },
   { file: "peter-schiff.jpg", wikidata: "Q512741", commonsSearch: "Peter Schiff portrait" },
   { file: "eric-sprott.jpg", commonsSearch: "Eric Sprott", fallbacks: ["https://upload.wikimedia.org/wikipedia/commons/5/5c/Eric_Sprott_2012.jpg"] },
-  { file: "sprott-asset-management.jpg", commonsSearch: "Eric Sprott", fallbacks: ["https://upload.wikimedia.org/wikipedia/commons/5/5c/Eric_Sprott_2012.jpg"] },
+  { file: "sprott-inc.jpg", commonsSearch: "Sprott Inc logo", fallbacks: ["https://upload.wikimedia.org/wikipedia/commons/5/5c/Eric_Sprott_2012.jpg"] },
   { file: "ross-beaty.jpg", commonsSearch: "Ross Beaty", fallbacks: [] },
   { file: "frank-giustra.jpg", commonsSearch: "Frank Giustra", fallbacks: [] },
   { file: "rick-rule.jpg", commonsSearch: "Rick Rule Sprott", fallbacks: [] },
-  { file: "john-hathaway.jpg", commonsSearch: "John Hathaway gold", fallbacks: [] },
-  { file: "ned-naylor-leyland.jpg", commonsSearch: "Ned Naylor-Leyland", fallbacks: ["https://www.jupiteram.com/media/ned-naylor-leyland.jpg"] },
+  { file: "jon-binder.jpg", commonsSearch: "Jon Binder", fallbacks: [] },
+  { file: "lawrence-lepard.jpg", commonsSearch: "Lawrence Lepard", fallbacks: [] },
   { file: "pierre-lassonde.jpg", wikidata: "Q3382607", commonsSearch: "Pierre Lassonde" },
   { file: "doug-casey.jpg", commonsSearch: "Doug Casey", fallbacks: [] },
-  { file: "marin-katusa.jpg", commonsSearch: "Marin Katusa", fallbacks: [] },
-  { file: "nolan-watson.jpg", commonsSearch: "Nolan Watson Sandstorm", fallbacks: [] },
-  { file: "lukas-lundin.jpg", commonsSearch: "Lukas Lundin", fallbacks: [] },
-  { file: "thomas-kaplan.jpg", commonsSearch: "Thomas Kaplan", fallbacks: [] },
-  { file: "grant-williams.jpg", commonsSearch: "Grant Williams finance", fallbacks: [] },
-  { file: "mark-bristow.jpg", commonsSearch: "Mark Bristow mining", fallbacks: [] },
-  { file: "david-garofalo.jpg", commonsSearch: "David Garofalo", fallbacks: [] },
-  { file: "keith-neumeyer.jpg", commonsSearch: "Keith Neumeyer", fallbacks: [] },
-  { file: "bob-quartermaine.jpg", commonsSearch: "Bob Quartermain Seabridge", fallbacks: [] },
-  { file: "tavi-costa.jpg", commonsSearch: "Tavi Costa Crescat", fallbacks: [] },
-  { file: "brien-lundin.jpg", commonsSearch: "Brien Lundin", fallbacks: [] },
+  { file: "don-durrett.jpg", commonsSearch: "Don Durrett gold", fallbacks: [] },
   { file: "rob-mcewen.jpg", commonsSearch: "Rob McEwen", fallbacks: [] },
 ];
 

@@ -5,6 +5,14 @@
 import fs from "fs";
 import path from "path";
 import * as XLSX from "xlsx";
+import {
+  isTrackedInvestorSlug,
+  normalizeTrackedInvestorSlug,
+} from "../src/lib/investors/tracked-roster";
+import {
+  isTrackedInvestorSlug,
+  normalizeTrackedInvestorSlug,
+} from "../src/lib/investors/tracked-roster";
 
 const ROOT = process.cwd();
 const EXCEL_PATH = path.join(ROOT, "GoldSignal_Investors.xlsx");
@@ -193,7 +201,7 @@ export function readInvestorsFromWorkbook(wb: XLSX.WorkBook): InvestorRecord[] {
     const name = meta?.name.split("/")[0].trim() || extractDisplayName(rows, sheetName);
 
     investors.push({
-      slug: slugify(sheetName),
+      slug: normalizeTrackedInvestorSlug(slugify(sheetName)),
       name,
       sheetName,
       role: meta?.role || "",
@@ -206,13 +214,22 @@ export function readInvestorsFromWorkbook(wb: XLSX.WorkBook): InvestorRecord[] {
     });
   }
 
-  return investors.sort((a, b) => a.name.localeCompare(b.name));
+  return investors
+    .filter((inv) => isTrackedInvestorSlug(inv.slug))
+    .sort((a, b) => a.name.localeCompare(b.name));
 }
 
 export function writeInvestorsJson(investors: InvestorRecord[], filePath = JSON_PATH): void {
+  const roster = investors
+    .map((inv) => ({
+      ...inv,
+      slug: normalizeTrackedInvestorSlug(inv.slug),
+    }))
+    .filter((inv) => isTrackedInvestorSlug(inv.slug));
+
   const payload: InvestorsFile = {
     updatedAt: new Date().toISOString(),
-    investors,
+    investors: roster.sort((a, b) => a.name.localeCompare(b.name)),
   };
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
   fs.writeFileSync(filePath, `${JSON.stringify(payload, null, 2)}\n`, "utf8");

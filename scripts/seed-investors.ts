@@ -1,6 +1,7 @@
 import "dotenv/config";
 import { getSupabaseServiceRole } from "@/lib/supabase/service-role";
 import { loadTrackedStocksSync } from "@/lib/tracked-stocks-load";
+import { isTrackedInvestorSlug } from "@/lib/investors/tracked-roster";
 
 type InvestorSeed = {
   slug: string;
@@ -32,6 +33,18 @@ const DEFAULT_SOURCE_RICK = "Public statement / conference";
 
 const INVESTOR_SEEDS: InvestorSeed[] = [
   {
+    slug: "garrett-goggin",
+    name: "Garrett Goggin",
+    type: "individual",
+    titleRole: "CFA / Portfolio Manager",
+    bio: "Precious-metals focused portfolio manager and analyst.",
+    website: null,
+    cik: null,
+    focusNote: "Track via sourced public disclosures and statements.",
+    sortOrder: 5,
+    positions: [],
+  },
+  {
     slug: "sprott-inc",
     name: "Sprott Inc.",
     type: "fund",
@@ -41,18 +54,6 @@ const INVESTOR_SEEDS: InvestorSeed[] = [
     cik: "0001512920",
     focusNote: "Precious-metals focused asset manager (Eric Sprott's firm)",
     sortOrder: 10,
-    positions: [],
-  },
-  {
-    slug: "asa-gold-precious-metals-limited",
-    name: "ASA Gold and Precious Metals Limited",
-    type: "fund",
-    titleRole: "Dedicated gold & precious-metals closed-end fund",
-    bio: "Long-running closed-end fund focused on gold and precious-metals equities.",
-    website: "https://www.asaltd.com",
-    cik: "0001230869",
-    focusNote: "Dedicated gold & precious-metals closed-end fund",
-    sortOrder: 20,
     positions: [],
   },
   {
@@ -286,15 +287,27 @@ const INVESTOR_SEEDS: InvestorSeed[] = [
     positions: [],
   },
   {
-    slug: "marin-katusa",
-    name: "Marin Katusa",
+    slug: "jon-binder",
+    name: "Jon Binder",
     type: "individual",
-    titleRole: "Founder, Katusa Research",
-    bio: "Natural-resource focused analyst and investor.",
-    website: null,
+    titleRole: "Founder, GoldSignal.ai",
+    bio: "Personal precious metals portfolio tracked since 2018. Positions are hand-curated and updated by Jon directly.",
+    website: "https://goldsignal.ai",
     cik: null,
-    focusNote: "Add sourced notable positions from explicit disclosures/statements.",
-    sortOrder: 90,
+    focusNote: "Personal portfolio — not from SEC filing.",
+    sortOrder: 55,
+    positions: [],
+  },
+  {
+    slug: "don-durrett",
+    name: "Don Durrett",
+    type: "individual",
+    titleRole: "Analyst, GoldStockData.com",
+    bio: "Gold stock analyst and author focused on undervalued precious-metals miners.",
+    website: "https://goldstockdata.com",
+    cik: null,
+    focusNote: "Track via GoldStockData.com watchlist and public commentary.",
+    sortOrder: 65,
     positions: [],
   },
   {
@@ -307,42 +320,6 @@ const INVESTOR_SEEDS: InvestorSeed[] = [
     cik: null,
     focusNote: "Add sourced notable positions from explicit statements.",
     sortOrder: 100,
-    positions: [],
-  },
-  {
-    slug: "lobo-tiggre",
-    name: "Lobo Tiggre",
-    type: "individual",
-    titleRole: "The Independent Speculator",
-    bio: "Resource-sector analyst and commentator.",
-    website: null,
-    cik: null,
-    focusNote: "Add sourced notable positions from explicit disclosures/statements.",
-    sortOrder: 110,
-    positions: [],
-  },
-  {
-    slug: "john-hathaway",
-    name: "John Hathaway",
-    type: "individual",
-    titleRole: "Gold-focused portfolio manager",
-    bio: "Long-time gold-focused portfolio manager and commentator.",
-    website: null,
-    cik: null,
-    focusNote: "Add sourced notable positions from explicit disclosures/statements.",
-    sortOrder: 120,
-    positions: [],
-  },
-  {
-    slug: "robert-friedland",
-    name: "Robert Friedland",
-    type: "individual",
-    titleRole: "Mining entrepreneur and financier",
-    bio: "Mining entrepreneur known for major resource ventures.",
-    website: null,
-    cik: null,
-    focusNote: "Add sourced notable positions via company filings/public disclosures.",
-    sortOrder: 130,
     positions: [],
   },
   {
@@ -379,30 +356,6 @@ const INVESTOR_SEEDS: InvestorSeed[] = [
     cik: null,
     focusNote: "Add sourced notable positions via explicit disclosures/statements.",
     sortOrder: 160,
-    positions: [],
-  },
-  {
-    slug: "lyn-alden",
-    name: "Lyn Alden",
-    type: "individual",
-    titleRole: "Macro strategist and investor",
-    bio: "Macro strategist with public precious-metals market commentary.",
-    website: null,
-    cik: null,
-    focusNote: "Add sourced notable positions only from explicit statements.",
-    sortOrder: 170,
-    positions: [],
-  },
-  {
-    slug: "luke-gromen",
-    name: "Luke Gromen",
-    type: "individual",
-    titleRole: "Macro strategist, FFTT",
-    bio: "Macro strategist with public commodities commentary.",
-    website: null,
-    cik: null,
-    focusNote: "Add sourced notable positions only from explicit statements.",
-    sortOrder: 180,
     positions: [],
   },
 ];
@@ -505,7 +458,7 @@ async function main() {
 
   let investorCount = 0;
   let positionCount = 0;
-  for (const investor of INVESTOR_SEEDS) {
+  for (const investor of INVESTOR_SEEDS.filter((seed) => isTrackedInvestorSlug(seed.slug))) {
     const investorId = await upsertInvestor(investor);
     investorCount += 1;
     for (const pos of investor.positions) {

@@ -1,43 +1,28 @@
 import Link from "next/link";
-import { InvestorPhoto } from "@/components/InvestorPhoto";
+import { HomePortfolioCard } from "@/components/home/HomePortfolioCard";
 import { StockLogo } from "@/components/stocks/StockLogo";
 import { WatchlistCaptureForm } from "@/components/home/WatchlistCaptureForm";
-import { investorPath, stockPath } from "@/lib/paths";
-import type { HomeDashboardModel, HomePopularInvestorRow } from "@/lib/home/types";
+import { stockPath } from "@/lib/paths";
+import type { HomeDashboardModel } from "@/lib/home/types";
+
+const RECENT_PORTFOLIOS_TITLE = "Recently Updated Portfolios";
 
 function Panel({
   title,
   children,
   className = "",
+  ariaLabel,
 }: {
   title: string;
   children: React.ReactNode;
   className?: string;
+  ariaLabel?: string;
 }) {
   return (
-    <section className={`home-panel ${className}`.trim()}>
-      <h2 className="home-panel__title">{title}</h2>
+    <section className={`home-panel ${className}`.trim()} aria-label={ariaLabel ?? title}>
+      <h2 className="home-panel__title home-portfolios__title">{title}</h2>
       {children}
     </section>
-  );
-}
-
-function PopularPortfolioRow({ row }: { row: HomePopularInvestorRow }) {
-  const stockLabel = `${row.stockCount} Stock${row.stockCount === 1 ? "" : "s"}`;
-
-  return (
-    <li className="home-portfolio-row">
-      <InvestorPhoto investor={{ name: row.name, slug: row.slug }} size="thumb" />
-      <div className="home-portfolio-row__body">
-        <Link href={investorPath(row.slug)} className="home-portfolio-row__name">
-          {row.name}
-        </Link>
-        <p className="home-portfolio-row__firm">{row.firm}</p>
-        <Link href={investorPath(row.slug)} className="home-portfolio-row__stocks">
-          {stockLabel}
-        </Link>
-      </div>
-    </li>
   );
 }
 
@@ -59,15 +44,23 @@ export function HomeDashboard({ model }: { model: HomeDashboardModel }) {
         {showColumns ? (
           <div className="home-dashboard__grid home-dashboard__grid--portfolios">
             {model.panels.popularPortfolios ? (
-              <Panel title="Most Popular Portfolios" className="home-panel--featured home-panel--portfolios">
-                <ul className="home-portfolio-list">
-                  {model.popularPortfolios.map((row) => (
-                    <PopularPortfolioRow key={row.slug} row={row} />
+              <Panel
+                title={RECENT_PORTFOLIOS_TITLE}
+                ariaLabel={RECENT_PORTFOLIOS_TITLE}
+                className="home-panel--featured home-panel--portfolios"
+              >
+                <div className="home-portfolio-grid">
+                  {model.popularPortfolios.map((row, index) => (
+                    <HomePortfolioCard key={row.slug} row={row} priorityPhoto={index < 3} />
                   ))}
-                </ul>
+                </div>
               </Panel>
             ) : (
-              <Panel title="Most Popular Portfolios" className="home-panel--featured home-panel--portfolios">
+              <Panel
+                title={RECENT_PORTFOLIOS_TITLE}
+                ariaLabel={RECENT_PORTFOLIOS_TITLE}
+                className="home-panel--featured home-panel--portfolios"
+              >
                 <p className="home-feed__empty">Published investor portfolios will appear here.</p>
               </Panel>
             )}

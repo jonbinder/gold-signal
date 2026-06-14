@@ -3,6 +3,7 @@ export type HomePopularInvestorRow = {
   name: string;
   firm: string;
   stockCount: number;
+  lastUpdatedAt: string;
 };
 
 export type HomeInsiderRow = {

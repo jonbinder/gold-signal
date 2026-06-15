@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
 import { PageCompliance } from "@/components/layout/PageCompliance";
 import { InvestorsList } from "@/components/investors/InvestorsList";
 import { getPublishedInvestorsList } from "@/lib/investors/queries";
-import { SITE_TAGLINE } from "@/lib/site";
 import "@/app/funds.css";
 
 const pageTitle = "Investors — sourced notable gold & silver positions | GoldSignal";
@@ -27,7 +25,7 @@ export const metadata: Metadata = {
   },
 };
 
-/** ISR: list data from unstable_cache; sort is client-side via URL. */
+/** ISR: list sorted by most recent portfolio update at query layer. */
 export const revalidate = 3600;
 
 export default async function InvestorsPage() {
@@ -35,22 +33,24 @@ export default async function InvestorsPage() {
 
   return (
     <main className="funds-page">
-      <header className="funds-hero">
+      <header className="funds-hero funds-hero--investors">
         <div className="funds-hero__inner">
-          <p className="funds-hero__eyebrow">Curated smart money</p>
-          <h1 className="funds-hero__title">Tracked investors</h1>
-          <p className="hero-tagline">{SITE_TAGLINE}</p>
-          <p className="funds-hero__sub">{pageDescription}</p>
+          <h1 className="funds-hero__title funds-hero__title--investors">
+            The Smart Money in Gold and Silver
+          </h1>
+          <p className="funds-hero__sub funds-hero__sub--investors">
+            Precious metal portfolio managers, funds and family offices.
+            <br />
+            Data sourced from SEC filings and public statements
+          </p>
         </div>
       </header>
-      <div className="funds-main">
-        <p className="funds-filter-note">
+      <div className="funds-main funds-main--investors">
+        <p className="funds-filter-note funds-filter-note--investors">
           Notable gold &amp; silver positions held by leading investors and funds — sourced from SEC filings and
           public statements. Not complete portfolios.
         </p>
-        <Suspense fallback={<p className="funds-empty">Loading investors…</p>}>
-          <InvestorsList investors={investors} />
-        </Suspense>
+        <InvestorsList investors={investors} />
         <PageCompliance />
       </div>
     </main>

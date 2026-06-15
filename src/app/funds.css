@@ -72,6 +72,43 @@
   max-width: 42rem;
 }
 
+.funds-hero--investors {
+  padding: 2rem 1rem;
+}
+
+@media (min-width: 640px) {
+  .funds-hero--investors {
+    padding: 2rem 1.5rem;
+  }
+}
+
+.funds-hero__title--investors {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 0.5rem;
+}
+
+.funds-hero__sub--investors {
+  color: #9ca3af;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+.funds-main--investors {
+  padding-top: 1rem;
+}
+
+@media (min-width: 640px) {
+  .funds-main--investors {
+    padding-top: 1.25rem;
+  }
+}
+
+.funds-filter-note--investors {
+  margin-bottom: 1rem;
+}
+
 .funds-main {
   max-width: 1100px;
   margin: 0 auto;

@@ -2,6 +2,7 @@
 
 import { revalidatePath, revalidateTag } from "next/cache";
 import { INVESTORS_LIST_CACHE_TAG } from "@/lib/investors/queries";
+import { bumpInvestorPortfolioUpdatedAt } from "@/lib/investors/last-updated";
 import { redirect } from "next/navigation";
 import { createSupabaseServiceClient } from "@/lib/supabase";
 import { loginAdmin, logoutAdmin, requireAdminPage } from "@/lib/admin-auth";
@@ -141,6 +142,8 @@ export async function savePositionAction(formData: FormData) {
     if (error) throw new Error(error.message);
   }
 
+  await bumpInvestorPortfolioUpdatedAt(supabase, investorId);
+
   revalidatePath("/admin");
   revalidatePath("/investors");
   revalidateTag(INVESTORS_LIST_CACHE_TAG);
@@ -179,8 +182,16 @@ export async function deletePositionAction(formData: FormData) {
   const supabase = serviceClientOrThrow();
   const id = String(formData.get("id") ?? "").trim();
   if (!id) throw new Error("Missing position id.");
+  const { data: row } = await supabase
+    .from("investor_positions")
+    .select("investor_id")
+    .eq("id", id)
+    .maybeSingle();
   const { error } = await supabase.from("investor_positions").delete().eq("id", id);
   if (error) throw new Error(error.message);
+  if (row?.investor_id) {
+    await bumpInvestorPortfolioUpdatedAt(supabase, row.investor_id as string);
+  }
   revalidatePath("/admin");
   revalidatePath("/investors");
   revalidateTag(INVESTORS_LIST_CACHE_TAG);

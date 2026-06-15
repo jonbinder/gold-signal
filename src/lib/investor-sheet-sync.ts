@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { readInvestorPositionsSheet, readSheetEnvConfig } from "@/lib/google-sheets/read-positions-tab";
 import type { PositionType } from "@/lib/investors/types";
+import { bumpInvestorPortfolioUpdatedAt } from "@/lib/investors/last-updated";
 import { loadTrackedStocksSync } from "@/lib/tracked-stocks-load";
 
 const REQUIRED_HEADERS = [
@@ -443,6 +444,10 @@ export async function syncInvestorPositionsFromGoogleSheet(
           if (!error) deleted += 1;
         }
       }
+    }
+
+    if (touchedInvestorIds.size > 0) {
+      await bumpInvestorPortfolioUpdatedAt(supabase, [...touchedInvestorIds]);
     }
 
     const dataRows = values.length - 1;

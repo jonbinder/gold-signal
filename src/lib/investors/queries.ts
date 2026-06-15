@@ -11,6 +11,10 @@ import type {
   InvestorType,
 } from "@/lib/investors/types";
 import { isTrackedInvestorSlug } from "@/lib/investors/tracked-roster";
+import {
+  loadInvestorLastUpdatedAt,
+  sortInvestorsByRecentUpdate,
+} from "@/lib/investors/last-updated";
 
 export const INVESTORS_LIST_CACHE_TAG = "investors-list";
 
@@ -283,23 +287,21 @@ async function loadAuto13fPositions(
   return { positions, count: positions.length };
 }
 
-export type InvestorSort = "name" | "positions" | "type";
+async function loadPublishedInvestorsListSorted(): Promise<InvestorListItem[]> {
+  const supabase = getAnonClient();
+  const investors = await loadPublishedInvestorsListRows();
+  if (investors.length === 0 || !supabase) return investors;
 
-export function sortPublishedInvestors(
-  list: InvestorListItem[],
-  sort: InvestorSort = "name",
-): InvestorListItem[] {
-  const copy = [...list];
-  if (sort === "positions") {
-    return copy.sort((a, b) => b.positionCount - a.positionCount || a.name.localeCompare(b.name));
-  }
-  if (sort === "type") {
-    return copy.sort((a, b) => a.type.localeCompare(b.type) || a.name.localeCompare(b.name));
-  }
-  return copy.sort((a, b) => a.name.localeCompare(b.name));
+  const lastUpdated = await loadInvestorLastUpdatedAt(supabase, investors);
+  const withTimestamps = investors.map((investor) => ({
+    ...investor,
+    updatedAt: lastUpdated.get(investor.id) ?? "",
+  }));
+
+  return sortInvestorsByRecentUpdate(withTimestamps, lastUpdated);
 }
 
-async function loadPublishedInvestorsList(): Promise<InvestorListItem[]> {
+async function loadPublishedInvestorsListRows(): Promise<InvestorListItem[]> {
   const supabase = getAnonClient();
   if (!supabase) return [];
 
@@ -346,13 +348,14 @@ async function loadPublishedInvestorsList(): Promise<InvestorListItem[]> {
       manualPositionCount,
       auto13fPositionCount,
       positionCount: manualPositionCount + auto13fPositionCount,
+      updatedAt: "",
     };
   });
 }
 
 const loadPublishedInvestorsListCached = unstable_cache(
-  loadPublishedInvestorsList,
-  ["investors-list-published-v3"],
+  loadPublishedInvestorsListSorted,
+  ["investors-list-published-v4"],
   { revalidate: 3600, tags: [INVESTORS_LIST_CACHE_TAG] },
 );
 
@@ -360,9 +363,9 @@ export async function getPublishedInvestorsList(): Promise<InvestorListItem[]> {
   return loadPublishedInvestorsListCached();
 }
 
-/** @deprecated Prefer getPublishedInvestorsList + client sort for ISR. */
-export async function getPublishedInvestors(sort: InvestorSort = "name"): Promise<InvestorListItem[]> {
-  return sortPublishedInvestors(await getPublishedInvestorsList(), sort);
+/** @deprecated List is pre-sorted by most recent portfolio update. */
+export async function getPublishedInvestors(): Promise<InvestorListItem[]> {
+  return getPublishedInvestorsList();
 }
 
 async function loadInvestorDetail(slug: string): Promise<InvestorDetailModel | null> {

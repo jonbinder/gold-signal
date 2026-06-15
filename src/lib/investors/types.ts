@@ -28,6 +28,7 @@ export type InvestorListItem = InvestorProfile & {
   manualPositionCount: number;
   auto13fPositionCount: number;
   positionCount: number;
+  updatedAt: string;
 };
 
 export type InvestorPosition = {

@@ -27,7 +27,8 @@ async function loadMostHeld(supabase: SupabaseClient): Promise<HomeMostHeldRow[]
   const { data: positions } = await supabase
     .from("investor_positions")
     .select("ticker, company_name, investor_id")
-    .eq("is_published", true);
+    .eq("is_published", true)
+    .eq("google_sheet_synced", true);
 
   for (const row of positions ?? []) {
     const investorId = (row as { investor_id: string }).investor_id;
@@ -40,33 +41,6 @@ async function loadMostHeld(supabase: SupabaseClient): Promise<HomeMostHeldRow[]
     entry.investors.add(investorId);
     if (!entry.companyName || entry.companyName === ticker) entry.companyName = companyName;
     byTicker.set(ticker, entry);
-  }
-
-  const { data: period } = await supabase
-    .from("reporting_periods")
-    .select("id")
-    .eq("is_latest", true)
-    .maybeSingle();
-
-  if (period?.id) {
-    const { data: holdings } = await supabase
-      .from("holdings")
-      .select("investor_id, security:securities(ticker, name)")
-      .eq("period_id", period.id);
-
-    for (const row of holdings ?? []) {
-      const investorId = (row as { investor_id: string }).investor_id;
-      if (!publishedIds.has(investorId)) continue;
-      const secRaw = (row as { security?: { ticker?: string; name?: string } | { ticker?: string; name?: string }[] })
-        .security;
-      const sec = Array.isArray(secRaw) ? secRaw[0] : secRaw;
-      const ticker = sec?.ticker ? normalizeTicker(sec.ticker) : "";
-      if (!ticker) continue;
-      const companyName = sec?.name?.trim() || ticker;
-      const entry = byTicker.get(ticker) ?? { companyName, investors: new Set<string>() };
-      entry.investors.add(investorId);
-      byTicker.set(ticker, entry);
-    }
   }
 
   const ranked = [...byTicker.entries()]

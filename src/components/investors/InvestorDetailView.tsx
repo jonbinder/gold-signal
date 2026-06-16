@@ -79,9 +79,7 @@ export function InvestorDetailView({ model }: { model: InvestorDetailModel }) {
         ) : null}
 
         {positions.length === 0 ? (
-          <p className="funds-empty">
-            No published positions yet. Use <code>/admin</code> to add sourced entries.
-          </p>
+          <p className="funds-empty">0 tracked positions.</p>
         ) : (
           <div className="funds-table-wrap">
             <table className="funds-table">

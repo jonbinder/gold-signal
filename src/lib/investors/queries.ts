@@ -56,19 +56,9 @@ type PositionRow = {
   as_of_date: string;
   why_interesting: string | null;
   is_published: boolean;
+  google_sheet_synced?: boolean;
   created_at: string;
   updated_at: string;
-};
-
-type HoldingAutoRow = {
-  id: string;
-  portfolio_pct: number | null;
-  change_type: string | null;
-  value_usd: number | null;
-  security:
-    | { ticker: string; name: string | null }
-    | { ticker: string; name: string | null }[]
-    | null;
 };
 
 type InvestorsClientMode = "service_role" | "anon" | "none";
@@ -148,7 +138,28 @@ function mapListInvestor(row: InvestorListRow): InvestorProfile {
   };
 }
 
-function mapManualPosition(row: PositionRow): InvestorPosition {
+
+function isPlaceholderPositionText(...parts: Array<string | null | undefined>): boolean {
+  const hay = parts.filter(Boolean).join(" ").toUpperCase();
+  return hay.includes("PLACEHOLDER");
+}
+
+function dedupePositionsByTicker(positions: InvestorPosition[]): InvestorPosition[] {
+  const seen = new Set<string>();
+  const out: InvestorPosition[] = [];
+  for (const position of positions) {
+    const key = position.ticker.toUpperCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(position);
+  }
+  return out;
+}
+
+function mapManualPosition(row: PositionRow): InvestorPosition | null {
+  if (row.google_sheet_synced === false) return null;
+  if (isPlaceholderPositionText(row.detail, row.source_detail, row.why_interesting)) return null;
+
   const clean = (value: string | null): string | null => {
     if (!value) return value;
     return value
@@ -175,119 +186,6 @@ function mapManualPosition(row: PositionRow): InvestorPosition {
     updatedAt: row.updated_at,
     isAuto13f: false,
   };
-}
-
-function securityFromHolding(
-  security: HoldingAutoRow["security"],
-): { ticker: string; name: string | null } | null {
-  if (!security) return null;
-  return Array.isArray(security) ? (security[0] ?? null) : security;
-}
-
-function formatValueUsd(value: number | null): string | null {
-  if (value == null || !Number.isFinite(value) || value <= 0) return null;
-  if (value >= 1_000_000_000) return `$${(value / 1_000_000_000).toFixed(2)}B`;
-  if (value >= 1_000_000) return `$${(value / 1_000_000).toFixed(1)}M`;
-  if (value >= 1_000) return `$${(value / 1_000).toFixed(0)}K`;
-  return `$${Math.round(value)}`;
-}
-
-/** One query: latest 13F period + all holdings for fund investor ids. */
-async function countFund13fPositionsByInvestor(
-  supabase: SupabaseClient,
-  fundInvestorIds: string[],
-): Promise<Map<string, number>> {
-  const counts = new Map<string, number>();
-  if (fundInvestorIds.length === 0) return counts;
-
-  const { data: period } = await supabase
-    .from("reporting_periods")
-    .select("id")
-    .eq("is_latest", true)
-    .maybeSingle();
-  if (!period?.id) return counts;
-
-  const { data: holdings, error } = await supabase
-    .from("holdings")
-    .select("investor_id")
-    .in("investor_id", fundInvestorIds)
-    .eq("period_id", period.id);
-
-  if (error) {
-    console.error("[investors] batch 13F count failed", error);
-    return counts;
-  }
-
-  for (const row of holdings ?? []) {
-    const id = (row as { investor_id: string }).investor_id;
-    counts.set(id, (counts.get(id) ?? 0) + 1);
-  }
-  return counts;
-}
-
-async function loadAuto13fPositions(
-  investorId: string,
-): Promise<{ positions: InvestorPosition[]; count: number }> {
-  const supabase = getAnonClient();
-  if (!supabase) return { positions: [], count: 0 };
-
-  const { data: period } = await supabase
-    .from("reporting_periods")
-    .select("id, label, period_end")
-    .eq("is_latest", true)
-    .maybeSingle();
-  if (!period?.id) return { positions: [], count: 0 };
-
-  const { data: holdings } = await supabase
-    .from("holdings")
-    .select(
-      `
-      id,
-      portfolio_pct,
-      change_type,
-      value_usd,
-      security:securities(ticker, name)
-    `,
-    )
-    .eq("investor_id", investorId)
-    .eq("period_id", period.id)
-    .order("value_usd", { ascending: false });
-
-  const rows = (holdings ?? []) as HoldingAutoRow[];
-  const positions: InvestorPosition[] = [];
-  for (const row of rows) {
-    const sec = securityFromHolding(row.security);
-    if (!sec?.ticker) continue;
-    const value = formatValueUsd(row.value_usd != null ? Number(row.value_usd) : null);
-    const pct =
-      row.portfolio_pct != null && Number.isFinite(Number(row.portfolio_pct))
-        ? `${Number(row.portfolio_pct).toFixed(1)}% of 13F portfolio`
-        : null;
-    const detailParts = [
-      row.change_type ? `13F ${row.change_type}` : "13F reported position",
-      value ? `value ${value}` : null,
-      pct,
-    ].filter(Boolean);
-    positions.push({
-      id: `auto13f-${period.id}-${row.id}`,
-      investorId,
-      ticker: normalizeTicker(sec.ticker),
-      companyName: sec.name ?? normalizeTicker(sec.ticker),
-      positionType: "fund_13f",
-      detail: detailParts.join(" · "),
-      approxSize: pct,
-      sourceType: "SEC 13F",
-      sourceDetail: `${period.label} 13F filing`,
-      asOfDate: period.period_end ?? new Date().toISOString().slice(0, 10),
-      whyInteresting: null,
-      isPublished: true,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      isAuto13f: true,
-    });
-  }
-
-  return { positions, count: positions.length };
 }
 
 async function loadPublishedInvestorsListSorted(): Promise<InvestorListItem[]> {
@@ -324,40 +222,55 @@ async function loadPublishedInvestorsListRows(): Promise<InvestorListItem[]> {
   if (investors.length === 0) return [];
 
   const ids = investors.map((i) => i.id);
-  const fundIds = investors.filter((i) => i.type === "fund").map((i) => i.id);
 
-  const [manualResult, auto13fCounts] = await Promise.all([
-    supabase.from("investor_positions").select("investor_id").in("investor_id", ids).eq("is_published", true),
-    countFund13fPositionsByInvestor(supabase, fundIds),
-  ]);
+  const { data: sheetRows, error: sheetError } = await supabase
+    .from("investor_positions")
+    .select("investor_id, ticker, detail, source_detail, why_interesting")
+    .in("investor_id", ids)
+    .eq("is_published", true)
+    .eq("google_sheet_synced", true);
 
-  if (manualResult.error) {
-    console.error("[investors] manual counts query failed", manualResult.error);
+  if (sheetError) {
+    console.error("[investors] sheet position counts query failed", sheetError);
   }
 
-  const manualById = new Map<string, number>();
-  for (const row of manualResult.data ?? []) {
-    const id = (row as { investor_id: string }).investor_id;
-    manualById.set(id, (manualById.get(id) ?? 0) + 1);
+  const sheetCountById = new Map<string, number>();
+  const seenTickerByInvestor = new Map<string, Set<string>>();
+  for (const row of sheetRows ?? []) {
+    const investorId = (row as { investor_id: string }).investor_id;
+    const ticker = normalizeTicker((row as { ticker: string }).ticker);
+    if (
+      isPlaceholderPositionText(
+        (row as { detail?: string }).detail,
+        (row as { source_detail?: string }).source_detail,
+        (row as { why_interesting?: string | null }).why_interesting,
+      )
+    ) {
+      continue;
+    }
+    const seen = seenTickerByInvestor.get(investorId) ?? new Set<string>();
+    if (seen.has(ticker)) continue;
+    seen.add(ticker);
+    seenTickerByInvestor.set(investorId, seen);
+    sheetCountById.set(investorId, (sheetCountById.get(investorId) ?? 0) + 1);
   }
 
   return investors
     .filter((investor) => isTrackedInvestorSlug(investor.slug))
     .map((investor) => {
-    const manualPositionCount = manualById.get(investor.id) ?? 0;
-    const auto13fPositionCount = auto13fCounts.get(investor.id) ?? 0;
+    const sheetPositionCount = sheetCountById.get(investor.id) ?? 0;
     return {
       ...investor,
-      manualPositionCount,
-      auto13fPositionCount,
-      positionCount: manualPositionCount + auto13fPositionCount,
+      manualPositionCount: sheetPositionCount,
+      auto13fPositionCount: 0,
+      positionCount: sheetPositionCount,
     };
   });
 }
 
 const loadPublishedInvestorsListCached = unstable_cache(
   loadPublishedInvestorsListSorted,
-  ["investors-list-published-v5"],
+  ["investors-list-published-v6-sheet-only"],
   { revalidate: 3600, tags: [INVESTORS_LIST_CACHE_TAG] },
 );
 
@@ -389,23 +302,23 @@ async function loadInvestorDetail(slug: string): Promise<InvestorDetailModel | n
   const { data: manualRaw } = await supabase
     .from("investor_positions")
     .select(
-      "id, investor_id, ticker, company_name, position_type, detail, approx_size, source_type, source_detail, as_of_date, why_interesting, is_published, created_at, updated_at",
+      "id, investor_id, ticker, company_name, position_type, detail, approx_size, source_type, source_detail, as_of_date, why_interesting, is_published, google_sheet_synced, created_at, updated_at",
     )
     .eq("investor_id", investor.id)
     .eq("is_published", true)
+    .eq("google_sheet_synced", true)
     .order("as_of_date", { ascending: false });
-  const manualPositions = ((manualRaw ?? []) as PositionRow[]).map(mapManualPosition);
-
-  const auto = investor.type === "fund" ? await loadAuto13fPositions(investor.id) : { positions: [], count: 0 };
-  const positions = [...manualPositions, ...auto.positions].sort((a, b) =>
-    b.asOfDate.localeCompare(a.asOfDate),
+  const manualPositions = dedupePositionsByTicker(
+    ((manualRaw ?? []) as PositionRow[])
+      .map(mapManualPosition)
+      .filter((row): row is InvestorPosition => row != null),
   );
 
   return {
     investor,
-    positions,
+    positions: manualPositions,
     manualPositionCount: manualPositions.length,
-    auto13fPositionCount: auto.count,
+    auto13fPositionCount: 0,
   };
 }
 
@@ -413,7 +326,7 @@ export async function getInvestorDetail(slug: string): Promise<InvestorDetailMod
   const normalized = slug.trim().toLowerCase();
   return unstable_cache(
     () => loadInvestorDetail(normalized),
-    ["investor-detail", normalized],
+    ["investor-detail-sheet-only", normalized],
     { revalidate: 3600, tags: [INVESTORS_LIST_CACHE_TAG, `investor-${normalized}`] },
   )();
 }
@@ -428,7 +341,8 @@ export const getPublishedInvestorsForTicker = cache(
       .from("investor_positions")
       .select("investor_id, investor:investors(slug, name, investor_type, is_published)")
       .eq("ticker", sym)
-      .eq("is_published", true);
+      .eq("is_published", true)
+      .eq("google_sheet_synced", true);
 
     const out = new Map<string, { slug: string; name: string; type: InvestorType }>();
     for (const row of manual ?? []) {
@@ -436,32 +350,6 @@ export const getPublishedInvestorsForTicker = cache(
         .investor;
       if (!inv?.slug || !inv?.name || inv.is_published !== true) continue;
       out.set(inv.slug, { slug: inv.slug, name: inv.name, type: inv.investor_type ?? "fund" });
-    }
-
-    const { data: security } = await supabase
-      .from("securities")
-      .select("id")
-      .eq("ticker", sym)
-      .maybeSingle();
-    const { data: period } = await supabase
-      .from("reporting_periods")
-      .select("id")
-      .eq("is_latest", true)
-      .maybeSingle();
-
-    if (security?.id && period?.id) {
-      const { data: holdings } = await supabase
-        .from("holdings")
-        .select("investor:investors(slug, name, investor_type, is_published)")
-        .eq("security_id", security.id)
-        .eq("period_id", period.id);
-      for (const row of holdings ?? []) {
-        const raw = (row as { investor?: { slug?: string; name?: string; investor_type?: InvestorType; is_published?: boolean } | { slug?: string; name?: string; investor_type?: InvestorType; is_published?: boolean }[] })
-          .investor;
-        const inv = Array.isArray(raw) ? raw[0] : raw;
-        if (!inv?.slug || !inv?.name || inv.is_published !== true) continue;
-        out.set(inv.slug, { slug: inv.slug, name: inv.name, type: inv.investor_type ?? "fund" });
-      }
     }
 
     return [...out.values()].sort((a, b) => a.name.localeCompare(b.name));

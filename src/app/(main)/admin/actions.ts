@@ -138,7 +138,10 @@ export async function savePositionAction(formData: FormData) {
     const { error } = await supabase.from("investor_positions").update(payload).eq("id", id);
     if (error) throw new Error(error.message);
   } else {
-    const { error } = await supabase.from("investor_positions").insert(payload);
+    const { error } = await supabase.from("investor_positions").insert({
+      ...payload,
+      google_sheet_synced: false,
+    });
     if (error) throw new Error(error.message);
   }
 

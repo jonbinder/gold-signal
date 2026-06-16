@@ -14,6 +14,8 @@ export type CachedDisplayStock = {
   category: string;
   subCategory: string;
   exchange: string | null;
+  price: number | null;
+  dailyChangePct: number | null;
   marketCap: number | null;
   peRatio: number | null;
   forwardPeRatio: number | null;
@@ -28,7 +30,7 @@ export type CachedDisplayStock = {
 };
 
 const STOCKS_LIST_COLUMNS_BASE =
-  "ticker, name, category, sub_category, exchange, logo_url, market_cap, pct_above_52_week_low, pe_ratio, forward_pe_ratio, famous_holder_count, insider_net_90d_usd, data_status";
+  "ticker, name, category, sub_category, exchange, logo_url, price, daily_change_pct, market_cap, pct_above_52_week_low, pe_ratio, forward_pe_ratio, famous_holder_count, insider_net_90d_usd, data_status";
 
 const STOCKS_LIST_COLUMNS =
   `${STOCKS_LIST_COLUMNS_BASE}, return_1m_pct, return_3m_pct, return_1y_pct`;
@@ -40,6 +42,8 @@ type StockListRow = {
   sub_category: string;
   exchange: string | null;
   logo_url: string | null;
+  price: number | null;
+  daily_change_pct: number | null;
   market_cap: number | null;
   pct_above_52_week_low: number | null;
   pe_ratio: number | null;
@@ -81,6 +85,8 @@ function fallbackFromTrackedFile(): CachedDisplayStock[] {
     category: s.category,
     subCategory: s.sub_category,
     exchange: s.exchange,
+    price: null,
+    dailyChangePct: null,
     marketCap: null,
     peRatio: null,
     forwardPeRatio: null,
@@ -102,6 +108,8 @@ function rowToDisplay(stock: CachedDisplayStock, row: StockListRow): CachedDispl
     category: row.category || stock.category,
     subCategory: row.sub_category || stock.subCategory,
     exchange: row.exchange ?? stock.exchange,
+    price: positiveNum(row.price) ?? stock.price,
+    dailyChangePct: finiteNum(row.daily_change_pct) ?? stock.dailyChangePct,
     marketCap: positiveNum(row.market_cap) ?? stock.marketCap,
     pctAbove52WeekLow: finiteNum(row.pct_above_52_week_low) ?? stock.pctAbove52WeekLow,
     peRatio: positiveNum(row.pe_ratio) ?? stock.peRatio,
@@ -152,7 +160,7 @@ async function loadStocksListFromSupabase(): Promise<CachedDisplayStock[]> {
 
 const loadStocksListFromSupabaseCached = unstable_cache(
   loadStocksListFromSupabase,
-  ["stocks-list-display-db-v4"],
+  ["stocks-list-display-db-v5-price"],
   { revalidate: 3600, tags: ["stocks-list"] },
 );
 

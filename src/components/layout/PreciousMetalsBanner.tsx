@@ -53,7 +53,7 @@ function QuoteRow({ label, labelClass, ticker, quote, formatPrice, loading }: Ro
     <div
       title={`${ticker} · Polygon.io`}
       className={cn(
-        "flex shrink-0 items-baseline gap-x-1.5 whitespace-nowrap border-r border-white/[0.06] pr-3 last:border-r-0 last:pr-0 sm:pr-4",
+        "metals-banner__item flex min-w-0 items-baseline gap-x-1.5 border-white/[0.06] pr-3 sm:pr-4",
       )}
     >
       <span className={cn("font-semibold tracking-wide", labelClass)}>{label}</span>
@@ -95,12 +95,7 @@ export function PreciousMetalsBanner() {
       aria-live="polite"
       aria-busy={stillLoading}
     >
-      <div
-        className={cn(
-          "flex min-h-[1.25rem] flex-nowrap items-baseline gap-x-0 gap-y-2 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none]",
-          "[&::-webkit-scrollbar]:hidden",
-        )}
-      >
+      <div className="metals-banner__grid">
         <QuoteRow
           label="GOLD"
           ticker="XAUUSD"

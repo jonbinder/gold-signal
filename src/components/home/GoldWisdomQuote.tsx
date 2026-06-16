@@ -1,14 +1,10 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { pickRandomGoldQuote, type GoldQuote } from "@/data/gold-quotes";
 
 export function GoldWisdomQuote() {
-  const [quote, setQuote] = useState<GoldQuote>(() => pickRandomGoldQuote());
-
-  const showAnother = useCallback(() => {
-    setQuote((current) => pickRandomGoldQuote(current.id));
-  }, []);
+  const [quote] = useState<GoldQuote>(() => pickRandomGoldQuote());
 
   return (
     <figure className="home-gold-wisdom" aria-label="Gold wisdom">
@@ -26,9 +22,6 @@ export function GoldWisdomQuote() {
         <cite className="home-gold-wisdom__author">{quote.author}</cite>
         {quote.source ? <span className="home-gold-wisdom__source">{quote.source}</span> : null}
       </figcaption>
-      <button type="button" className="home-gold-wisdom__another" onClick={showAnother}>
-        Another quote
-      </button>
     </figure>
   );
 }

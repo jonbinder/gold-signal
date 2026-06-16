@@ -779,3 +779,56 @@
     display: grid !important;
   }
 }
+
+/* ─── Sitewide mobile polish (375–414px) ─── */
+@media (max-width: 640px) {
+  html,
+  body {
+    overflow-x: clip;
+    max-width: 100%;
+  }
+
+  .home-page,
+  .stocks-list-page,
+  .funds-page,
+  .about-page {
+    overflow-x: clip;
+  }
+
+  .home-panel-list__link {
+    min-width: 0;
+  }
+
+  .home-panel-list__secondary {
+    white-space: normal;
+    line-height: 1.35;
+  }
+
+  .home-portfolio-card__firm {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
+  }
+
+  .home-dashboard {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .whats-new-capture input,
+  .whats-new-capture textarea,
+  .whats-new-capture__submit {
+    min-height: 44px;
+    font-size: 1rem;
+  }
+
+  .whats-new-capture__submit {
+    min-height: 48px;
+  }
+
+  .funds-main,
+  .funds-hero__inner {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}

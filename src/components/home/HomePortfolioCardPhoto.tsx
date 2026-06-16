@@ -35,7 +35,7 @@ export function HomePortfolioCardPhoto({ name, slug, priority = false }: HomePor
         alt=""
         fill
         priority={priority}
-        sizes="(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 33vw"
+        sizes="(max-width: 640px) 480px, (max-width: 1024px) 360px, 400px"
         onError={() => setFailed(true)}
         className="home-portfolio-card__image"
       />

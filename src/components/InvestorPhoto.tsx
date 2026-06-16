@@ -101,7 +101,7 @@ export function InvestorPhoto({ investor, size, className = "", priority = false
         width={pixelSize}
         height={pixelSize}
         priority={priority}
-        sizes={`${pixelSize}px`}
+        sizes={size === "hero" ? "(max-width: 640px) 180px, 180px" : "56px"}
         onError={() => setFailed(true)}
         style={{
           width: "100%",

@@ -4,10 +4,9 @@ import { StocksTable } from "@/components/stocks/StocksTable";
 import { getCachedDisplayStocks } from "@/lib/stock-cache";
 import "@/app/stocks-list.css";
 
-const pageTitle =
-  "Gold & silver stocks — insider & institutional activity from SEC filings | GoldSignal";
+const pageTitle = "Gold & silver stocks — market data from SEC filings | GoldSignal";
 const pageDescription =
-  "Browse gold and silver mining and royalty stocks with recent SEC Form 4 insider activity, tracked institutional holders from 13F filings, and market cap — sourced from public filings.";
+  "Browse gold and silver mining and royalty stocks with market cap, price, and daily change — sourced from public filings and cached market data. No scores or predictions.";
 
 export const metadata: Metadata = {
   title: pageTitle,

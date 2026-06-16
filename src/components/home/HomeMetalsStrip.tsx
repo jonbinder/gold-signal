@@ -1,4 +1,5 @@
-import type { CachedMetalsMarket } from "@/lib/metals-market-read";
+import type { SpotSnapshot } from "@/lib/spot-market";
+import { formatSpotFreshnessLabel } from "@/lib/spot-market";
 
 function fmtUsd(value: number | null, kind: "gold" | "silver" | "default" = "default"): string {
   if (value == null || !Number.isFinite(value)) return "—";
@@ -25,19 +26,6 @@ function fmtRatio(value: number | null): string {
   return value.toFixed(2);
 }
 
-function fmtAsOf(iso: string | null): string | null {
-  if (!iso) return null;
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return null;
-  return d.toLocaleString("en-US", {
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-    timeZoneName: "short",
-  });
-}
-
 type StatProps = {
   label: string;
   value: string;
@@ -57,37 +45,44 @@ function Stat({ label, value, change, labelClass = "" }: StatProps) {
   );
 }
 
-export function HomeMetalsStrip({ metals }: { metals: CachedMetalsMarket | null }) {
-  const goldChg = fmtChg(metals?.goldChangePct ?? null);
-  const silverChg = fmtChg(metals?.silverChangePct ?? null);
-  const ratioChg = fmtChg(metals?.ratioChangePct ?? null);
-  const asOf = fmtAsOf(metals?.updatedAt ?? null);
+export function HomeMetalsStrip({ spot }: { spot: SpotSnapshot | null }) {
+  const goldChg = fmtChg(spot?.goldChangePct ?? null);
+  const silverChg = fmtChg(spot?.silverChangePct ?? null);
+  const ratioChg = fmtChg(spot?.ratioChangePct ?? null);
+  const freshness = spot
+    ? formatSpotFreshnessLabel(spot.asOf, spot.marketState, spot.delayed)
+    : null;
 
   return (
     <section className="home-metals-strip" aria-label="Gold and silver market snapshot">
       <div className="home-metals-strip__inner">
         <Stat
-          label={metals?.goldLabel ?? "Gold (USD/oz)"}
-          value={fmtUsd(metals?.goldPrice ?? null, "gold")}
+          label={spot?.goldLabel ?? "Gold (USD/oz)"}
+          value={fmtUsd(spot?.gold ?? null, "gold")}
           change={goldChg}
           labelClass="home-metals-strip__label--gold"
         />
         <Stat
-          label={metals?.silverLabel ?? "Silver (USD/oz)"}
-          value={fmtUsd(metals?.silverPrice ?? null, "silver")}
+          label={spot?.silverLabel ?? "Silver (USD/oz)"}
+          value={fmtUsd(spot?.silver ?? null, "silver")}
           change={silverChg}
           labelClass="home-metals-strip__label--silver"
         />
         <Stat
           label="Gold / Silver ratio"
-          value={fmtRatio(metals?.goldSilverRatio ?? null)}
+          value={fmtRatio(spot?.ratio ?? null)}
           change={ratioChg}
           labelClass="home-metals-strip__label--ratio"
         />
       </div>
-      <p className="home-metals-strip__note mono">
+      <p className="home-metals-strip__note tabular-nums">
         Physical gold &amp; silver spot · ratio = gold ÷ silver
-        {asOf ? ` · as of ${asOf}` : ""}
+        {freshness ? (
+          <span className={spot?.delayed ? "home-metals-strip__freshness--delayed" : ""}>
+            {" "}
+            · {freshness}
+          </span>
+        ) : null}
       </p>
     </section>
   );

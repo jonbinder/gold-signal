@@ -11,10 +11,6 @@ import type {
   InvestorType,
 } from "@/lib/investors/types";
 import { isTrackedInvestorSlug } from "@/lib/investors/tracked-roster";
-import {
-  loadInvestorLastUpdatedAt,
-  sortInvestorsByRecentUpdate,
-} from "@/lib/investors/last-updated";
 
 export const INVESTORS_LIST_CACHE_TAG = "investors-list";
 
@@ -37,8 +33,15 @@ type InvestorRow = {
 
 type InvestorListRow = Pick<
   InvestorRow,
-  "id" | "slug" | "name" | "investor_type" | "title_role" | "photo_url" | "focus_note" | "sort_order"
->;
+  | "id"
+  | "slug"
+  | "name"
+  | "investor_type"
+  | "title_role"
+  | "photo_url"
+  | "focus_note"
+  | "sort_order"
+> & { updated_at: string | null };
 
 type PositionRow = {
   id: string;
@@ -74,7 +77,7 @@ const INVESTOR_SELECT =
   "id, slug, name, investor_type, title_role, bio, photo_url, website, website_url, cik, focus_note, context_note, sort_order, is_published";
 
 const INVESTOR_LIST_SELECT =
-  "id, slug, name, investor_type, title_role, photo_url, focus_note, sort_order";
+  "id, slug, name, investor_type, title_role, photo_url, focus_note, sort_order, updated_at";
 
 function getInvestorsClient(): {
   client: SupabaseClient | null;
@@ -288,17 +291,13 @@ async function loadAuto13fPositions(
 }
 
 async function loadPublishedInvestorsListSorted(): Promise<InvestorListItem[]> {
-  const supabase = getAnonClient();
   const investors = await loadPublishedInvestorsListRows();
-  if (investors.length === 0 || !supabase) return investors;
-
-  const lastUpdated = await loadInvestorLastUpdatedAt(supabase, investors);
-  const withTimestamps = investors.map((investor) => ({
-    ...investor,
-    updatedAt: lastUpdated.get(investor.id) ?? "",
-  }));
-
-  return sortInvestorsByRecentUpdate(withTimestamps, lastUpdated);
+  return [...investors].sort((a, b) => {
+    const aTs = a.updatedAt ?? "";
+    const bTs = b.updatedAt ?? "";
+    if (aTs !== bTs) return bTs.localeCompare(aTs);
+    return a.name.localeCompare(b.name);
+  });
 }
 
 async function loadPublishedInvestorsListRows(): Promise<InvestorListItem[]> {
@@ -317,7 +316,11 @@ async function loadPublishedInvestorsListRows(): Promise<InvestorListItem[]> {
     return [];
   }
 
-  const investors = ((data ?? []) as InvestorListRow[]).map(mapListInvestor);
+  const rows = (data ?? []) as InvestorListRow[];
+  const investors = rows.map((row) => ({
+    ...mapListInvestor(row),
+    updatedAt: row.updated_at ?? "",
+  }));
   if (investors.length === 0) return [];
 
   const ids = investors.map((i) => i.id);
@@ -348,14 +351,13 @@ async function loadPublishedInvestorsListRows(): Promise<InvestorListItem[]> {
       manualPositionCount,
       auto13fPositionCount,
       positionCount: manualPositionCount + auto13fPositionCount,
-      updatedAt: "",
     };
   });
 }
 
 const loadPublishedInvestorsListCached = unstable_cache(
   loadPublishedInvestorsListSorted,
-  ["investors-list-published-v4"],
+  ["investors-list-published-v5"],
   { revalidate: 3600, tags: [INVESTORS_LIST_CACHE_TAG] },
 );
 

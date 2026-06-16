@@ -735,3 +735,114 @@
   padding: 0.62rem 0.72rem;
   min-width: 6.8rem;
 }
+
+/* —— Modernization: search, sticky header, returns, skeletons —— */
+.stocks-list-search {
+  width: min(100%, 16rem);
+  border: 1px solid var(--border-dim);
+  border-radius: 6px;
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  padding: 0.45rem 0.65rem;
+}
+
+.stocks-list-toolbar__group--search {
+  margin-left: auto;
+}
+
+.stocks-list-table-wrap {
+  overflow: auto;
+  border: 1px solid var(--border-dim);
+  border-radius: 8px;
+  background: var(--bg-surface);
+}
+
+.stocks-list-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: #0f172a;
+  color: #94a3b8;
+}
+
+.stocks-list-table__row:hover td {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.stocks-list-table__row td {
+  padding: 0.85rem 0.75rem;
+  border-bottom: 1px solid var(--border-dim);
+  background: var(--bg-surface);
+}
+
+.stocks-table__na {
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+}
+
+.stocks-return-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-weight: 600;
+  font-size: 0.8125rem;
+}
+
+.stocks-return-cell--up {
+  color: #6ee7b7;
+}
+
+.stocks-return-cell--down {
+  color: #fca5a5;
+}
+
+.stocks-return-cell--flat,
+.stocks-return-cell--na {
+  color: var(--text-muted);
+}
+
+.mini-sparkline--up {
+  color: #6ee7b7;
+}
+
+.mini-sparkline--down {
+  color: #fca5a5;
+}
+
+.mini-sparkline--flat {
+  color: #94a3b8;
+}
+
+.stocks-list-empty__title {
+  font-weight: 600;
+  margin: 0 0 0.35rem;
+}
+
+.stocks-list-empty__body {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  max-width: 36rem;
+}
+
+.stocks-table-skeleton__toolbar {
+  height: 2.5rem;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+}
+
+.stocks-table-skeleton__head,
+.stocks-table-skeleton__row {
+  display: grid;
+  grid-template-columns: 0.8fr 2fr 1fr 1fr 1fr 0.7fr 0.7fr 0.8fr;
+  gap: 0.5rem;
+  margin-bottom: 0.45rem;
+}
+
+.stocks-table-skeleton__th,
+.stocks-table-skeleton__cell {
+  height: 2rem;
+  border-radius: 4px;
+}

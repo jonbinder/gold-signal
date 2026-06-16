@@ -2,26 +2,12 @@ import "./globals.css";
 import "./mobile.css";
 
 import type { Metadata } from "next";
-import { Fraunces, Inter_Tight, Newsreader } from "next/font/google";
+import { Inter } from "next/font/google";
 import { cn } from "@/lib/utils";
 
-const interTight = Inter_Tight({
+const inter = Inter({
   subsets: ["latin"],
-  variable: "--font-body-loaded",
-  display: "swap",
-});
-
-const fraunces = Fraunces({
-  subsets: ["latin"],
-  variable: "--font-display-loaded",
-  weight: ["600"],
-  display: "swap",
-});
-
-const newsreader = Newsreader({
-  subsets: ["latin"],
-  variable: "--font-reading-loaded",
-  weight: ["400", "500"],
+  variable: "--font-sans-loaded",
   display: "swap",
 });
 
@@ -42,10 +28,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html
-      lang="en"
-      className={cn(interTight.variable, fraunces.variable, newsreader.variable, "scroll-smooth")}
-    >
+    <html lang="en" className={cn(inter.variable, "scroll-smooth")}>
       <body>{children}</body>
     </html>
   );

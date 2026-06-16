@@ -1,13 +1,12 @@
 /* Shared polish — heroes, compliance, cross-page rhythm */
 
 .hero-tagline {
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-size: clamp(1rem, 2.5vw, 1.125rem);
-  font-weight: 600;
-  font-style: italic;
+  font-weight: 500;
   color: #e2e8f0;
   margin: 0 0 0.5rem;
-  line-height: 1.3;
+  line-height: 1.4;
 }
 
 .page-compliance {
@@ -46,8 +45,8 @@
 
 .footer__tagline {
   margin: 0.35rem 0 0;
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-size: 0.9375rem;
-  font-style: italic;
+  font-weight: 500;
   color: #cbd5e1;
 }

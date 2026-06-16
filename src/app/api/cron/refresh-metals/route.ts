@@ -23,6 +23,7 @@ export async function GET(req: Request) {
 
   const result = await refreshMetalsMarketCache();
   if (result.ok) {
+    revalidateTag("spot-prices");
     revalidateTag("metals-market");
     revalidatePath("/");
     console.info("[cron/refresh-metals] cache updated");

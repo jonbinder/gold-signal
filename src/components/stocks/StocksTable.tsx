@@ -6,6 +6,7 @@ import { StockLogo } from "@/components/stocks/StockLogo";
 import { TopMoversPanel } from "@/components/stocks/TopMoversPanel";
 import { stockPath } from "@/lib/paths";
 import type { CachedDisplayStock } from "@/lib/stock-cache";
+import { MiniReturnSparkline, formatReturnPct } from "@/components/stocks/MiniReturnSparkline";
 import { formatHolderCount, formatPctAbove52WeekLow } from "@/lib/stock-facts-format";
 
 type SortKey =
@@ -15,7 +16,8 @@ type SortKey =
   | "marketCap"
   | "pctAbove52WeekLow"
   | "peRatio"
-  | "forwardPeRatio";
+  | "forwardPeRatio"
+  | "return3mPct";
 
 type ListView = "universe" | "movers" | "value";
 
@@ -42,6 +44,7 @@ const MOBILE_SORT_OPTIONS: Array<{ key: SortKey; label: string }> = [
   { key: "pctAbove52WeekLow", label: "% Off 52W Low" },
   { key: "peRatio", label: "PE" },
   { key: "forwardPeRatio", label: "Fwd PE" },
+  { key: "return3mPct", label: "3M %" },
   { key: "holderCount", label: "Investors" },
   { key: "ticker", label: "Ticker A-Z" },
 ];
@@ -66,6 +69,7 @@ function sortValue(stock: CachedDisplayStock, key: SortKey): number | string {
   if (key === "pctAbove52WeekLow") return stock.pctAbove52WeekLow ?? -1;
   if (key === "peRatio") return stock.peRatio ?? -1;
   if (key === "forwardPeRatio") return stock.forwardPeRatio ?? -1;
+  if (key === "return3mPct") return stock.return3mPct ?? -9999;
   return stock.marketCap ?? -1;
 }
 
@@ -73,9 +77,18 @@ export function StocksTable({ stocks }: StocksTableProps) {
   const [listView, setListView] = useState<ListView>("universe");
   const [sortKey, setSortKey] = useState<SortKey>("marketCap");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+  const [search, setSearch] = useState("");
+
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return stocks;
+    return stocks.filter(
+      (s) => s.ticker.toLowerCase().includes(q) || s.name.toLowerCase().includes(q),
+    );
+  }, [stocks, search]);
 
   const sorted = useMemo(() => {
-    const list = [...stocks];
+    const list = [...filtered];
     if (listView === "value") {
       list.sort((a, b) => valueScreenScore(a) - valueScreenScore(b));
       return list;
@@ -101,7 +114,7 @@ export function StocksTable({ stocks }: StocksTableProps) {
         : (av as number) - (bv as number);
     });
     return list;
-  }, [stocks, sortKey, sortDir, listView]);
+  }, [filtered, sortKey, sortDir, listView]);
 
   const setSort = (key: SortKey) => {
     if (listView === "value") setListView("universe");
@@ -161,12 +174,38 @@ export function StocksTable({ stocks }: StocksTableProps) {
               Value preset
             </button>
           ) : null}
+          <div className="stocks-list-toolbar__group stocks-list-toolbar__group--search">
+            <label className="stocks-list-toolbar__label" htmlFor="stocks-search">
+              Search
+            </label>
+            <input
+              id="stocks-search"
+              type="search"
+              className="stocks-list-search"
+              placeholder="Ticker or company…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              autoComplete="off"
+            />
+          </div>
+          <p className="stocks-list-toolbar__count tabular-nums">
+            {sorted.length} of {stocks.length}
+          </p>
         </div>
 
         {listView === "movers" ? (
-          <TopMoversPanel stocks={stocks} />
+          <TopMoversPanel stocks={filtered} />
         ) : sorted.length === 0 ? (
-          <p className="stocks-list-empty">No tracked stocks yet.</p>
+          <div className="stocks-list-empty" role="status">
+            <p className="stocks-list-empty__title">
+              {search.trim() ? "No matches for that search" : "No tracked stocks yet"}
+            </p>
+            <p className="stocks-list-empty__body">
+              {search.trim()
+                ? "Try a ticker symbol or part of the company name. The universe is limited to precious-metals names we track from public filings."
+                : "Stock rows populate after the daily cache refresh from our tracked universe."}
+            </p>
+          </div>
         ) : (
           <>
             {listView === "value" ? (
@@ -214,6 +253,7 @@ export function StocksTable({ stocks }: StocksTableProps) {
                   <col className="stocks-list-table__col--company" />
                   <col className="stocks-list-table__col--cap" />
                   <col className="stocks-list-table__col--pct52" />
+                  <col className="stocks-list-table__col--return" />
                   <col className="stocks-list-table__col--pe" />
                   <col className="stocks-list-table__col--fpe" />
                   <col className="stocks-list-table__col--holders" />
@@ -251,6 +291,14 @@ export function StocksTable({ stocks }: StocksTableProps) {
                       dir={sortDir}
                       onSort={setSort}
                       className="stocks-list-table__th--pct52"
+                    />
+                    <SortHeader
+                      label="3M %"
+                      sortKey="return3mPct"
+                      active={sortKey}
+                      dir={sortDir}
+                      onSort={setSort}
+                      className="stocks-list-table__th--return"
                     />
                     <SortHeader
                       label="PE"
@@ -332,10 +380,11 @@ function SortHeader({
 function StockTableRow({ stock }: { stock: CachedDisplayStock }) {
   const holders = formatHolderCount(stock.famousHolderCount);
   const marketCap = formatMarketCap(stock.marketCap);
+  const ret3m = formatReturnPct(stock.return3mPct);
 
   return (
     <tr className="stocks-list-table__row">
-      <td className="stocks-list-table__ticker">
+      <td className="stocks-list-table__ticker tabular-nums">
         <Link href={stockPath(stock.ticker)} className="stocks-list-table__link">
           {stock.ticker}
         </Link>
@@ -353,16 +402,36 @@ function StockTableRow({ stock }: { stock: CachedDisplayStock }) {
           </span>
         </Link>
       </td>
-      <td className="stocks-list-table__num stocks-list-table__num--cap">{marketCap}</td>
-      <td className="stocks-list-table__num stocks-list-table__num--pct52">
+      <td className="stocks-list-table__num stocks-list-table__num--cap tabular-nums">{marketCap}</td>
+      <td className="stocks-list-table__num stocks-list-table__num--pct52 tabular-nums">
         {formatPctAbove52WeekLow(stock.pctAbove52WeekLow)}
       </td>
-      <td className="stocks-list-table__num stocks-list-table__num--pe">{formatRatio(stock.peRatio)}</td>
-      <td className="stocks-list-table__num stocks-list-table__num--fpe">
-        {formatRatio(stock.forwardPeRatio)}
+      <td className="stocks-list-table__num stocks-list-table__num--return tabular-nums">
+        <span className={`stocks-return-cell stocks-return-cell--${ret3m.tone}`}>
+          <MiniReturnSparkline
+            return1mPct={stock.return1mPct}
+            return3mPct={stock.return3mPct}
+            return1yPct={stock.return1yPct}
+          />
+          <span>{ret3m.text}</span>
+        </span>
       </td>
-      <td className="stocks-list-table__num stocks-list-table__num--holders">
-        {holders === "—" ? <span className="stocks-table__na">—</span> : holders}
+      <td className="stocks-list-table__num stocks-list-table__num--pe tabular-nums">
+        {formatRatio(stock.peRatio) === "—" ? (
+          <span className="stocks-table__na">N/A</span>
+        ) : (
+          formatRatio(stock.peRatio)
+        )}
+      </td>
+      <td className="stocks-list-table__num stocks-list-table__num--fpe tabular-nums">
+        {formatRatio(stock.forwardPeRatio) === "—" ? (
+          <span className="stocks-table__na">N/A</span>
+        ) : (
+          formatRatio(stock.forwardPeRatio)
+        )}
+      </td>
+      <td className="stocks-list-table__num stocks-list-table__num--holders tabular-nums">
+        {holders === "—" ? <span className="stocks-table__na">N/A</span> : holders}
       </td>
     </tr>
   );

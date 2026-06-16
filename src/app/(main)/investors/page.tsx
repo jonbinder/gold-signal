@@ -3,6 +3,7 @@ import { PageCompliance } from "@/components/layout/PageCompliance";
 import { InvestorsList } from "@/components/investors/InvestorsList";
 import { getPublishedInvestorsList } from "@/lib/investors/queries";
 import "@/app/funds.css";
+import "@/app/home-dashboard.css";
 
 const pageTitle = "Investors — sourced notable gold & silver positions | GoldSignal";
 const pageDescription =

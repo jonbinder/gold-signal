@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { InvestorImage } from "@/components/investors/InvestorImage";
+import { HomePortfolioCardPhoto } from "@/components/home/HomePortfolioCardPhoto";
 import { investorPath } from "@/lib/paths";
 import type { InvestorListItem } from "@/lib/investors/types";
 
@@ -9,47 +9,46 @@ type Props = {
 
 export function InvestorsList({ investors }: Props) {
   if (investors.length === 0) {
-    return <p className="funds-empty">No published investors yet.</p>;
+    return (
+      <div className="investors-empty" role="status">
+        <h2 className="investors-empty__title">No tracked investors yet</h2>
+        <p className="investors-empty__body">
+          Curated investors and funds appear here once positions are synced from SEC filings and our
+          sourced research sheet. Check back after the next data refresh, or browse{" "}
+          <Link href="/stocks">gold &amp; silver stocks</Link> in the meantime.
+        </p>
+      </div>
+    );
   }
 
   return (
-    <ul className="funds-grid">
-      {investors.map((inv) => (
-        <li key={inv.id}>
-          <Link href={investorPath(inv.slug)} className="funds-card">
-            <div className="investor-card__head">
-              {inv.photoUrl ? (
-                <InvestorImage
-                  src={inv.photoUrl}
-                  alt=""
-                  width={56}
-                  height={56}
-                  sizes="56px"
-                  className="investor-card__photo"
-                />
-              ) : (
-                <span className="investor-card__photo investor-card__photo--placeholder" aria-hidden>
-                  {inv.name
-                    .split(" ")
-                    .map((p) => p[0])
-                    .slice(0, 2)
-                    .join("")
-                    .toUpperCase()}
-                </span>
-              )}
-              <span className={`investor-type-badge investor-type-badge--${inv.type}`}>
-                {inv.type === "fund" ? "Fund" : "Individual"}
-              </span>
-            </div>
-            <h2 className="funds-card__name">{inv.name}</h2>
-            {inv.titleRole ? <p className="funds-card__meta">{inv.titleRole}</p> : null}
-            {inv.focusNote ? <p className="funds-card__meta">{inv.focusNote}</p> : null}
-            <p className="funds-card__stats">
-              {inv.positionCount} tracked position{inv.positionCount === 1 ? "" : "s"}
-            </p>
-          </Link>
-        </li>
-      ))}
+    <ul className="investors-portfolio-grid">
+      {investors.map((inv, index) => {
+        const role = inv.titleRole ?? inv.focusNote;
+        const stockLabel = `${inv.positionCount} tracked position${inv.positionCount === 1 ? "" : "s"}`;
+
+        return (
+          <li key={inv.id}>
+            <article className="home-portfolio-card investors-portfolio-card">
+              <Link href={investorPath(inv.slug)} className="investors-portfolio-card__link">
+                <HomePortfolioCardPhoto name={inv.name} slug={inv.slug} priority={index < 6} />
+              </Link>
+              <div className="home-portfolio-card__body">
+                <Link href={investorPath(inv.slug)} className="home-portfolio-card__name">
+                  {inv.name}
+                </Link>
+                {role ? <p className="home-portfolio-card__firm">{role}</p> : null}
+                <p className="investors-portfolio-card__meta tabular-nums">
+                  <span className={`investor-type-badge investor-type-badge--${inv.type}`}>
+                    {inv.type === "fund" ? "Fund" : "Individual"}
+                  </span>
+                  <span className="investors-portfolio-card__count">{stockLabel}</span>
+                </p>
+              </div>
+            </article>
+          </li>
+        );
+      })}
     </ul>
   );
 }

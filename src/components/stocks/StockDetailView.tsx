@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
+import { FreshnessBadge } from "@/components/ui/FreshnessBadge";
 import { ChevronLeft } from "lucide-react";
 import { StockLogo } from "@/components/stocks/StockLogo";
 import { InsiderActivityList } from "@/components/stocks/InsiderActivityList";
@@ -110,8 +111,13 @@ export function StockDetailView({ model }: { model: StockDetailPageModel }) {
         <SectionShell
           id="insider"
           title="Recent insider activity"
-          subtitle={`SEC Form 4 · non-derivative common stock${asOf ? ` · as of ${asOf}` : ""}`}
+          subtitle="SEC Form 4 · non-derivative common stock"
         >
+          {asOf ? (
+            <p className="stock-detail-freshness">
+              <FreshnessBadge label={`Form 4 as of ${asOf}`} />
+            </p>
+          ) : null}
           {charts.hasPriceChart ? (
             <div className="stock-detail-viz-block">
               <h3 className="stock-detail-viz-label">Share price (12 mo)</h3>

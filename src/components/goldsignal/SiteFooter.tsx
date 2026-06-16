@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { GoldWisdomQuote } from "@/components/home/GoldWisdomQuote";
 import { SITE_NAV_LINKS } from "@/lib/goldsignal/nav-links";
 import { COMPLIANCE_LINE, SITE_TAGLINE } from "@/lib/site";
 
@@ -18,14 +17,14 @@ export function SiteFooter() {
                 <Link href={link.href}>{link.label}</Link>
               </li>
             ))}
+            <li>
+              <Link href="/#portfolio-review">Get the readout</Link>
+            </li>
           </ul>
         </nav>
-        <div className="footer__quote">
-          <GoldWisdomQuote />
-        </div>
       </div>
       <p className="footer__source">{COMPLIANCE_LINE}</p>
-      <p className="footer__copy mono">&copy; 2026 GoldSignal.ai. All rights reserved.</p>
+      <p className="footer__copy tabular-nums">&copy; 2026 GoldSignal.ai. All rights reserved.</p>
     </footer>
   );
 }

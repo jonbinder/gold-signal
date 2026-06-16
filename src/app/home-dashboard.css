@@ -86,6 +86,11 @@
   letter-spacing: 0.04em;
 }
 
+.home-metals-strip__freshness--delayed {
+  color: #94a3b8;
+  font-style: italic;
+}
+
 .home-masthead {
   background: #11151f;
   color: #f1f5f9;
@@ -197,7 +202,7 @@
 }
 
 .home-gold-wisdom__mark {
-  font-family: var(--font-reading, var(--font-display));
+  font-family: var(--font-body);
   font-size: 1.15rem;
   line-height: 1;
   font-weight: 500;
@@ -224,7 +229,7 @@
 
 .home-gold-wisdom__quote p {
   margin: 0;
-  font-family: var(--font-reading, Georgia, serif);
+  font-family: var(--font-body);
   font-size: clamp(0.88rem, 2.4vw, 0.95rem);
   font-style: italic;
   font-weight: 400;

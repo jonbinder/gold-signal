@@ -4,7 +4,7 @@ import { SiteFooter } from "@/components/goldsignal/SiteFooter";
 import { HomeDashboard } from "@/components/home/HomeDashboard";
 import { HomeMetalsStrip } from "@/components/home/HomeMetalsStrip";
 import { getHomeDashboard } from "@/lib/home/dashboard";
-import { getCachedMetalsMarket } from "@/lib/metals-market-read";
+import { getSpotSnapshot } from "@/lib/spot-market";
 import { COMPLIANCE_LINE } from "@/lib/site";
 import "./home-dashboard.css";
 import "./whats-new.css";
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
   },
 };
 
-export const revalidate = 3600;
+export const revalidate = 600;
 
 const structuredData = {
   "@context": "https://schema.org",
@@ -44,7 +44,7 @@ const structuredData = {
 };
 
 export default async function HomePage() {
-  const [dashboard, metals] = await Promise.all([getHomeDashboard(), getCachedMetalsMarket()]);
+  const [dashboard, spot] = await Promise.all([getHomeDashboard(), getSpotSnapshot()]);
 
   return (
     <>
@@ -56,7 +56,7 @@ export default async function HomePage() {
       <SiteNav />
 
       <main className="home-page home-page--dashboard">
-        <HomeMetalsStrip metals={metals} />
+        <HomeMetalsStrip spot={spot} />
         <HomeDashboard model={dashboard} />
         <p className="home-dashboard-footer-note">{COMPLIANCE_LINE}</p>
       </main>

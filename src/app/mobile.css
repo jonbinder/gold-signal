@@ -27,7 +27,7 @@
   }
 
   body {
-    font-family: var(--font-body-loaded), "DM Sans", system-ui, sans-serif;
+    font-family: var(--font-sans-loaded), "DM Sans", system-ui, sans-serif;
     background: var(--bg-surface);
     color: var(--text-primary);
   }
@@ -171,7 +171,7 @@
   }
 
   .nav__overlay-links a {
-    font-family: var(--font-display-loaded), "Playfair Display", serif;
+    font-family: var(--font-sans-loaded), "Playfair Display", serif;
     font-size: 2rem;
     font-weight: 700;
     color: var(--text-primary);
@@ -216,7 +216,7 @@
   }
 
   .hero__eyebrow {
-    font-family: var(--font-body-loaded), "DM Sans", sans-serif;
+    font-family: var(--font-sans-loaded), "DM Sans", sans-serif;
     font-size: 11px;
     letter-spacing: 0.12em;
     text-transform: uppercase;
@@ -230,7 +230,7 @@
   }
 
   .hero__title {
-    font-family: var(--font-display-loaded), "Playfair Display", serif;
+    font-family: var(--font-sans-loaded), "Playfair Display", serif;
     font-size: clamp(32px, 9vw, 42px);
     line-height: 1.15;
     margin-bottom: 16px;
@@ -283,7 +283,7 @@
   }
 
   .hero__stat-value {
-    font-family: var(--font-body-loaded), "DM Sans", sans-serif !important;
+    font-family: var(--font-sans-loaded), "DM Sans", sans-serif !important;
     font-size: 22px;
     font-weight: 700;
     color: var(--text-primary);
@@ -335,7 +335,7 @@
   }
 
   .section-header--hub .section-header__title {
-    font-family: var(--font-display-loaded), "Playfair Display", serif;
+    font-family: var(--font-sans-loaded), "Playfair Display", serif;
     font-size: 26px;
     font-weight: 700;
     color: var(--text-primary);
@@ -387,7 +387,7 @@
   }
 
   .hub-card__title {
-    font-family: var(--font-body-loaded), "DM Sans", sans-serif;
+    font-family: var(--font-sans-loaded), "DM Sans", sans-serif;
     font-size: 15px;
     font-weight: 600;
     color: var(--text-primary);
@@ -430,7 +430,7 @@
   }
 
   .section-header--row .section-header__title {
-    font-family: var(--font-display-loaded), "Playfair Display", serif;
+    font-family: var(--font-sans-loaded), "Playfair Display", serif;
     font-size: 22px;
     font-weight: 700;
     margin: 0;
@@ -504,7 +504,7 @@
   }
 
   .pill--mobile {
-    font-family: var(--font-body-loaded), "DM Sans", sans-serif;
+    font-family: var(--font-sans-loaded), "DM Sans", sans-serif;
     font-size: 10px;
     font-weight: 600;
     padding: 3px 8px;
@@ -554,7 +554,7 @@
   }
 
   .rankings--preview .section-header__title {
-    font-family: var(--font-display-loaded), "Playfair Display", serif;
+    font-family: var(--font-sans-loaded), "Playfair Display", serif;
     font-size: 22px;
     color: #fff;
     margin: 0 0 6px;
@@ -589,7 +589,7 @@
   }
 
   .portfolio-review--home .section-header__title {
-    font-family: var(--font-display-loaded), "Playfair Display", serif;
+    font-family: var(--font-sans-loaded), "Playfair Display", serif;
     color: var(--text-primary);
   }
 
@@ -624,7 +624,7 @@
   }
 
   .investors-page-header .section-header__title {
-    font-family: var(--font-display-loaded), "Playfair Display", serif;
+    font-family: var(--font-sans-loaded), "Playfair Display", serif;
     font-size: 28px;
     font-weight: 700;
     color: var(--text-primary);
@@ -685,7 +685,7 @@
   }
 
   .investor-name {
-    font-family: var(--font-body-loaded), "DM Sans", sans-serif;
+    font-family: var(--font-sans-loaded), "DM Sans", sans-serif;
     font-size: 15px;
     font-weight: 600;
     color: var(--text-primary);

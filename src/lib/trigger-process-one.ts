@@ -126,6 +126,36 @@ export function triggerRefreshStocks(batch: number, origin: string): void {
   });
 }
 
+/** Cron hook: refresh metals_market_cache (uses CRON_SECRET bearer). */
+export async function invokeRefreshMetals(origin: string): Promise<void> {
+  const cronSecret = process.env.CRON_SECRET?.trim();
+  if (!cronSecret) {
+    console.warn("[trigger] CRON_SECRET not set; skipping refresh-metals");
+    return;
+  }
+
+  const url = new URL("/api/cron/refresh-metals", origin);
+  try {
+    const res = await fetch(url.toString(), {
+      method: "GET",
+      headers: { authorization: `Bearer ${cronSecret}` },
+    });
+    if (!res.ok) {
+      const body = await res.text().catch(() => "");
+      console.warn("[trigger] refresh-metals returned error", {
+        status: res.status,
+        body: body.slice(0, 300),
+      });
+      return;
+    }
+    console.info("[trigger] refresh-metals ok", { status: res.status });
+  } catch (err) {
+    console.warn("[trigger] refresh-metals fetch failed", {
+      message: err instanceof Error ? err.message : String(err),
+    });
+  }
+}
+
 /** Daily cron hook: sync Google Sheet → investor_positions (uses CRON_SECRET bearer). */
 export async function invokeSyncInvestorSheet(origin: string): Promise<void> {
   const cronSecret = process.env.CRON_SECRET?.trim();

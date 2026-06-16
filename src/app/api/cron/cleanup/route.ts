@@ -3,6 +3,7 @@ import { createSupabaseServiceClient } from "@/lib/supabase";
 import {
   getDeploymentOrigin,
   invokeProcessOne,
+  invokeRefreshMetals,
   invokeRefreshStocks,
   invokeSyncInvestorSheet,
 } from "@/lib/trigger-process-one";
@@ -74,6 +75,9 @@ export async function GET(req: Request) {
     ids: idList,
   });
 
+  await invokeRefreshMetals(origin);
+  console.info("[cron/cleanup] Invoked metals spot cache refresh");
+
   await invokeRefreshStocks(0, origin);
   console.info("[cron/cleanup] Invoked stock universe refresh batch 0");
 
@@ -84,6 +88,7 @@ export async function GET(req: Request) {
     ok: true,
     triggered: ids.size,
     submissionIds: [...ids],
+    metalsRefreshStarted: true,
     stockRefreshStarted: true,
     investorSheetSyncStarted: true,
   });

@@ -25,6 +25,19 @@ function fmtRatio(value: number | null): string {
   return value.toFixed(2);
 }
 
+function fmtAsOf(iso: string | null): string | null {
+  if (!iso) return null;
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return null;
+  return d.toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    timeZoneName: "short",
+  });
+}
+
 type StatProps = {
   label: string;
   value: string;
@@ -48,6 +61,7 @@ export function HomeMetalsStrip({ metals }: { metals: CachedMetalsMarket | null 
   const goldChg = fmtChg(metals?.goldChangePct ?? null);
   const silverChg = fmtChg(metals?.silverChangePct ?? null);
   const ratioChg = fmtChg(metals?.ratioChangePct ?? null);
+  const asOf = fmtAsOf(metals?.updatedAt ?? null);
 
   return (
     <section className="home-metals-strip" aria-label="Gold and silver market snapshot">
@@ -73,7 +87,7 @@ export function HomeMetalsStrip({ metals }: { metals: CachedMetalsMarket | null 
       </div>
       <p className="home-metals-strip__note mono">
         Physical gold &amp; silver spot · ratio = gold ÷ silver
-        {metals?.updatedAt ? ` · ${new Date(metals.updatedAt).toLocaleDateString("en-US")}` : ""}
+        {asOf ? ` · as of ${asOf}` : ""}
       </p>
     </section>
   );

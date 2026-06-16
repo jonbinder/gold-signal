@@ -1,3 +1,6 @@
+import * as dotenv from "dotenv";
+dotenv.config({ path: ".env.local" });
+
 import { refreshMetalsMarketCache } from "@/lib/metals-market-refresh";
 
 async function main() {

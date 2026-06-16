@@ -58,7 +58,7 @@ async function loadMetalsMarketFromSupabase(): Promise<CachedMetalsMarket | null
   return mapRow(data as MetalsRow | null);
 }
 
-const loadMetalsMarketCached = unstable_cache(loadMetalsMarketFromSupabase, ["metals-market-cache-v1"], {
+const loadMetalsMarketCached = unstable_cache(loadMetalsMarketFromSupabase, ["metals-market-cache-v2"], {
   revalidate: 3600,
   tags: ["metals-market"],
 });

@@ -16,6 +16,10 @@ export async function refreshMetalsMarketCache(): Promise<{ ok: boolean; error?:
   const [gold, silver] = await Promise.all([resolveGoldSpotQuote(), resolveSilverSpotQuote()]);
 
   if (!gold || !silver) {
+    console.warn("[metals-market-refresh] spot unavailable; keeping last cache", {
+      gold: Boolean(gold),
+      silver: Boolean(silver),
+    });
     return { ok: false, error: "Spot gold/silver price unavailable" };
   }
 

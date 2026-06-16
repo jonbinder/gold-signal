@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/cleanup",
       "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/cron/refresh-metals",
+      "schedule": "0 * * * *"
     }
   ],
   "functions": {
@@ -13,6 +17,9 @@
       "maxDuration": 60
     },
     "src/app/api/cron/cleanup/route.ts": {
+      "maxDuration": 60
+    },
+    "src/app/api/cron/refresh-metals/route.ts": {
       "maxDuration": 60
     },
     "src/app/api/sync-investor-sheet/route.ts": {

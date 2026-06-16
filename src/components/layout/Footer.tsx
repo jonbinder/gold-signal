@@ -7,14 +7,12 @@ const COLS = [
     links: [
       { href: "/", label: "Home" },
       { href: "/investors", label: "Investors" },
-      { href: "/stocks", label: "Stocks" },
     ],
   },
   {
     title: "Data",
     links: [
-      { href: "/stocks", label: "Portfolio companies" },
-      { href: "/investors", label: "Investors" },
+      { href: "/investors", label: "Investor profiles" },
       { href: "/signalscore", label: "How it works" },
     ],
   },

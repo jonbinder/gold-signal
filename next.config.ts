@@ -15,8 +15,9 @@ const nextConfig: NextConfig = {
   typedRoutes: true,
   async redirects() {
     return [
-      { source: "/gold-silver-stocks", destination: "/stocks", permanent: true },
-      { source: "/leaderboard", destination: "/stocks", permanent: true },
+      { source: "/stocks", destination: "/investors", permanent: true },
+      { source: "/gold-silver-stocks", destination: "/investors", permanent: true },
+      { source: "/leaderboard", destination: "/investors", permanent: true },
       { source: "/funds", destination: "/investors", permanent: false },
       { source: "/funds/:slug", destination: "/investors/:slug", permanent: false },
     ];

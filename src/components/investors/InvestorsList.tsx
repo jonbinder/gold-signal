@@ -14,8 +14,7 @@ export function InvestorsList({ investors }: Props) {
         <h2 className="investors-empty__title">No tracked investors yet</h2>
         <p className="investors-empty__body">
           Curated investors and funds appear here once positions are synced from SEC filings and our
-          sourced research sheet. Check back after the next data refresh, or browse{" "}
-          <Link href="/stocks">gold &amp; silver stocks</Link> in the meantime.
+          sourced research sheet. Check back after the next data refresh.
         </p>
       </div>
     );

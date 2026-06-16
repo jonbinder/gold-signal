@@ -7,7 +7,7 @@ import "./site-cohesion.css";
 
 export const metadata: Metadata = {
   title: "Page not found — GoldSignal.ai",
-  description: `${SITE_TAGLINE}. Browse stocks, funds, and SEC filing activity.`,
+  description: `${SITE_TAGLINE}. Browse investors and SEC filing activity.`,
 };
 
 export default function NotFound() {
@@ -19,14 +19,11 @@ export default function NotFound() {
           Page not found
         </h1>
         <p style={{ color: "var(--text-secondary)", maxWidth: "28rem", margin: "0 auto 1.5rem" }}>
-          That URL isn&apos;t in our tracked universe. Try the homepage, stocks list, or funds directory.
+          That URL isn&apos;t in our tracked universe. Try the homepage or investors directory.
         </p>
         <div style={{ display: "flex", flexWrap: "wrap", gap: "0.65rem", justifyContent: "center" }}>
           <Link href="/" className="btn btn--cta">
             Home
-          </Link>
-          <Link href="/stocks" className="btn btn--secondary">
-            Stocks
           </Link>
           <Link href="/investors" className="btn btn--secondary">
             Investors

@@ -49,15 +49,9 @@ const SITE_GUIDE = [
     detail: "A rolling view of notable insider, institutional, and large-stake activity across our tracked precious-metals universe.",
   },
   {
-    name: "Stocks",
-    href: "/stocks",
-    detail: "Browse the universe, then open any ticker for Form 4 history, 13F context, charts, and company facts.",
-  },
-  {
     name: "Investors",
     href: "/investors",
-    detail:
-      "Browse curated investors and funds with sourced notable positions, plus auto-13F holdings for tracked filers.",
+    detail: "Browse curated investors and funds with sourced notable positions from our research sheet.",
   },
   {
     name: "Free email readout",
@@ -194,8 +188,8 @@ export default function HowItWorksPage() {
             <Link href="/" className="about-btn about-btn--primary">
               What&apos;s New
             </Link>
-            <Link href="/stocks" className="about-btn about-btn--secondary">
-              Browse stocks
+            <Link href="/investors" className="about-btn about-btn--secondary">
+              Browse investors
             </Link>
           </div>
         </div>

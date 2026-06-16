@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Layers, Users } from "lucide-react";
+import { Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { PreciousMetalsBanner } from "@/components/layout/PreciousMetalsBanner";
@@ -7,7 +7,6 @@ import { BrandLogo } from "@/components/layout/BrandLogo";
 
 const NAV_LINKS = [
   { href: "/investors", label: "Investors", icon: Users },
-  { href: "/stocks", label: "Stocks", icon: Layers },
 ] as const;
 
 export function Navbar() {

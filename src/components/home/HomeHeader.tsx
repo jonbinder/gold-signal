@@ -2,7 +2,6 @@ import Link from "next/link";
 
 const NAV_LINKS = [
   { href: "/investors", label: "Investors" },
-  { href: "/stocks", label: "Stocks" },
   { href: "/signalscore", label: "How It Works" },
 ] as const;
 

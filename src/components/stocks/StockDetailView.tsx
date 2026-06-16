@@ -77,9 +77,9 @@ export function StockDetailView({ model }: { model: StockDetailPageModel }) {
     <div className="stock-detail-page">
       <header className="stock-detail-header">
         <div className="stock-detail-header__inner">
-          <Link href="/stocks" className="stock-detail-back mono">
+          <Link href="/investors" className="stock-detail-back mono">
             <ChevronLeft className="size-4" aria-hidden />
-            All stocks
+            All investors
           </Link>
 
           <div className="stock-detail-header__main">

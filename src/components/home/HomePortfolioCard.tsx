@@ -12,8 +12,10 @@ export function HomePortfolioCard({ row, priorityPhoto = false }: HomePortfolioC
   const stockLabel = `${row.stockCount} Stock${row.stockCount === 1 ? "" : "s"}`;
 
   return (
-    <article className="home-portfolio-card">
-      <HomePortfolioCardPhoto name={row.name} slug={row.slug} priority={priorityPhoto} />
+    <article className="home-portfolio-card home-portfolio-card--compact">
+      <Link href={investorPath(row.slug)} className="home-portfolio-card__photo-link" tabIndex={-1}>
+        <HomePortfolioCardPhoto name={row.name} slug={row.slug} priority={priorityPhoto} />
+      </Link>
       <div className="home-portfolio-card__body">
         <Link href={investorPath(row.slug)} className="home-portfolio-card__name">
           {row.name}

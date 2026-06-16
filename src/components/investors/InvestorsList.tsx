@@ -29,8 +29,8 @@ export function InvestorsList({ investors }: Props) {
 
         return (
           <li key={inv.id}>
-            <article className="home-portfolio-card investors-portfolio-card">
-              <Link href={investorPath(inv.slug)} className="investors-portfolio-card__link">
+            <article className="home-portfolio-card home-portfolio-card--compact investors-portfolio-card">
+              <Link href={investorPath(inv.slug)} className="home-portfolio-card__photo-link" tabIndex={-1}>
                 <HomePortfolioCardPhoto name={inv.name} slug={inv.slug} priority={index < 6} />
               </Link>
               <div className="home-portfolio-card__body">

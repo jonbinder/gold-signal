@@ -808,6 +808,12 @@
     white-space: normal;
     overflow: visible;
     text-overflow: unset;
+    -webkit-line-clamp: 2;
+  }
+
+  .home-portfolio-card__photo,
+  .home-portfolio-card__image {
+    max-height: 96px;
   }
 
   .home-dashboard {

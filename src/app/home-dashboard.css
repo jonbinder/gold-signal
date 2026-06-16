@@ -103,7 +103,13 @@
 }
 
 .home-masthead--compact {
-  padding: 1rem 0.9rem 1.1rem;
+  padding: 1rem 0.9rem 1.35rem;
+  border-bottom: none;
+  box-shadow: inset 0 -18px 20px -16px rgba(0, 0, 0, 0.35);
+}
+
+.home-page--dashboard .home-masthead--compact {
+  margin-bottom: 0;
 }
 
 .home-masthead__inner--solo {
@@ -117,7 +123,7 @@
 }
 
 .home-masthead__inner--solo .home-masthead__desc {
-  color: #94a3b8;
+  color: #d8e2ef;
   font-size: 0.875rem;
   max-width: 36rem;
 }
@@ -359,6 +365,14 @@
   max-width: 1180px;
   margin: 0 auto;
   padding: 0 1rem 2.5rem;
+  position: relative;
+  z-index: 1;
+}
+
+.home-page--dashboard .home-dashboard {
+  margin-top: -0.5rem;
+  padding-top: 0.35rem;
+  background: linear-gradient(180deg, #1c2433 0%, #e9edf2 14px, var(--bg-void) 40px);
 }
 
 @media (min-width: 640px) {
@@ -404,57 +418,91 @@
   min-height: 100%;
 }
 
+.home-page--dashboard .home-panel--portfolios.home-panel--featured {
+  border-top-left-radius: 14px;
+  border-top-right-radius: 14px;
+  padding-top: 1rem;
+  box-shadow:
+    0 -6px 18px rgba(15, 23, 42, 0.07),
+    0 1px 8px rgba(15, 23, 42, 0.04);
+}
+
 @media (max-width: 639px) {
   .home-panel--portfolios {
-    margin-left: -0.25rem;
-    margin-right: -0.25rem;
-    padding-left: 16px;
-    padding-right: 16px;
+    margin-left: 0;
+    margin-right: 0;
+    padding-left: 0.85rem;
+    padding-right: 0.85rem;
   }
 }
 
 .home-panel--portfolios .home-portfolios__title {
-  font-size: 1.25rem;
+  font-size: 1.05rem;
   font-weight: 700;
   color: #1a1a2e;
-  margin: 0 0 20px;
+  margin: 0 0 0.75rem;
 }
 
 .home-portfolio-grid {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 24px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem;
 }
 
-@media (min-width: 640px) {
+@media (min-width: 768px) {
   .home-portfolio-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.85rem;
   }
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 1100px) {
   .home-portfolio-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
   }
 }
 
 .home-portfolio-card {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 0.55rem;
+  padding: 0.55rem;
   background: #fff;
   border: 1px solid #e5e7eb;
-  border-radius: 0;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   overflow: hidden;
+  min-width: 0;
+}
+
+.home-portfolio-card__photo-link {
+  display: block;
+  flex-shrink: 0;
+  text-decoration: none;
+  line-height: 0;
 }
 
 .home-portfolio-card__photo {
   position: relative;
-  width: 100%;
-  aspect-ratio: 1 / 1;
+  width: 96px;
+  height: 96px;
+  max-width: 96px;
+  max-height: 120px;
+  flex-shrink: 0;
   background: #1a1a2e;
-  border-radius: 0;
+  border-radius: 8px;
   overflow: hidden;
+}
+
+@media (min-width: 640px) {
+  .home-portfolio-card__photo {
+    width: 108px;
+    height: 108px;
+    max-width: 108px;
+    max-height: 108px;
+  }
 }
 
 .home-portfolio-card__photo--fallback {
@@ -464,13 +512,17 @@
 }
 
 .home-portfolio-card__image {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100%;
+  max-height: 120px;
   object-fit: cover;
   object-position: center top;
 }
 
 .home-portfolio-card__initials {
   font-family: var(--font-display);
-  font-size: 2.5rem;
+  font-size: 1.35rem;
   font-weight: 600;
   color: #c9a84c;
   line-height: 1;
@@ -478,39 +530,46 @@
 }
 
 .home-portfolio-card__body {
-  padding: 0 16px 16px;
+  padding: 0;
+  min-width: 0;
+  flex: 1;
 }
 
 .home-portfolio-card__name {
   display: block;
-  margin-top: 12px;
+  margin-top: 0;
   font-family: var(--font-display);
-  font-size: 1rem;
+  font-size: 0.8125rem;
   font-weight: 600;
   color: #1a1a2e;
   text-decoration: none;
-  line-height: 1.3;
+  line-height: 1.25;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .home-portfolio-card__name:hover {
-  color: #1a1a2e;
+  color: var(--gold-700, #8b6914);
 }
 
 .home-portfolio-card__firm {
-  margin: 2px 0 0;
-  font-size: 0.8125rem;
+  margin: 0.2rem 0 0;
+  font-size: 0.6875rem;
   line-height: 1.35;
   color: #6b7280;
-  white-space: nowrap;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .home-portfolio-card__stocks {
   display: inline-block;
-  margin-top: 8px;
-  font-size: 0.8125rem;
-  font-weight: 500;
+  margin-top: 0.35rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
   color: #c9a84c;
   text-decoration: none;
 }

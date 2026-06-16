@@ -3,6 +3,9 @@
 import { useState } from "react";
 import Image from "next/image";
 
+/** Display + request size — keeps Next from serving 4K variants on phones. */
+const PHOTO_PX = 112;
+
 type HomePortfolioCardPhotoProps = {
   name: string;
   slug: string;
@@ -33,9 +36,10 @@ export function HomePortfolioCardPhoto({ name, slug, priority = false }: HomePor
       <Image
         src={src}
         alt=""
-        fill
+        width={PHOTO_PX}
+        height={PHOTO_PX}
         priority={priority}
-        sizes="(max-width: 640px) 480px, (max-width: 1024px) 360px, 400px"
+        sizes="(max-width: 640px) 128px, (max-width: 1024px) 160px, 200px"
         onError={() => setFailed(true)}
         className="home-portfolio-card__image"
       />

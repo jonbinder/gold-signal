@@ -109,7 +109,7 @@ export function InvestorDetailView({ model }: { model: InvestorDetailModel }) {
                         )}
                       </div>
                     </td>
-                    <td>{row.companyName}</td>
+                    <td>{row.companyName?.trim() || row.ticker}</td>
                     <td>
                       <p style={{ margin: 0 }}>{row.detail}</p>
                       {row.whyInteresting ? (

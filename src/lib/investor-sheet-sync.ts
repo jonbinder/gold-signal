@@ -14,13 +14,14 @@ const REQUIRED_HEADERS = [
   "as_of_date",
 ] as const;
 
-const OPTIONAL_HEADERS = ["size", "source_url", "published"] as const;
+const OPTIONAL_HEADERS = ["size", "source_url", "published", "company_name"] as const;
 
 /** Sheet header synonyms → canonical column name */
 const HEADER_SYNONYMS: Record<string, (typeof REQUIRED_HEADERS)[number] | (typeof OPTIONAL_HEADERS)[number]> = {
   date: "as_of_date",
   as_of: "as_of_date",
   pub: "published",
+  company: "company_name",
 };
 
 const POSITION_TYPE_MAP: Record<string, PositionType> = {
@@ -202,6 +203,16 @@ function companyNameForTicker(ticker: string, stockNames: Map<string, string>): 
   return stockNames.get(ticker) ?? ticker;
 }
 
+function resolveCompanyName(
+  sheetCompanyName: string,
+  ticker: string,
+  stockNames: Map<string, string>,
+): string {
+  const fromSheet = sheetCompanyName.trim();
+  if (fromSheet) return fromSheet;
+  return companyNameForTicker(ticker, stockNames);
+}
+
 function isMissingSheetSyncColumn(error: { code?: string; message?: string } | null): boolean {
   if (!error) return false;
   const msg = error.message ?? "";
@@ -338,6 +349,7 @@ export async function syncInvestorPositionsFromGoogleSheet(
       const sourceUrl = cell(row, col, "source_url") || null;
       const asOfRaw = cell(row, col, "as_of_date");
       const publishedRaw = cell(row, col, "published");
+      const companyNameRaw = cell(row, col, "company_name");
 
       if (!investorName) {
         skipped.push({ row: rowNum, reason: "missing investor" });
@@ -400,7 +412,7 @@ export async function syncInvestorPositionsFromGoogleSheet(
       const payload = {
         investor_id: investor.id,
         ticker,
-        company_name: companyNameForTicker(ticker, stockNames),
+        company_name: resolveCompanyName(companyNameRaw, ticker, stockNames),
         position_type: positionType,
         detail,
         approx_size: size || null,

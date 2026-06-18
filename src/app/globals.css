@@ -1,6 +1,11 @@
 ﻿
 @import "tailwindcss";
 
+/* GOLDSIGNAL CONTRAST STANDARDS
+   Dark bg (#11151F): text-white, text-gray-100, text-gray-200, text-yellow-500
+   NEVER on dark bg: text-gray-400 and below, text-muted-foreground (Shadcn default)
+   Light bg (white): text-gray-900, text-gray-700
+   Decorative/watermark only: opacity-5 to opacity-10 */
 /* â”€â”€ GoldSignal Â· Corporate mining theme â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 :root {
   /* Brand gold */
@@ -2614,7 +2619,7 @@ h1, h2, h3 {
   align-items: center;
   gap: 24px;
   background: var(--ink);
-  color: rgba(253, 250, 242, 0.75);
+  color: #e5e7eb;
   padding: 40px 48px 36px;
   text-align: center;
 }
@@ -2682,6 +2687,7 @@ h1, h2, h3 {
   line-height: 1.55;
   max-width: 36rem;
   margin: 0;
+  color: #e5e7eb;
 }
 
 .footer__quote {
@@ -2705,7 +2711,7 @@ h1, h2, h3 {
 .footer__copy {
   font-family: var(--font-mono);
   font-size: 12px;
-  opacity: 0.5;
+  color: #e5e7eb;
   margin: 0;
 }
 
@@ -3622,7 +3628,7 @@ select {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.09em;
-  color: #9ca3af;
+  color: #e5e7eb;
 }
 
 .nav__link:hover,
@@ -3671,7 +3677,7 @@ select {
 
 .footer {
   background: var(--navy-dark);
-  color: #d1d5db;
+  color: #e5e7eb;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
@@ -3819,7 +3825,7 @@ select {
 .funds-hero__sub,
 .stocks-list-hero__sub,
 .whats-new-hero__explainer {
-  color: #c4cad5;
+  color: #e5e7eb;
 }
 
 .investor-holdings-table {

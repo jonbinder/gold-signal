@@ -39,7 +39,7 @@ export function Footer() {
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div className="lg:col-span-1">
             <BrandLogo className="mb-3" imageClassName="max-w-[220px]" sizes="220px" />
-            <p className="max-w-xs text-sm leading-relaxed text-slate-400">
+            <p className="max-w-xs text-sm leading-relaxed text-slate-300">
               Institutional 13F coverage for gold and silver miners, royalties, and ETFs — built for serious
               precious-metals investors.
             </p>
@@ -47,7 +47,7 @@ export function Footer() {
           {COLS.map((col) => (
             <div key={col.title}>
               <h3 className="mb-4 text-xs font-bold uppercase tracking-[0.15em] text-white">{col.title}</h3>
-              <ul className="space-y-2.5 text-sm text-slate-400">
+              <ul className="space-y-2.5 text-sm text-slate-300">
                 {col.links.map((l) => (
                   <li key={l.label}>
                     <Link href={l.href} className="hover:text-gold-400">
@@ -60,12 +60,12 @@ export function Footer() {
           ))}
         </div>
         <div className="mt-12 border-t border-white/10 pt-8">
-          <div className="flex flex-col gap-4 text-center text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between sm:text-left">
+          <div className="flex flex-col gap-4 text-center text-xs text-slate-300 sm:flex-row sm:items-center sm:justify-between sm:text-left">
             <p className="font-mono uppercase tracking-wide">
               Holdings data from SEC 13F filings · Not financial advice · May be delayed up to 45 days after quarter
               end
             </p>
-            <p className="text-slate-600">© {new Date().getFullYear()} GoldSignal</p>
+            <p className="text-slate-300">© {new Date().getFullYear()} GoldSignal</p>
           </div>
         </div>
       </div>

@@ -60,7 +60,7 @@ export function WaitlistSignup() {
         </p>
 
         {submitted ? (
-          <p className="waitlist-page__confirm">You&apos;re on the list. We&apos;ll be in touch.</p>
+          <p className="waitlist-page__confirm text-white">You&apos;re on the list. We&apos;ll be in touch.</p>
         ) : (
           <>
             <form className="waitlist-form" onSubmit={handleSubmit}>

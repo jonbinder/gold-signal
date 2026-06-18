@@ -44,7 +44,7 @@ export function InvestorDetailView({ model }: { model: InvestorDetailModel }) {
     <main className="funds-page">
       <header className="funds-hero">
         <div className="funds-hero__inner funds-hero__inner--with-photo">
-          <Link href="/portfolios" className="funds-back" style={{ color: "#94a3b8" }}>
+          <Link href="/portfolios" className="funds-back">
             ← All portfolios
           </Link>
           <div className="funds-hero__profile">

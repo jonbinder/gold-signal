@@ -43,7 +43,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: #94a3b8;
+  color: #e5e7eb;
 }
 
 .home-metals-strip__label--gold {
@@ -79,14 +79,14 @@
 
 .home-metals-strip__chg--flat,
 .home-metals-strip__chg--na {
-  color: #94a3b8;
+  color: #e5e7eb;
 }
 
 .home-metals-strip__note {
   max-width: 1180px;
   margin: 0.35rem auto 0;
   font-size: 0.625rem;
-  color: #64748b;
+  color: #e5e7eb;
   letter-spacing: 0.04em;
 }
 
@@ -177,7 +177,7 @@
   max-width: 36rem;
   font-size: clamp(0.9rem, 2.4vw, 0.94rem);
   line-height: 1.5;
-  color: #b8c5d6;
+  color: #e5e7eb;
 }
 
 .home-masthead__quote-slot .home-gold-wisdom {

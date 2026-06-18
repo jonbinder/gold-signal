@@ -837,4 +837,38 @@
     padding-left: 1rem;
     padding-right: 1rem;
   }
+
+  /* Dark-bg readable text on mobile */
+  .funds-filter-note,
+  .funds-filter-note--investors,
+  .investor-bio-section__text,
+  .funds-empty,
+  .funds-back {
+    color: #e5e7eb;
+  }
+
+  .funds-hero__title,
+  .funds-hero__title--investors,
+  .stocks-list-hero__title,
+  .about-hero__title,
+  .waitlist-page__title {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .funds-table-wrap,
+  .stocks-list-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .funds-hero__profile {
+    min-width: 0;
+  }
+
+  .footer__source,
+  .footer__copy {
+    color: #e5e7eb;
+    opacity: 1;
+  }
 }

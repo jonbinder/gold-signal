@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { HomePortfolioCardPhoto } from "@/components/home/HomePortfolioCardPhoto";
+import { PositionCountLabel } from "@/components/investors/PositionCountLabel";
 import { investorPath } from "@/lib/paths";
 import type { InvestorListItem } from "@/lib/investors/types";
 
@@ -24,7 +25,6 @@ export function InvestorsList({ investors }: Props) {
     <ul className="investors-portfolio-grid">
       {investors.map((inv, index) => {
         const role = inv.titleRole ?? inv.focusNote;
-        const stockLabel = `${inv.positionCount} tracked position${inv.positionCount === 1 ? "" : "s"}`;
 
         return (
           <li key={inv.id}>
@@ -47,7 +47,9 @@ export function InvestorsList({ investors }: Props) {
                   <span className={`investor-type-badge investor-type-badge--${inv.type}`}>
                     {inv.type === "fund" ? "Fund" : "Individual"}
                   </span>
-                  <span className="investors-portfolio-card__count">{stockLabel}</span>
+                  <span className="investors-portfolio-card__count">
+                    <PositionCountLabel count={inv.positionCount} />
+                  </span>
                 </p>
               </div>
             </article>

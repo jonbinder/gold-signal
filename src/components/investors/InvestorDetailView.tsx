@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { InvestorPhoto } from "@/components/InvestorPhoto";
+import { PositionCountLabel } from "@/components/investors/PositionCountLabel";
 import { StockLogo } from "@/components/stocks/StockLogo";
 import { isInvestorNeedsData } from "@/lib/investors/csv-data";
 import { stockPath } from "@/lib/paths";
@@ -112,7 +113,9 @@ export function InvestorDetailView({ model }: { model: InvestorDetailModel }) {
         ) : null}
 
         {positions.length === 0 ? (
-          <p className="funds-empty">0 tracked positions.</p>
+          <p className="funds-empty">
+            <PositionCountLabel count={0} />
+          </p>
         ) : (
           <div className="funds-table-wrap">
             <table className="funds-table">

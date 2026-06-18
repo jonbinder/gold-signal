@@ -1,17 +1,23 @@
 /**
  * Reads data/GS-Investors.csv and writes public/data/investors.json.
+ * When Supabase service role is configured, replaces investor_positions from CSV only.
  */
+import dotenv from "dotenv";
 import fs from "fs";
 import path from "path";
 import {
   getInvestors as getCsvInvestors,
   INVESTOR_NEEDS_DATA,
   type CsvInvestor,
+  type CsvInvestorPosition,
 } from "../src/lib/investors/csv-data";
 import {
   isTrackedInvestorSlug,
   normalizeTrackedInvestorSlug,
 } from "../src/lib/investors/tracked-roster";
+import { getSupabaseServiceRole } from "../src/lib/supabase/service-role";
+
+dotenv.config({ path: path.join(process.cwd(), ".env.local") });
 
 const ROOT = process.cwd();
 const CSV_PATH = path.join(ROOT, "data", "GS-Investors.csv");
@@ -53,6 +59,11 @@ function parseWeightFromDetail(detail: string): number | null {
 function formatHoldingNotes(detail: string, sourceType: string, sourceDetail: string): string {
   const parts = [detail, sourceType, sourceDetail].map((p) => p.trim()).filter(Boolean);
   return parts.join(" · ");
+}
+
+function isPlaceholderPositionText(...parts: Array<string | null | undefined>): boolean {
+  const hay = parts.filter(Boolean).join(" ").toUpperCase();
+  return hay.includes("PLACEHOLDER");
 }
 
 function csvInvestorToRecord(inv: CsvInvestor): InvestorRecord {
@@ -108,23 +119,114 @@ export function writeInvestorsJson(investors: InvestorRecord[], filePath = JSON_
   fs.writeFileSync(filePath, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
 }
 
-function main(): void {
+function csvPositionRows(investorId: string, holdings: CsvInvestorPosition[]) {
+  const now = new Date().toISOString();
+  return holdings
+    .filter((row) => !isPlaceholderPositionText(row.detail, row.sourceDetail))
+    .map((row) => ({
+      investor_id: investorId,
+      ticker: row.ticker.trim().toUpperCase(),
+      company_name: row.companyName.trim() || row.ticker,
+      position_type: row.positionType,
+      detail: row.detail,
+      approx_size: null,
+      source_type: row.sourceType,
+      source_detail: row.sourceDetail,
+      as_of_date: row.asOfDate,
+      why_interesting: null,
+      is_published: true,
+      needs_review: false,
+      google_sheet_synced: true,
+      updated_at: now,
+    }));
+}
+
+async function syncSupabasePositionsFromCsv(csvInvestors: CsvInvestor[]): Promise<number> {
+  const supabase = getSupabaseServiceRole();
+  if (!supabase) {
+    console.warn("[investors:sync] Skipping Supabase position sync (missing service role env).");
+    return 0;
+  }
+
+  const { data: investorRows, error: investorError } = await supabase
+    .from("investors")
+    .select("id, slug");
+
+  if (investorError) {
+    throw new Error(`Failed to load investors for position sync: ${investorError.message}`);
+  }
+
+  const csvBySlug = new Map(
+    csvInvestors.map((inv) => [normalizeTrackedInvestorSlug(inv.slug), inv] as const),
+  );
+
+  const trackedIds = (investorRows ?? [])
+    .filter((row) => isTrackedInvestorSlug(row.slug))
+    .map((row) => row.id);
+
+  if (trackedIds.length > 0) {
+    const { error: deleteError } = await supabase
+      .from("investor_positions")
+      .delete()
+      .in("investor_id", trackedIds);
+    if (deleteError) {
+      throw new Error(`Failed to clear investor_positions: ${deleteError.message}`);
+    }
+  }
+
+  let inserted = 0;
+  for (const row of investorRows ?? []) {
+    const slug = normalizeTrackedInvestorSlug(row.slug);
+    if (!isTrackedInvestorSlug(slug)) continue;
+
+    const csvInvestor = csvBySlug.get(slug);
+    if (!csvInvestor?.holdings.length) continue;
+
+    const payload = csvPositionRows(row.id, csvInvestor.holdings);
+    if (payload.length === 0) continue;
+
+    const { error: insertError } = await supabase.from("investor_positions").insert(payload);
+    if (insertError) {
+      throw new Error(`Failed to insert positions for ${slug}: ${insertError.message}`);
+    }
+    inserted += payload.length;
+
+    await supabase.from("investors").update({ updated_at: new Date().toISOString() }).eq("id", row.id);
+  }
+
+  return inserted;
+}
+
+async function main(): Promise<void> {
   if (!fs.existsSync(CSV_PATH)) {
     console.error(`Missing ${path.relative(ROOT, CSV_PATH)}. Add GS-Investors.csv under data/.`);
     process.exit(1);
   }
 
-  const investors = readInvestorsFromCsv();
+  const csvInvestors = getCsvInvestors();
+  const investors = csvInvestors
+    .map(csvInvestorToRecord)
+    .filter((inv) => isTrackedInvestorSlug(inv.slug))
+    .sort((a, b) => a.name.localeCompare(b.name));
+
   writeInvestorsJson(investors);
+
+  const positionRows = await syncSupabasePositionsFromCsv(csvInvestors);
+  const investorsWithPositions = investors.filter((inv) => inv.positionCount > 0).length;
+
   console.log(`Synced ${investors.length} investors → public/data/investors.json`);
+  console.log(
+    `CSV positions: ${investorsWithPositions} investors with holdings, ${investors.reduce((sum, inv) => sum + inv.positionCount, 0)} total rows`,
+  );
+  if (positionRows > 0) {
+    console.log(`Supabase investor_positions: inserted ${positionRows} rows from CSV`);
+  }
 }
 
 const isDirectRun = process.argv[1]?.includes("sync-investors-from-csv");
 if (isDirectRun) {
-  try {
-    main();
-  } catch (err) {
+  main().catch((err) => {
     console.error(err instanceof Error ? err.message : err);
     process.exit(1);
-  }
+  });
 }

@@ -582,6 +582,14 @@
   text-decoration: underline;
 }
 
+.home-portfolio-card__stocks .investor-needs-data {
+  color: #b8860b;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New",
+    monospace;
+  font-size: 0.6875rem;
+  font-weight: 600;
+}
+
 .home-feed__title,
 .home-panel__title {
   font-family: var(--font-display);

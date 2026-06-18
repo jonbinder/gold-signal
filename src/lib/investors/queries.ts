@@ -250,13 +250,12 @@ async function loadPublishedInvestorsListRows(): Promise<InvestorListItem[]> {
         positionCount: sheetPositionCount,
         updatedAt: csvUpdated || investor.id,
       };
-    })
-    .filter((investor) => investor.positionCount > 0);
+    });
 }
 
 const loadPublishedInvestorsListCached = unstable_cache(
   loadPublishedInvestorsListSorted,
-  ["investors-list-published-v8-csv-bio"],
+  ["investors-list-published-v9-csv-only"],
   { revalidate: 3600, tags: [INVESTORS_LIST_CACHE_TAG] },
 );
 
@@ -295,8 +294,6 @@ async function loadInvestorDetail(slug: string): Promise<InvestorDetailModel | n
       .sort((a, b) => b.asOfDate.localeCompare(a.asOfDate)),
   );
 
-  if (manualPositions.length === 0) return null;
-
   return {
     investor,
     positions: manualPositions,
@@ -309,7 +306,7 @@ export async function getInvestorDetail(slug: string): Promise<InvestorDetailMod
   const normalized = slug.trim().toLowerCase();
   return unstable_cache(
     () => loadInvestorDetail(normalized),
-    ["investor-detail-csv-v2-bio", normalized],
+    ["investor-detail-csv-v3-needs-data", normalized],
     { revalidate: 3600, tags: [INVESTORS_LIST_CACHE_TAG, `investor-${normalized}`] },
   )();
 }

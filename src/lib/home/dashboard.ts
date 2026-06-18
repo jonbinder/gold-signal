@@ -70,7 +70,6 @@ async function loadMostHeld(supabase: SupabaseClient): Promise<HomeMostHeldRow[]
 async function loadRecentlyUpdatedPortfolios(): Promise<HomePopularInvestorRow[]> {
   const investors = await getPublishedInvestorsList();
   return investors
-    .filter((inv) => inv.positionCount > 0)
     .slice(0, RECENT_PORTFOLIOS_CAP)
     .map((inv) => ({
       slug: inv.slug,

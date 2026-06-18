@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "stocks:sync": "npx tsx scripts/sync-stocks-from-excel.ts",
-    "investors:sync": "npx tsx scripts/sync-investors-from-excel.ts",
+    "investors:sync": "npx tsx scripts/sync-investors-from-csv.ts",
     "data:sync": "npm run stocks:sync && npm run investors:sync",
     "prebuild": "npm run data:sync",
     "sync-investors-data": "npx tsx scripts/sync-investors-data.ts",

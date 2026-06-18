@@ -1,263 +1,316 @@
 {
-  "updatedAt": "2026-06-18T08:24:37.682Z",
+  "updatedAt": "2026-06-18T14:20:00.143Z",
   "investors": [
     {
-      "slug": "doug-casey",
-      "name": "Doug Casey",
-      "sheetName": "Doug Casey",
-      "role": "Speculator / Author",
-      "aum": "~$100M+",
-      "positionCount": 11,
-      "thesis": "Casey Research; anarcho-capitalist; physical coins + juniors",
-      "bio": "Anarcho-capitalist speculator and author of 'Crisis Investing.' Concentrated in junior gold explorers; anti-establishment gold bug.",
+      "slug": "adrian-day",
+      "name": "Adrian Day",
+      "sheetName": "Adrian Day",
+      "role": "",
+      "aum": "",
+      "positionCount": 5,
+      "thesis": "With over 35 years of experience, CEO of Adrian Day Asset Management, publishes Global Analyst.",
+      "bio": "Adrian Day is Chairman and CEO of Adrian Day Asset Management, a registered Investment Advisory firm. He is also editor-in-chief of Global Analyst, an e-mail newsletter. With over 35 years of experience, Adrian Day curates specific buy and sell recommendations with a track record boasting an average 87.5% return for all closed positions.",
       "tickers": [
-        "VAR",
-        "UEC",
-        "GSV",
-        "LODE",
-        "SIC.V",
-        "DV.V",
-        "LGD"
+        "FNV",
+        "AEM",
+        "WPM",
+        "FSM",
+        "PAAS"
       ],
       "holdings": [
         {
           "rank": 1,
-          "company": "International Speculator picks",
-          "ticker": "VAR",
-          "weight": 20,
-          "notes": "Casey Research newsletter-driven juniors basket"
+          "company": "Franco-Nevada Corp",
+          "ticker": "FNV",
+          "weight": 9,
+          "notes": "~9% (named top position) · interview · Podcast: Triangle Investor"
         },
         {
           "rank": 2,
-          "company": "Marin Katusa picks (overlap)",
-          "ticker": "VAR",
-          "weight": 10,
-          "notes": "Katusa Research co-investments"
+          "company": "Agnico Eagle Mines Ltd",
+          "ticker": "AEM",
+          "weight": 11,
+          "notes": "~11% (named top position) · interview · Podcast: Triangle Investor"
         },
         {
           "rank": 3,
-          "company": "Uranium Energy Corp",
-          "ticker": "UEC",
-          "weight": 8,
-          "notes": "Energy metals; Casey bullish uranium"
+          "company": "Wheaton Precious Metals Corp",
+          "ticker": "WPM",
+          "weight": null,
+          "notes": "named holding · interview · Podcast: Triangle Investor"
         },
         {
           "rank": 4,
-          "company": "International Tower / Priv",
-          "ticker": "",
-          "weight": 8,
-          "notes": "Private resource deals globally"
+          "company": "Fortuna Mining Corp",
+          "ticker": "FSM",
+          "weight": null,
+          "notes": "named holding · interview · Podcast: Triangle Investor"
         },
         {
           "rank": 5,
-          "company": "Gold Standard Ventures",
-          "ticker": "GSV",
-          "weight": 7,
-          "notes": "Nevada Railroad District; Tier-1 address"
+          "company": "Pan American Silver Corp",
+          "ticker": "PAAS",
+          "weight": null,
+          "notes": "named holding · interview · Podcast: Lobo Tigre"
+        }
+      ]
+    },
+    {
+      "slug": "don-durrett",
+      "name": "Don Durrett",
+      "sheetName": "Don Durrett",
+      "role": "",
+      "aum": "",
+      "positionCount": 25,
+      "thesis": "",
+      "bio": "",
+      "tickers": [
+        "AUMBF",
+        "USAS",
+        "ADSLF",
+        "ASM",
+        "AYA",
+        "CDE",
+        "DSVSF",
+        "EXK"
+      ],
+      "holdings": [
+        {
+          "rank": 1,
+          "company": "1911 Gold Corp",
+          "ticker": "AUMBF",
+          "weight": null,
+          "notes": "named holding · X Social Media · 25 Must Own List"
+        },
+        {
+          "rank": 2,
+          "company": "Americas Gold & Silver Corp",
+          "ticker": "USAS",
+          "weight": null,
+          "notes": "named holding · X Social Media · 25 Must Own List"
+        },
+        {
+          "rank": 3,
+          "company": "Andean Silver Ltd",
+          "ticker": "ADSLF",
+          "weight": null,
+          "notes": "named holding · X Social Media · 25 Must Own List"
+        },
+        {
+          "rank": 4,
+          "company": "Avino Silver & Gold Mines Ltd",
+          "ticker": "ASM",
+          "weight": null,
+          "notes": "named holding · X Social Media · 25 Must Own List"
+        },
+        {
+          "rank": 5,
+          "company": "Aya Gold & Silver Inc",
+          "ticker": "AYA",
+          "weight": null,
+          "notes": "named holding · X Social Media · 25 Must Own List"
         },
         {
           "rank": 6,
-          "company": "Comstock Mining",
-          "ticker": "LODE",
-          "weight": 7,
-          "notes": "Nevada historical district; Casey supporter"
+          "company": "BMC Minerals Ltd",
+          "ticker": "ASX: BMC",
+          "weight": null,
+          "notes": "named holding · X Social Media · 25 Must Own List"
         },
         {
           "rank": 7,
-          "company": "Sokoman Minerals",
-          "ticker": "SIC.V",
-          "weight": 5,
-          "notes": "Newfoundland gold; high-grade hits"
+          "company": "Capricorn Metals Ltd",
+          "ticker": "ASX: CMM",
+          "weight": null,
+          "notes": "named holding · X Social Media · 25 Must Own List"
         },
         {
           "rank": 8,
-          "company": "Dolly Varden Silver",
-          "ticker": "DV.V",
-          "weight": 5,
-          "notes": "BC silver; newsletter favorite"
+          "company": "Coeur Mining Inc",
+          "ticker": "CDE",
+          "weight": null,
+          "notes": "named holding · X Social Media · 25 Must Own List"
         },
         {
           "rank": 9,
-          "company": "Liberty Gold",
-          "ticker": "LGD",
-          "weight": 5,
-          "notes": "Idaho; open-pit friendly jurisdiction"
+          "company": "Discovery Silver Corp",
+          "ticker": "DSVSF",
+          "weight": null,
+          "notes": "named holding · X Social Media · 25 Must Own List"
         },
         {
           "rank": 10,
-          "company": "Physical Gold Coins",
-          "ticker": "",
-          "weight": 15,
-          "notes": "Firm believer in holding coins, not paper"
+          "company": "Endeavour Silver Corp",
+          "ticker": "EXK",
+          "weight": null,
+          "notes": "named holding · X Social Media · 25 Must Own List"
         },
         {
           "rank": 11,
-          "company": "Cash (offshore)",
-          "ticker": "",
-          "weight": 10,
-          "notes": "Keeps significant liquidity outside US system"
+          "company": "First Majestic Silver Corp",
+          "ticker": "AG",
+          "weight": null,
+          "notes": "named holding · X Social Media · 25 Must Own List"
+        },
+        {
+          "rank": 12,
+          "company": "Fresnillo Plc",
+          "ticker": "FNLPF",
+          "weight": null,
+          "notes": "named holding · X Social Media · 25 Must Own List"
+        },
+        {
+          "rank": 13,
+          "company": "Gogold Resources",
+          "ticker": "GLGDF",
+          "weight": null,
+          "notes": "named holding · X Social Media · 25 Must Own List"
+        },
+        {
+          "rank": 14,
+          "company": "Greatland Resources Ltd",
+          "ticker": "ASX: GGP",
+          "weight": null,
+          "notes": "named holding · X Social Media · 25 Must Own List"
+        },
+        {
+          "rank": 15,
+          "company": "Guanajuato Silver",
+          "ticker": "GSVRF",
+          "weight": null,
+          "notes": "named holding · X Social Media · 25 Must Own List"
+        },
+        {
+          "rank": 16,
+          "company": "Hecla Mining Company",
+          "ticker": "HL",
+          "weight": null,
+          "notes": "named holding · X Social Media · 25 Must Own List"
+        },
+        {
+          "rank": 17,
+          "company": "Honey Badger Silver",
+          "ticker": "HBEIF",
+          "weight": null,
+          "notes": "named holding · X Social Media · 25 Must Own List"
+        },
+        {
+          "rank": 18,
+          "company": "NexGold Mining Corp",
+          "ticker": "NXGCF",
+          "weight": null,
+          "notes": "named holding · X Social Media · 25 Must Own List"
+        },
+        {
+          "rank": 19,
+          "company": "Pan American Silver Corp",
+          "ticker": "PAAS",
+          "weight": null,
+          "notes": "named holding · X Social Media · 25 Must Own List"
+        },
+        {
+          "rank": 20,
+          "company": "Ramelius Resources Ltd",
+          "ticker": "RMLRF",
+          "weight": null,
+          "notes": "named holding · X Social Media · 25 Must Own List"
+        },
+        {
+          "rank": 21,
+          "company": "Regis Resources Ltd",
+          "ticker": "RGRNF",
+          "weight": null,
+          "notes": "named holding · X Social Media · 25 Must Own List"
+        },
+        {
+          "rank": 22,
+          "company": "Santacruz Silver Mining Ltd",
+          "ticker": "SCZM",
+          "weight": null,
+          "notes": "named holding · X Social Media · 25 Must Own List"
+        },
+        {
+          "rank": 23,
+          "company": "Talisker Resources Ltd",
+          "ticker": "TSKFF",
+          "weight": null,
+          "notes": "named holding · X Social Media · 25 Must Own List"
+        },
+        {
+          "rank": 24,
+          "company": "Vizsla Silver Corp",
+          "ticker": "VZLA",
+          "weight": null,
+          "notes": "named holding · X Social Media · 25 Must Own List"
+        },
+        {
+          "rank": 25,
+          "company": "Westgold Resources Ltd",
+          "ticker": "WGXRF",
+          "weight": null,
+          "notes": "named holding · X Social Media · 25 Must Own List"
         }
       ]
     },
     {
       "slug": "eric-sprott",
-      "name": "Eric Sprott – Personal Junior Portfolio",
+      "name": "Eric Sprott",
       "sheetName": "Eric Sprott",
-      "role": "Angel / Financier",
-      "aum": "~$300M+",
-      "positionCount": 20,
-      "thesis": "Junior miner kingmaker; private placements; 100+ companies backed",
-      "bio": "Billionaire investor & mining financier | Known for backing 100+ junior miners via private placements; positions estimated from SEDAR/EDGAR filings & interviews",
+      "role": "",
+      "aum": "",
+      "positionCount": 6,
+      "thesis": "",
+      "bio": "",
       "tickers": [
-        "ESK.V",
-        "DV.V",
-        "BBB.V",
-        "LODE",
-        "FF.V",
-        "LAB.V",
-        "GOT.V",
-        "FURY"
+        "DSVSF",
+        "JAGGF",
+        "ANPMF",
+        "HYMC",
+        "TDRRF",
+        "SPOFF"
       ],
       "holdings": [
         {
           "rank": 1,
-          "company": "Eskay Mining",
-          "ticker": "ESK.V",
-          "weight": 8,
-          "notes": "Flagship exploration bet; Golden Triangle BC"
+          "company": "Discovery Silver Corp",
+          "ticker": "DSVSF",
+          "weight": 22.07,
+          "notes": "43,221,500 sh, ~22.07% weighting · SEC Form 4 / GuruFocus · Reporting owner holdings, as of 2025-10-09"
         },
         {
           "rank": 2,
-          "company": "Dolly Varden Silver",
-          "ticker": "DV.V",
-          "weight": 7,
-          "notes": "High-grade silver; Sprott major backer"
+          "company": "Jaguar Mining Inc",
+          "ticker": "JAGGF",
+          "weight": 13.05,
+          "notes": "33,293,204 sh, ~13.05% weighting · SEC Form 4 / GuruFocus · Reporting owner holdings, as of 2025-04-25"
         },
         {
           "rank": 3,
-          "company": "Brixton Metals",
-          "ticker": "BBB.V",
-          "weight": 6,
-          "notes": "Multi-target explorer; Thorn Project BC"
+          "company": "Andean Precious Metals Corp",
+          "ticker": "ANPMF",
+          "weight": 9.64,
+          "notes": "23,109,638 sh, ~9.64% weighting · SEC Form 4 / GuruFocus · Reporting owner holdings, as of 2024-10-08"
         },
         {
           "rank": 4,
-          "company": "Comstock Mining",
-          "ticker": "LODE",
-          "weight": 5,
-          "notes": "Nevada historical gold district revival"
+          "company": "Hycroft Mining Holding Corp",
+          "ticker": "HYMC",
+          "weight": 10,
+          "notes": "Filed as 10% owner; added 300,000 sh in April (950,000 sh YTD 2026) · SEC Form 4 · Form 4 transactions Apr 9 & Apr 24, 2026"
         },
         {
           "rank": 5,
-          "company": "First Mining Gold",
-          "ticker": "FF.V",
-          "weight": 5,
-          "notes": "Gold bank model; optionality portfolio"
+          "company": "Tudor Gold Corp",
+          "ticker": "TDRRF",
+          "weight": null,
+          "notes": "Named holding among 36 reporting-owner positions · SEC Form 4 / GuruFocus · Reporting owner holdings"
         },
         {
           "rank": 6,
-          "company": "Labrador Gold",
-          "ticker": "LAB.V",
-          "weight": 5,
-          "notes": "High-grade gold Labrador; active explorer"
-        },
-        {
-          "rank": 7,
-          "company": "Goliath Resources",
-          "ticker": "GOT.V",
-          "weight": 5,
-          "notes": "Skeena area explorer; drill results catalyst"
-        },
-        {
-          "rank": 8,
-          "company": "Fury Gold Mines",
-          "ticker": "FURY",
-          "weight": 4,
-          "notes": "Quebec & Nunavut; strong resource base"
-        },
-        {
-          "rank": 9,
-          "company": "Tudor Gold",
-          "ticker": "TUD.V",
-          "weight": 4,
-          "notes": "Treaty Creek BC; Seabridge JV area"
-        },
-        {
-          "rank": 10,
-          "company": "Vizsla Silver",
-          "ticker": "VZLA",
-          "weight": 4,
-          "notes": "Mexico high-grade silver-gold; fast grower"
-        },
-        {
-          "rank": 11,
-          "company": "Signature Resources",
-          "ticker": "SGU.V",
-          "weight": 4,
-          "notes": "Ontario gold; Lingman Lake project"
-        },
-        {
-          "rank": 12,
-          "company": "Silver Tiger Metals",
-          "ticker": "SLVR.V",
-          "weight": 4,
-          "notes": "Mexico bonanza silver veins"
-        },
-        {
-          "rank": 13,
-          "company": "Blackrock Silver",
-          "ticker": "BRC.V",
-          "weight": 4,
-          "notes": "Nevada silver-gold explorer"
-        },
-        {
-          "rank": 14,
-          "company": "Aftermath Silver",
-          "ticker": "AAG.V",
-          "weight": 3,
-          "notes": "Chile silver; Berenguela asset"
-        },
-        {
-          "rank": 15,
-          "company": "Ophir Gold",
-          "ticker": "OPHIR.V",
-          "weight": 3,
-          "notes": "Tier-1 Canada explorer"
-        },
-        {
-          "rank": 16,
-          "company": "Gold79 Mines",
-          "ticker": "AUU.V",
-          "weight": 3,
-          "notes": "Arizona & Nevada gold targets"
-        },
-        {
-          "rank": 17,
-          "company": "Kainantu Resources",
-          "ticker": "KRL.V",
-          "weight": 3,
-          "notes": "PNG high-grade gold"
-        },
-        {
-          "rank": 18,
-          "company": "Scottie Resources",
-          "ticker": "SCOT.V",
-          "weight": 3,
-          "notes": "Golden Triangle BC; adjacent to Eskay"
-        },
-        {
-          "rank": 19,
-          "company": "Enduro Metals",
-          "ticker": "ENDR.V",
-          "weight": 3,
-          "notes": "BC explorer; Newmont ground area"
-        },
-        {
-          "rank": 20,
-          "company": "Cash / Dry Powder",
-          "ticker": "",
-          "weight": 6,
-          "notes": "Reserves for private placements"
+          "company": "EarthLabs Inc",
+          "ticker": "SPOFF",
+          "weight": null,
+          "notes": "Named holding among 36 reporting-owner positions · SEC Form 4 / GuruFocus · Reporting owner holdings"
         }
       ]
     },
@@ -265,91 +318,218 @@
       "slug": "frank-giustra",
       "name": "Frank Giustra",
       "sheetName": "Frank Giustra",
-      "role": "Mining Financier",
-      "aum": "~$300M+",
-      "positionCount": 10,
-      "thesis": "Goldcorp architect; global deal-maker; film & mining",
-      "bio": "Mining financier, founder of Wheaton River (became Goldcorp). Pivotal deal-maker; estimated portfolio based on known projects, speeches, and filings.",
+      "role": "",
+      "aum": "",
+      "positionCount": 4,
+      "thesis": "",
+      "bio": "",
       "tickers": [
-        "F.V",
-        "CXB",
-        "EQX",
-        "ETG",
-        "RVG.V",
-        "AAG.V",
-        "OSK.V",
-        "WPM"
+        "ARIS",
+        "LBCMF",
+        "NRYCF",
+        "ONVEF"
       ],
       "holdings": [
         {
           "rank": 1,
-          "company": "Fiore Gold",
-          "ticker": "F.V",
-          "weight": 20,
-          "notes": "Founder & chairman; Nevada Pan Mine producer"
+          "company": "Aris Mining Corp",
+          "ticker": "ARIS",
+          "weight": 24.18,
+          "notes": "~24.18% (direct + Radcliffe), co-founder · SEC filing / InvestorsHub · Post debt-restructuring conversion disclosure"
         },
         {
           "rank": 2,
-          "company": "Calibre Mining",
-          "ticker": "CXB",
-          "weight": 15,
-          "notes": "Major backer; Nicaragua & Nevada gold"
+          "company": "Libero Copper & Gold Corp",
+          "ticker": "LBCMF",
+          "weight": 11.2,
+          "notes": "11.2% stake; Fiore Group · press / Globe and Mail · Acquired Mar 11, 2024"
         },
         {
           "rank": 3,
-          "company": "Leagold Mining/Equinox",
-          "ticker": "EQX",
-          "weight": 12,
-          "notes": "Historical Leagold merged into Equinox; retained stake"
+          "company": "Nations Royalty Corp",
+          "ticker": "NRYCF",
+          "weight": null,
+          "notes": "Founder (2024) · company / MarketScreener · Founder disclosure"
         },
         {
           "rank": 4,
-          "company": "Entrée Resources",
-          "ticker": "ETG",
+          "company": "Oronova Energy (to become Seva Mining)",
+          "ticker": "ONVEF",
+          "weight": null,
+          "notes": "First Mining/Fiore-backed deal; largest shareholder · press release · First Mining PR, Nov 20, 2025"
+        }
+      ]
+    },
+    {
+      "slug": "garrett-goggin",
+      "name": "Garrett Goggin",
+      "sheetName": "Garrett Goggin",
+      "role": "",
+      "aum": "",
+      "positionCount": 2,
+      "thesis": "",
+      "bio": "",
+      "tickers": [
+        "NEM",
+        "ELE"
+      ],
+      "holdings": [
+        {
+          "rank": 1,
+          "company": "Newmont Corp",
+          "ticker": "NEM",
+          "weight": null,
+          "notes": "Named pick; called the rebound · public commentary · Golden Portfolio / interviews"
+        },
+        {
+          "rank": 2,
+          "company": "Elemental Royalty",
+          "ticker": "ELE",
+          "weight": null,
+          "notes": "Named pick; called the rebound · public commentary · Golden Portfolio / interviews"
+        }
+      ]
+    },
+    {
+      "slug": "jon-binder",
+      "name": "Jon Binder",
+      "sheetName": "Jon Binder",
+      "role": "",
+      "aum": "",
+      "positionCount": 2,
+      "thesis": "",
+      "bio": "",
+      "tickers": [
+        "AUMBF",
+        "HSTXF"
+      ],
+      "holdings": [
+        {
+          "rank": 1,
+          "company": "1911 Gold Corp",
+          "ticker": "AUMBF",
+          "weight": null,
+          "notes": "named holding · X Social Media · named holding"
+        },
+        {
+          "rank": 2,
+          "company": "Heliostar Metals Ltd",
+          "ticker": "HSTXF",
+          "weight": null,
+          "notes": "named holding · X Social Media · named holding"
+        }
+      ]
+    },
+    {
+      "slug": "lawrence-lepard",
+      "name": "Lawrence Lepard",
+      "sheetName": "Lawrence Lepard",
+      "role": "",
+      "aum": "",
+      "positionCount": 13,
+      "thesis": "",
+      "bio": "",
+      "tickers": [
+        "RYES",
+        "OMGGF",
+        "LGCXF",
+        "ASM",
+        "CDE",
+        "AGMRF",
+        "PAAS",
+        "EXK"
+      ],
+      "holdings": [
+        {
+          "rank": 1,
+          "company": "Rise Gold Corp",
+          "ticker": "RYES",
           "weight": 10,
-          "notes": "Mongolia copper-gold; Oyu Tolgoi JV"
+          "notes": "Director / 10% owner; ~4,576,061 sh · SEC Form 4 / GuruFocus · Reporting owner holdings"
+        },
+        {
+          "rank": 2,
+          "company": "Omai Gold Mines Corp",
+          "ticker": "OMGGF",
+          "weight": null,
+          "notes": "Big fund position; sees 5-10x potential · interview · Mining Stock Education / Bill Powers"
+        },
+        {
+          "rank": 3,
+          "company": "Lahontan Gold Corp",
+          "ticker": "LGCXF",
+          "weight": null,
+          "notes": "Big fund position; sees 5-10x potential · interview · Mining Stock Education / Bill Powers"
+        },
+        {
+          "rank": 4,
+          "company": "Avino Silver & Gold Mines Ltd",
+          "ticker": "ASM",
+          "weight": null,
+          "notes": "Named holding ('I love Avino') · interview · Mining Stock Education / Bill Powers"
         },
         {
           "rank": 5,
-          "company": "Revival Gold",
-          "ticker": "RVG.V",
-          "weight": 8,
-          "notes": "Idaho historic Beartrack mine; restart story"
+          "company": "Coeur Mining Inc",
+          "ticker": "CDE",
+          "weight": null,
+          "notes": "Named holding ('I love Coeur') · interview · Mining Stock Education / Bill Powers"
         },
         {
           "rank": 6,
-          "company": "Aftermath Silver",
-          "ticker": "AAG.V",
-          "weight": 6,
-          "notes": "Chile silver; early backer"
+          "company": "Silver Mountain Resources Inc",
+          "ticker": "AGMRF",
+          "weight": null,
+          "notes": "Named holding; favored as pure-silver development story · interview · Mining Stock Education / Bill Powers"
         },
         {
           "rank": 7,
-          "company": "Osisko Mining",
-          "ticker": "OSK.V",
-          "weight": 6,
-          "notes": "Windfall Quebec; world-class discovery"
+          "company": "Pan American Silver Corp",
+          "ticker": "PAAS",
+          "weight": null,
+          "notes": "Named holding (large-cap) · interview · Mining Stock Education / Bill Powers"
         },
         {
           "rank": 8,
-          "company": "Wheaton Precious Metals",
-          "ticker": "WPM",
-          "weight": 5,
-          "notes": "Legacy position from Wheaton River days"
+          "company": "Endeavour Silver Corp",
+          "ticker": "EXK",
+          "weight": null,
+          "notes": "Named holding; growing production · interview · Mining Stock Education / Bill Powers"
         },
         {
           "rank": 9,
-          "company": "Private Resource Deals",
-          "ticker": "",
-          "weight": 12,
-          "notes": "Active in private placements globally"
+          "company": "B2Gold Corp",
+          "ticker": "BTG",
+          "weight": null,
+          "notes": "Named deep-value holding; 'silly cheap', possible Africa spinoff · interview · Mining Stock Education / Bill Powers"
         },
         {
           "rank": 10,
-          "company": "Cash / Media Investments",
-          "ticker": "",
-          "weight": 6,
-          "notes": "Lionsgate & other non-mining diversification"
+          "company": "Zodiac Gold Inc",
+          "ticker": "ZAUIF",
+          "weight": null,
+          "notes": "Large recent position; ON BOARD (director). <$100M cap, early-stage West Africa · interview · Mining Stock Education / Bill Powers / company PR Dec 29 2025"
+        },
+        {
+          "rank": 11,
+          "company": "Banyan Gold Corp",
+          "ticker": "BYAGF",
+          "weight": null,
+          "notes": "Named holding; cheap per-ounce, Yukon (Tara) · interview · Mining Stock Education / Bill Powers"
+        },
+        {
+          "rank": 12,
+          "company": "Lavras Gold Corp",
+          "ticker": "LGCFF",
+          "weight": 10,
+          "notes": "~10% of fund; ON BOARD (director), Brazil drill story, PEA pending · interview · Mining Stock Education / Bill Powers"
+        },
+        {
+          "rank": 13,
+          "company": "Cabral Gold Inc",
+          "ticker": "CBGZF",
+          "weight": null,
+          "notes": "Named holding; ON BOARD (director), Brazil, near-term heap-leach producer · interview · Mining Stock Education / Bill Powers"
         }
       ]
     },
@@ -357,175 +537,122 @@
       "slug": "peter-schiff",
       "name": "Peter Schiff",
       "sheetName": "Peter Schiff",
-      "role": "Fund Manager",
-      "aum": "~$500M",
-      "positionCount": 11,
-      "thesis": "Anti-fiat; EPGFX public fund; senior gold & silver equities",
-      "bio": "Founder & Portfolio Manager | Ardent gold-standard advocate; runs EPGFX focused on global gold & silver equities",
+      "role": "",
+      "aum": "",
+      "positionCount": 9,
+      "thesis": "",
+      "bio": "",
       "tickers": [
         "AEM",
-        "FNV",
-        "WPM",
-        "NEM",
-        "RGLD",
-        "GOLD",
-        "KGC",
-        "PAAS"
+        "PAAS",
+        "FSM",
+        "B",
+        "OR",
+        "MTA",
+        "HSTXF",
+        "RGLD"
       ],
       "holdings": [
         {
           "rank": 1,
-          "company": "Agnico Eagle Mines",
+          "company": "Agnico Eagle Mines Ltd",
           "ticker": "AEM",
-          "weight": 18,
-          "notes": "Core large-cap; consistent dividend, low-cost producer"
+          "weight": 6.6,
+          "notes": "6.60% of fund · Fund fact sheet · EuroPac EPGFX top-10 holdings"
         },
         {
           "rank": 2,
-          "company": "Franco-Nevada",
-          "ticker": "FNV",
-          "weight": 14,
-          "notes": "Royalty/streaming; preferred defensive gold exposure"
+          "company": "Pan American Silver Corp",
+          "ticker": "PAAS",
+          "weight": 5.95,
+          "notes": "5.95% of fund · Fund fact sheet · EuroPac EPGFX top-10 holdings"
         },
         {
           "rank": 3,
-          "company": "Wheaton Precious Metals",
-          "ticker": "WPM",
-          "weight": 12,
-          "notes": "Silver & gold streams; long-life assets"
+          "company": "Fortuna Mining Corp",
+          "ticker": "FSM",
+          "weight": 5.4,
+          "notes": "5.40% of fund · Fund fact sheet · EuroPac EPGFX top-10 holdings"
         },
         {
           "rank": 4,
-          "company": "Newmont Corporation",
-          "ticker": "NEM",
-          "weight": 10,
-          "notes": "World's largest gold miner; global diversification"
+          "company": "Barrick Mining Corp",
+          "ticker": "B",
+          "weight": 5.4,
+          "notes": "5.40% of fund · Fund fact sheet · EuroPac EPGFX top-10 holdings"
         },
         {
           "rank": 5,
-          "company": "Royal Gold",
-          "ticker": "RGLD",
-          "weight": 8,
-          "notes": "Royalty company; leveraged to gold price"
+          "company": "OR Royalties Inc",
+          "ticker": "OR",
+          "weight": 5.22,
+          "notes": "5.22% of fund · Fund fact sheet · EuroPac EPGFX top-10 holdings"
         },
         {
           "rank": 6,
-          "company": "Barrick Gold",
-          "ticker": "GOLD",
-          "weight": 8,
-          "notes": "Senior producer; Africa & Americas asset base"
+          "company": "Metalla Royalty & Streaming Ltd",
+          "ticker": "MTA",
+          "weight": 5.18,
+          "notes": "5.18% of fund · Fund fact sheet · EuroPac EPGFX top-10 holdings"
         },
         {
           "rank": 7,
-          "company": "Kinross Gold",
-          "ticker": "KGC",
-          "weight": 7,
-          "notes": "Mid-tier; Americas-focused, low cost"
+          "company": "Heliostar Metals Ltd",
+          "ticker": "HSTXF",
+          "weight": 5.02,
+          "notes": "5.02% of fund · Fund fact sheet · EuroPac EPGFX top-10 holdings"
         },
         {
           "rank": 8,
-          "company": "Pan American Silver",
-          "ticker": "PAAS",
-          "weight": 7,
-          "notes": "Silver focus; Latin American operations"
+          "company": "Royal Gold Inc",
+          "ticker": "RGLD",
+          "weight": 4.97,
+          "notes": "4.97% of fund · Fund fact sheet · EuroPac EPGFX top-10 holdings"
         },
         {
           "rank": 9,
-          "company": "First Majestic Silver",
-          "ticker": "AG",
-          "weight": 6,
-          "notes": "Pure-play silver; Schiff outspoken supporter"
-        },
-        {
-          "rank": 10,
-          "company": "Endeavour Mining",
-          "ticker": "EDV",
-          "weight": 5,
-          "notes": "West Africa gold; growth profile"
-        },
-        {
-          "rank": 11,
-          "company": "Gold Fields",
-          "ticker": "GFI",
-          "weight": 5,
-          "notes": "S. Africa & intl; Salares Norte catalyst"
+          "company": "Franco-Nevada Corp",
+          "ticker": "FNV",
+          "weight": 4.38,
+          "notes": "4.38% of fund · Fund fact sheet · EuroPac EPGFX top-10 holdings"
         }
       ]
     },
     {
       "slug": "pierre-lassonde",
-      "name": "Pierre Lassonde – Franco-Nevada",
+      "name": "Pierre Lassonde",
       "sheetName": "Pierre Lassonde",
-      "role": "Royalty Pioneer",
-      "aum": "~$1B+",
-      "positionCount": 8,
-      "thesis": "Co-invented gold royalty model; Quebec & Canada focus",
-      "bio": "Co-founder & former chairman of Franco-Nevada; invented the gold royalty business model. Estimated portfolio based on known stakes, board roles & interviews.",
+      "role": "",
+      "aum": "",
+      "positionCount": 3,
+      "thesis": "",
+      "bio": "",
       "tickers": [
-        "FNV",
-        "OR",
-        "OSK.V",
-        "PPTA",
-        "MD.V",
-        "GROY",
-        "AEM"
+        "ORLA",
+        "PRYMF",
+        "AGXMF"
       ],
       "holdings": [
         {
           "rank": 1,
-          "company": "Franco-Nevada",
-          "ticker": "FNV",
-          "weight": 30,
-          "notes": "Life's work; founding shareholder & architect of royalty model"
+          "company": "Orla Mining Ltd",
+          "ticker": "ORLA",
+          "weight": 10,
+          "notes": "10% security holder; ~25,859,363 sh · SEC Form 4 / GuruFocus · Reporting owner holdings"
         },
         {
           "rank": 2,
-          "company": "Osisko Gold Royalties",
-          "ticker": "OR",
-          "weight": 15,
-          "notes": "Quebec royalty; Lassonde very active backer"
+          "company": "Prime Mining Corp",
+          "ticker": "PRYMF",
+          "weight": 10,
+          "notes": "10% security holder; ~13,920,978 sh · SEC Form 4 / GuruFocus · Reporting owner holdings"
         },
         {
           "rank": 3,
-          "company": "Osisko Mining",
-          "ticker": "OSK.V",
+          "company": "Argentex Mining Corp",
+          "ticker": "AGXMF",
           "weight": 10,
-          "notes": "Windfall discovery; royalty feeder strategy"
-        },
-        {
-          "rank": 4,
-          "company": "Midas Gold / Perpetua",
-          "ticker": "PPTA",
-          "weight": 8,
-          "notes": "Idaho Stibnite gold; Lassonde backed"
-        },
-        {
-          "rank": 5,
-          "company": "Midland Exploration",
-          "ticker": "MD.V",
-          "weight": 6,
-          "notes": "Quebec explorer; royalty strategy"
-        },
-        {
-          "rank": 6,
-          "company": "Gold Royalty Corp",
-          "ticker": "GROY",
-          "weight": 6,
-          "notes": "Emerging royalty; Lassonde advisory role"
-        },
-        {
-          "rank": 7,
-          "company": "Agnico Eagle Mines",
-          "ticker": "AEM",
-          "weight": 8,
-          "notes": "Long-term quality; Quebec/Canada focus"
-        },
-        {
-          "rank": 8,
-          "company": "Cash / Private",
-          "ticker": "",
-          "weight": 17,
-          "notes": "Private deals & philanthropic capital"
+          "notes": "10% security holder; ~13,030,000 sh · SEC Form 4 / GuruFocus · Reporting owner holdings"
         }
       ]
     },
@@ -533,382 +660,153 @@
       "slug": "rick-rule",
       "name": "Rick Rule",
       "sheetName": "Rick Rule",
-      "role": "Value Investor",
-      "aum": "~$200M+",
-      "positionCount": 12,
-      "thesis": "Patient contrarian; large cash reserve; uranium + gold",
-      "bio": "Legendary resource sector investor; former CEO Sprott US Holdings. Concentrated value-based PM strategy; estimated from interviews & public commentary.",
+      "role": "",
+      "aum": "",
+      "positionCount": 7,
+      "thesis": "",
+      "bio": "",
       "tickers": [
-        "URC",
-        "FNV",
-        "WPM",
-        "AEM",
-        "ALS",
-        "OR",
-        "LGD",
-        "LODE"
+        "RGLD",
+        "GLDG",
+        "MUX",
+        "ODV",
+        "SCTSF",
+        "HHLKF",
+        "VZLA"
       ],
       "holdings": [
         {
           "rank": 1,
-          "company": "Uranium Royalty Corp",
-          "ticker": "URC",
-          "weight": 9,
-          "notes": "Uranium exposure; royalty model he championed"
+          "company": "Royal Gold Inc",
+          "ticker": "RGLD",
+          "weight": null,
+          "notes": "named holding / loves royalty model · interview · VRIC 2026 / Triangle Investor"
         },
         {
           "rank": 2,
-          "company": "Franco-Nevada",
-          "ticker": "FNV",
-          "weight": 9,
-          "notes": "Core royalty holding; compounding machine"
+          "company": "GoldMining Inc",
+          "ticker": "GLDG",
+          "weight": null,
+          "notes": "named long-term hold · interview · Triangle Investor portfolio breakdown"
         },
         {
           "rank": 3,
-          "company": "Wheaton Precious Metals",
-          "ticker": "WPM",
-          "weight": 8,
-          "notes": "Streaming; Rule has praised WPM model repeatedly"
+          "company": "McEwen Inc",
+          "ticker": "MUX",
+          "weight": null,
+          "notes": "owns; copper upside · interview · Triangle Investor portfolio breakdown"
         },
         {
           "rank": 4,
-          "company": "Agnico Eagle Mines",
-          "ticker": "AEM",
-          "weight": 8,
-          "notes": "Quality operator; Tier-1 jurisdictions"
+          "company": "Osisko Development Corp",
+          "ticker": "ODV",
+          "weight": null,
+          "notes": "owns · interview · Triangle Investor portfolio breakdown"
         },
         {
           "rank": 5,
-          "company": "Altius Minerals",
-          "ticker": "ALS",
-          "weight": 7,
-          "notes": "Royalty generalist; potash + PM exposure"
+          "company": "Scottie Resources Corp",
+          "ticker": "SCTSF",
+          "weight": null,
+          "notes": "small position · interview · Triangle Investor portfolio breakdown"
         },
         {
           "rank": 6,
-          "company": "International Tower Group",
-          "ticker": "",
-          "weight": 6,
-          "notes": "Private investments; resource finance"
+          "company": "Hot Chili Ltd",
+          "ticker": "HHLKF",
+          "weight": null,
+          "notes": "owns; large deposit · interview · Triangle Investor portfolio breakdown"
         },
         {
           "rank": 7,
-          "company": "Osisko Gold Royalties",
-          "ticker": "OR",
-          "weight": 6,
-          "notes": "Canadian royalty; Rule bullish on Quebec"
-        },
-        {
-          "rank": 8,
-          "company": "Liberty Gold",
-          "ticker": "LGD",
-          "weight": 5,
-          "notes": "Idaho Black Pine project; Rule-backed"
-        },
-        {
-          "rank": 9,
-          "company": "Comstock Inc",
-          "ticker": "LODE",
-          "weight": 5,
-          "notes": "Nevada; Rule bullish on historic district"
-        },
-        {
-          "rank": 10,
-          "company": "Vizsla Silver",
+          "company": "Vizsla Silver Corp",
           "ticker": "VZLA",
-          "weight": 5,
-          "notes": "High-grade Mexico silver; Rule-endorsed"
-        },
-        {
-          "rank": 11,
-          "company": "Labrador Gold",
-          "ticker": "LAB.V",
-          "weight": 4,
-          "notes": "Exploration upside; Rule backed placement"
-        },
-        {
-          "rank": 12,
-          "company": "Cash / Waiting",
-          "ticker": "",
-          "weight": 28,
-          "notes": "Rule famous for holding cash until 'fat pitch'"
+          "weight": null,
+          "notes": "named silver reinvestment holding · interview · INN, after VRIC 2026"
         }
       ]
     },
     {
       "slug": "rob-mcewen",
-      "name": "Rob McEwen – McEwen Mining",
+      "name": "Rob McEwen",
       "sheetName": "Rob McEwen",
-      "role": "Mining CEO",
-      "aum": "~$500M+",
-      "positionCount": 5,
-      "thesis": "No salary; 100% invested in MUX; Los Azules copper upside",
-      "bio": "Built Goldcorp into a major gold producer; founded McEwen Mining. Famous for 100% personal salary in company stock.",
+      "role": "",
+      "aum": "",
+      "positionCount": 3,
+      "thesis": "",
+      "bio": "",
       "tickers": [
         "MUX",
-        "VAR"
+        "GOTRF",
+        "PAVLF"
       ],
       "holdings": [
         {
           "rank": 1,
-          "company": "McEwen Mining",
+          "company": "McEwen Inc",
           "ticker": "MUX",
-          "weight": 60,
-          "notes": "Founder; >25% personal ownership; no salary taken in cash"
+          "weight": null,
+          "notes": "Chief Owner; >US$200M invested personally · SEC filing / company 8-K · Company disclosure of insider ownership"
         },
         {
           "rank": 2,
-          "company": "McEwen Copper (private)",
-          "ticker": "",
-          "weight": 20,
-          "notes": "Los Azules Argentina; major copper-gold porphyry"
+          "company": "Goliath Resources Ltd",
+          "ticker": "GOTRF",
+          "weight": null,
+          "notes": "MUX acquired 5,181,347 units · SEC Form 10-Q · McEwen Inc 10-Q, Mar 10, 2025 purchase"
         },
         {
           "rank": 3,
-          "company": "Lexam VG Gold (hist.)",
-          "ticker": "",
-          "weight": 5,
-          "notes": "Folded into McEwen; legacy position"
-        },
-        {
-          "rank": 4,
-          "company": "Physical Gold",
-          "ticker": "",
-          "weight": 8,
-          "notes": "Direct bullion; monetary conviction"
-        },
-        {
-          "rank": 5,
-          "company": "Other Miners",
-          "ticker": "VAR",
-          "weight": 7,
-          "notes": "Diversified basket of gold peers"
+          "company": "Paragon Advanced Labs Inc",
+          "ticker": "PAVLF",
+          "weight": 27.3,
+          "notes": "27.3% interest, cost basis $13.7M · SEC Form 8-K · McEwen Inc 8-K, acquired Dec 9, 2025"
         }
       ]
     },
     {
       "slug": "ross-beaty",
-      "name": "Ross Beaty – Pan American",
+      "name": "Ross Beaty",
       "sheetName": "Ross Beaty",
-      "role": "Serial Entrepreneur",
-      "aum": "~$500M+",
-      "positionCount": 11,
-      "thesis": "Founder PAAS & Equinox; Latin America & BC specialist",
-      "bio": "Serial mining entrepreneur; founded Pan American Silver & Equinox Gold. Estimated personal portfolio based on known holdings, board positions, and public filings.",
+      "role": "",
+      "aum": "",
+      "positionCount": 4,
+      "thesis": "",
+      "bio": "",
       "tickers": [
         "EQX",
         "PAAS",
-        "LUM.V",
-        "GRX",
-        "AAG.V",
-        "MMAT",
-        "OR",
-        "WPM"
+        "NEWP",
+        "ARREF"
       ],
       "holdings": [
         {
           "rank": 1,
-          "company": "Equinox Gold",
+          "company": "Equinox Gold Corp",
           "ticker": "EQX",
-          "weight": 22,
-          "notes": "Co-founder; major personal stake; multi-mine Americas producer"
+          "weight": 3.5,
+          "notes": "~3.5% / ~27.1M sh · exchange filings / press · Early-2026 filings, Chair Emeritus"
         },
         {
           "rank": 2,
-          "company": "Pan American Silver",
+          "company": "Pan American Silver Corp",
           "ticker": "PAAS",
-          "weight": 18,
-          "notes": "Founder; legacy cornerstone holding since 1994"
+          "weight": null,
+          "notes": "2,828,680 sh (founder, long-term holder) · SEC / GuruFocus · Reporting holdings"
         },
         {
           "rank": 3,
-          "company": "Lumina Gold",
-          "ticker": "LUM.V",
-          "weight": 10,
-          "notes": "Founder; Cangrejos Ecuador deposit — giant project"
+          "company": "New Pacific Metals Corp",
+          "ticker": "NEWP",
+          "weight": null,
+          "notes": "14,724,068 sh · SEC / GuruFocus · Reporting holdings"
         },
         {
           "rank": 4,
-          "company": "GreenX Metals",
-          "ticker": "GRX",
-          "weight": 8,
-          "notes": "Coal-to-green metals; founder position"
-        },
-        {
-          "rank": 5,
-          "company": "Aftermath Silver",
-          "ticker": "AAG.V",
-          "weight": 6,
-          "notes": "Board involvement; Chile silver"
-        },
-        {
-          "rank": 6,
-          "company": "Torchlight Energy/Meta Mtls",
-          "ticker": "MMAT",
-          "weight": 5,
-          "notes": "Speculative diversification"
-        },
-        {
-          "rank": 7,
-          "company": "Osisko Gold Royalties",
-          "ticker": "OR",
-          "weight": 5,
-          "notes": "Royalty exposure; Canadian assets"
-        },
-        {
-          "rank": 8,
-          "company": "Wheaton Precious Metals",
-          "ticker": "WPM",
-          "weight": 5,
-          "notes": "Streaming; long-time respected holding"
-        },
-        {
-          "rank": 9,
-          "company": "Agnico Eagle Mines",
-          "ticker": "AEM",
-          "weight": 5,
-          "notes": "Quality bias; Tier-1 Canada producer"
-        },
-        {
-          "rank": 10,
-          "company": "Private / Pre-IPO Mining",
-          "ticker": "",
-          "weight": 11,
-          "notes": "Multiple private placements & early-stage bets"
-        },
-        {
-          "rank": 11,
-          "company": "Cash & Other",
-          "ticker": "",
-          "weight": 5,
-          "notes": "Liquidity buffer"
-        }
-      ]
-    },
-    {
-      "slug": "sprott-inc",
-      "name": "Sprott Asset Management Funds",
-      "sheetName": "Sprott Asset Management Funds",
-      "role": "Fund Complex (SII)",
-      "aum": "~$25B+",
-      "positionCount": 15,
-      "thesis": "Flagship funds; senior & mid-tier gold; royalties",
-      "bio": "Toronto-based alternative asset manager specializing in precious metals; AUM ~$25B+. Holdings reflect flagship public fund positioning.",
-      "tickers": [
-        "AEM",
-        "FNV",
-        "WPM",
-        "NEM",
-        "GOLD",
-        "RGLD",
-        "KGC",
-        "PAAS"
-      ],
-      "holdings": [
-        {
-          "rank": 1,
-          "company": "Agnico Eagle Mines",
-          "ticker": "AEM",
-          "weight": 16,
-          "notes": "Highest-quality senior producer; consistent outperformer"
-        },
-        {
-          "rank": 2,
-          "company": "Franco-Nevada",
-          "ticker": "FNV",
-          "weight": 13,
-          "notes": "Gold royalty; zero-debt, royalty model"
-        },
-        {
-          "rank": 3,
-          "company": "Wheaton Precious Metals",
-          "ticker": "WPM",
-          "weight": 11,
-          "notes": "Largest silver streamer; gold streams growing"
-        },
-        {
-          "rank": 4,
-          "company": "Newmont Corporation",
-          "ticker": "NEM",
-          "weight": 9,
-          "notes": "Scale & diversification; Tier-1 assets"
-        },
-        {
-          "rank": 5,
-          "company": "Barrick Gold",
-          "ticker": "GOLD",
-          "weight": 8,
-          "notes": "Copper-gold growth strategy"
-        },
-        {
-          "rank": 6,
-          "company": "Royal Gold",
-          "ticker": "RGLD",
-          "weight": 6,
-          "notes": "Royalty diversification"
-        },
-        {
-          "rank": 7,
-          "company": "Kinross Gold",
-          "ticker": "KGC",
-          "weight": 5,
-          "notes": "Americas-focused; takeover optionality"
-        },
-        {
-          "rank": 8,
-          "company": "Pan American Silver",
-          "ticker": "PAAS",
-          "weight": 5,
-          "notes": "Silver & gold; Latin America operator"
-        },
-        {
-          "rank": 9,
-          "company": "Alamos Gold",
-          "ticker": "AGI",
-          "weight": 5,
-          "notes": "Canada & Mexico producer; Island Gold expansion"
-        },
-        {
-          "rank": 10,
-          "company": "Endeavour Silver",
-          "ticker": "EXK",
-          "weight": 4,
-          "notes": "Mexico silver producer; Terronera builder"
-        },
-        {
-          "rank": 11,
-          "company": "First Majestic Silver",
-          "ticker": "AG",
-          "weight": 4,
-          "notes": "Pure-play silver; San Dimas & Santa Elena"
-        },
-        {
-          "rank": 12,
-          "company": "Torex Gold",
-          "ticker": "TXG",
-          "weight": 4,
-          "notes": "Mexico Media Luna project; re-rating target"
-        },
-        {
-          "rank": 13,
-          "company": "Wesdome Gold Mines",
-          "ticker": "WDO",
-          "weight": 4,
-          "notes": "Canada; high-grade Eagle River mine"
-        },
-        {
-          "rank": 14,
-          "company": "Osisko Gold Royalties",
-          "ticker": "OR",
-          "weight": 3,
-          "notes": "Quebec-focused royalty; Canadian Shield"
-        },
-        {
-          "rank": 15,
-          "company": "Coeur Mining",
-          "ticker": "CDE",
-          "weight": 3,
-          "notes": "Silver-gold producer; Silvertip catalyst"
+          "company": "Amerigo Resources Ltd",
+          "ticker": "ARREF",
+          "weight": null,
+          "notes": "17,747,792 sh · SEC / GuruFocus · Reporting holdings"
         }
       ]
     }

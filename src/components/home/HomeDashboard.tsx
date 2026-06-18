@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { HomePortfolioCard } from "@/components/home/HomePortfolioCard";
 import { StockLogo } from "@/components/stocks/StockLogo";
-import { WatchlistCaptureForm } from "@/components/home/WatchlistCaptureForm";
 import { stockPath } from "@/lib/paths";
 import type { HomeDashboardModel } from "@/lib/home/types";
 
@@ -93,18 +92,6 @@ export function HomeDashboard({ model }: { model: HomeDashboardModel }) {
             ) : null}
           </div>
         ) : null}
-
-        <section className="home-capture-band" aria-labelledby="home-capture-heading">
-          <div className="home-capture-band__inner">
-            <h2 id="home-capture-heading" className="home-capture-band__title">
-              Get the free readout — your tickers, the filings decoded
-            </h2>
-            <p className="home-capture-band__sub">
-              Weekly-style snapshot of Form 4, 13F, and large-stake context for the names you follow.
-            </p>
-            <WatchlistCaptureForm variant="footer" />
-          </div>
-        </section>
       </div>
     </>
   );

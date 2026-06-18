@@ -6,14 +6,14 @@ const COLS = [
     title: "Platform",
     links: [
       { href: "/", label: "Home" },
-      { href: "/investors", label: "Investors" },
+      { href: "/portfolios", label: "Portfolios" },
     ],
   },
   {
     title: "Data",
     links: [
-      { href: "/investors", label: "Investor profiles" },
-      { href: "/signalscore", label: "How it works" },
+      { href: "/stocks", label: "Stocks" },
+      { href: "/data", label: "Data" },
     ],
   },
   {

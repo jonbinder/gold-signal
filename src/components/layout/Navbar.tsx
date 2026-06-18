@@ -1,13 +1,8 @@
 import Link from "next/link";
-import { Users } from "lucide-react";
+import { SITE_NAV_LINKS } from "@/lib/goldsignal/nav-links";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 import { PreciousMetalsBanner } from "@/components/layout/PreciousMetalsBanner";
 import { BrandLogo } from "@/components/layout/BrandLogo";
-
-const NAV_LINKS = [
-  { href: "/investors", label: "Investors", icon: Users },
-] as const;
 
 export function Navbar() {
   return (
@@ -24,25 +19,18 @@ export function Navbar() {
         />
 
         <nav className="flex items-center gap-1 sm:gap-2">
-          {NAV_LINKS.map((link) => {
-            const Icon = link.icon;
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={cn(
-                  "flex flex-col items-center gap-0.5 rounded-sm px-2 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-navy-100 no-underline",
-                  "hover:bg-white/5 hover:text-gold-300 sm:flex-row sm:gap-2 sm:px-3 sm:py-2 sm:text-xs",
-                )}
-              >
-                <Icon className="size-4 shrink-0 opacity-80 sm:size-[18px]" strokeWidth={1.5} aria-hidden />
-                <span className="max-w-[4.5rem] truncate uppercase sm:max-w-none">{link.label}</span>
-              </Link>
-            );
-          })}
-          <Button variant="gold" size="sm" className="ml-2 shrink-0" asChild>
-            <Link href="/auth">Login</Link>
-          </Button>
+          {SITE_NAV_LINKS.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className={cn(
+                "flex flex-col items-center gap-0.5 rounded-sm px-2 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-navy-100 no-underline",
+                "hover:bg-white/5 hover:text-gold-300 sm:flex-row sm:gap-2 sm:px-3 sm:py-2 sm:text-xs",
+              )}
+            >
+              <span className="max-w-[4.5rem] truncate uppercase sm:max-w-none">{link.label}</span>
+            </Link>
+          ))}
         </nav>
       </div>
     </header>

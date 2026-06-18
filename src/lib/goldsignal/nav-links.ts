@@ -1,4 +1,7 @@
 export const SITE_NAV_LINKS = [
-  { href: "/investors", label: "Investors" },
-  { href: "/signalscore", label: "How It Works" },
+  { href: "/portfolios", label: "PORTFOLIOS" },
+  { href: "/stocks", label: "STOCKS" },
+  { href: "/data", label: "DATA" },
+  { href: "/about", label: "ABOUT" },
+  { href: "/auth", label: "LOGIN" },
 ] as const;

@@ -59,9 +59,6 @@ export function SiteNav() {
           <span />
           <span />
         </button>
-        <Link href="/#portfolio-review" className="btn btn--cta nav__cta">
-          Get the readout
-        </Link>
       </nav>
 
       <div

@@ -90,7 +90,7 @@ function FootprintNote({ row }: { row: FootprintRow }) {
     return (
       <p className="ss-contrast__factor-note">
         {parts[0]}
-        <Link href="/investors">Investors</Link> page{parts[1] ?? ""}
+        <Link href="/portfolios">Portfolios</Link> page{parts[1] ?? ""}
       </p>
     );
   }

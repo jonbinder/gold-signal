@@ -17,9 +17,6 @@ export function SiteFooter() {
                 <Link href={link.href}>{link.label}</Link>
               </li>
             ))}
-            <li>
-              <Link href="/#portfolio-review">Get the readout</Link>
-            </li>
           </ul>
         </nav>
       </div>

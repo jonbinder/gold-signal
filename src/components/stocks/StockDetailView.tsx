@@ -17,7 +17,6 @@ import {
   formatMarketCapDisplay,
 } from "@/lib/stock-facts";
 import type { StockDetailPageModel } from "@/lib/stock-detail/types";
-import { COMPLIANCE_LINE } from "@/lib/site";
 import { getTeachingSnippet } from "@/lib/whats-new/teaching-snippets";
 import { formatUsdCompact } from "@/lib/whats-new/format";
 
@@ -77,9 +76,9 @@ export function StockDetailView({ model }: { model: StockDetailPageModel }) {
     <div className="stock-detail-page">
       <header className="stock-detail-header">
         <div className="stock-detail-header__inner">
-          <Link href="/investors" className="stock-detail-back mono">
+          <Link href="/portfolios" className="stock-detail-back mono">
             <ChevronLeft className="size-4" aria-hidden />
-            All investors
+            All portfolios
           </Link>
 
           <div className="stock-detail-header__main">
@@ -305,8 +304,6 @@ export function StockDetailView({ model }: { model: StockDetailPageModel }) {
             <p className="stock-detail-empty stock-detail-empty--inline">Company description not on file.</p>
           )}
         </SectionShell>
-
-        <p className="stock-detail-compliance">{COMPLIANCE_LINE}</p>
       </div>
     </div>
   );

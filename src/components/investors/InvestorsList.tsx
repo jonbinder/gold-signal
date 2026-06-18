@@ -11,9 +11,9 @@ export function InvestorsList({ investors }: Props) {
   if (investors.length === 0) {
     return (
       <div className="investors-empty" role="status">
-        <h2 className="investors-empty__title">No tracked investors yet</h2>
+        <h2 className="investors-empty__title">No tracked portfolios yet</h2>
         <p className="investors-empty__body">
-          Curated investors and funds appear here once positions are synced from SEC filings and our
+          Curated portfolios appear here once positions are synced from SEC filings and our
           sourced research sheet. Check back after the next data refresh.
         </p>
       </div>

@@ -6,5 +6,5 @@ interface Props {
 
 export default async function FundDetailPage({ params }: Props) {
   const { slug } = await params;
-  redirect(`/investors/${slug}`);
+  redirect(`/portfolios/${slug}`);
 }

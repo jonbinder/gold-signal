@@ -15,11 +15,13 @@ const nextConfig: NextConfig = {
   typedRoutes: true,
   async redirects() {
     return [
-      { source: "/stocks", destination: "/investors", permanent: true },
-      { source: "/gold-silver-stocks", destination: "/investors", permanent: true },
-      { source: "/leaderboard", destination: "/investors", permanent: true },
-      { source: "/funds", destination: "/investors", permanent: false },
-      { source: "/funds/:slug", destination: "/investors/:slug", permanent: false },
+      { source: "/investors", destination: "/portfolios", permanent: true },
+      { source: "/investors/:slug", destination: "/portfolios/:slug", permanent: true },
+      { source: "/gold-silver-stocks", destination: "/portfolios", permanent: true },
+      { source: "/leaderboard", destination: "/portfolios", permanent: true },
+      { source: "/funds", destination: "/portfolios", permanent: false },
+      { source: "/funds/:slug", destination: "/portfolios/:slug", permanent: false },
+      { source: "/signalscore", destination: "/about", permanent: true },
     ];
   },
 };

@@ -77,7 +77,7 @@ export async function saveInvestorAction(formData: FormData) {
   }
 
   revalidatePath("/admin");
-  revalidatePath("/investors");
+  revalidatePath("/portfolios");
   revalidateTag(INVESTORS_LIST_CACHE_TAG);
   revalidatePath("/stocks");
 }
@@ -90,7 +90,7 @@ export async function deleteInvestorAction(formData: FormData) {
   const { error } = await supabase.from("investors").delete().eq("id", id);
   if (error) throw new Error(error.message);
   revalidatePath("/admin");
-  revalidatePath("/investors");
+  revalidatePath("/portfolios");
   revalidateTag(INVESTORS_LIST_CACHE_TAG);
 }
 
@@ -148,7 +148,7 @@ export async function savePositionAction(formData: FormData) {
   await bumpInvestorPortfolioUpdatedAt(supabase, investorId);
 
   revalidatePath("/admin");
-  revalidatePath("/investors");
+  revalidatePath("/portfolios");
   revalidateTag(INVESTORS_LIST_CACHE_TAG);
   revalidatePath("/stocks");
 }
@@ -175,7 +175,7 @@ export async function bulkPublishDraftsAction(formData: FormData) {
   }
 
   revalidatePath("/admin");
-  revalidatePath("/investors");
+  revalidatePath("/portfolios");
   revalidateTag(INVESTORS_LIST_CACHE_TAG);
   revalidatePath("/stocks");
 }
@@ -196,7 +196,7 @@ export async function deletePositionAction(formData: FormData) {
     await bumpInvestorPortfolioUpdatedAt(supabase, row.investor_id as string);
   }
   revalidatePath("/admin");
-  revalidatePath("/investors");
+  revalidatePath("/portfolios");
   revalidateTag(INVESTORS_LIST_CACHE_TAG);
   revalidatePath("/stocks");
 }

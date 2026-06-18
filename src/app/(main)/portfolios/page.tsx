@@ -1,23 +1,22 @@
 import type { Metadata } from "next";
-import { PageCompliance } from "@/components/layout/PageCompliance";
 import { InvestorsList } from "@/components/investors/InvestorsList";
 import { getPublishedInvestorsList } from "@/lib/investors/queries";
 import "@/app/funds.css";
 import "@/app/home-dashboard.css";
 
-const pageTitle = "Investors — sourced notable gold & silver positions | GoldSignal";
+const pageTitle = "Portfolios — sourced notable gold & silver positions | GoldSignal";
 const pageDescription =
   "Notable gold and silver positions held by leading investors and funds — sourced from SEC filings and public statements.";
 
 export const metadata: Metadata = {
   title: pageTitle,
   description: pageDescription,
-  alternates: { canonical: "https://goldsignal.ai/investors" },
+  alternates: { canonical: "https://goldsignal.ai/portfolios" },
   openGraph: {
     title: pageTitle,
     description: pageDescription,
     type: "website",
-    url: "https://goldsignal.ai/investors",
+    url: "https://goldsignal.ai/portfolios",
   },
   twitter: {
     card: "summary",
@@ -29,7 +28,7 @@ export const metadata: Metadata = {
 /** ISR: list sorted by most recent portfolio update at query layer. */
 export const revalidate = 3600;
 
-export default async function InvestorsPage() {
+export default async function PortfoliosPage() {
   const investors = await getPublishedInvestorsList();
 
   return (
@@ -52,7 +51,6 @@ export default async function InvestorsPage() {
           public statements. Not complete portfolios.
         </p>
         <InvestorsList investors={investors} />
-        <PageCompliance />
       </div>
     </main>
   );

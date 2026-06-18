@@ -1,9 +1,5 @@
 import Link from "next/link";
-
-const NAV_LINKS = [
-  { href: "/investors", label: "Investors" },
-  { href: "/signalscore", label: "How It Works" },
-] as const;
+import { SITE_NAV_LINKS } from "@/lib/goldsignal/nav-links";
 
 /** Legacy header — same inline nav as SiteNav (no hamburger). */
 export function HomeHeader() {
@@ -15,7 +11,7 @@ export function HomeHeader() {
         <span className="nav__logo-ink">.ai</span>
       </Link>
       <ul className="nav__links">
-        {NAV_LINKS.map((link) => (
+        {SITE_NAV_LINKS.map((link) => (
           <li key={link.href}>
             <Link href={link.href}>{link.label}</Link>
           </li>

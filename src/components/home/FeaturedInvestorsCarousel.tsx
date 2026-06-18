@@ -28,9 +28,9 @@ export function FeaturedInvestorsCarousel({ investors, totalCount }: FeaturedInv
   return (
     <section className="investors investors--preview" id="investors-preview">
       <header className="section-header section-header--row">
-        <h2 className="section-header__title">Featured investors</h2>
-        <Link href="/investors" className="section-header__link">
-          View all {totalCount} investors →
+        <h2 className="section-header__title">Featured portfolios</h2>
+        <Link href="/portfolios" className="section-header__link">
+          View all {totalCount} portfolios →
         </Link>
       </header>
       <div className="investors-carousel-wrap">
@@ -39,7 +39,7 @@ export function FeaturedInvestorsCarousel({ investors, totalCount }: FeaturedInv
             <article key={investor.slug} className="investor-card investor-card--carousel fade-in visible">
               <InvestorAvatar slug={investor.slug} name={investor.name} size={48} className="investor-card__avatar" />
               <h3 className="investor-card__name">
-                <Link href={`/investors/${investor.slug}`}>{investorDisplayName(investor.name, investor.sheetName)}</Link>
+                <Link href={`/portfolios/${investor.slug}`}>{investorDisplayName(investor.name, investor.sheetName)}</Link>
               </h3>
               <p className="investor-card__role">{investor.role}</p>
               <div className="investor-card__tickers">

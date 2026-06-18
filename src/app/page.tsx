@@ -5,7 +5,6 @@ import { HomeDashboard } from "@/components/home/HomeDashboard";
 import { HomeMetalsStrip } from "@/components/home/HomeMetalsStrip";
 import { getHomeDashboard } from "@/lib/home/dashboard";
 import { getSpotSnapshot } from "@/lib/spot-market";
-import { COMPLIANCE_LINE } from "@/lib/site";
 import "./home-dashboard.css";
 import "./whats-new.css";
 import "./site-cohesion.css";
@@ -58,7 +57,6 @@ export default async function HomePage() {
       <main className="home-page home-page--dashboard">
         <HomeMetalsStrip spot={spot} />
         <HomeDashboard model={dashboard} />
-        <p className="home-dashboard-footer-note">{COMPLIANCE_LINE}</p>
       </main>
 
       <SiteFooter />

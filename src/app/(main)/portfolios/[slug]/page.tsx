@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { InvestorDetailView } from "@/components/investors/InvestorDetailView";
-import { PageCompliance } from "@/components/layout/PageCompliance";
 import { getInvestorDetail } from "@/lib/investors/queries";
 import "@/app/funds.css";
 
@@ -12,18 +11,18 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const model = await getInvestorDetail(slug);
-  if (!model) return { title: "Investor not found — GoldSignal.ai" };
+  if (!model) return { title: "Portfolio not found — GoldSignal.ai" };
   const title = `${model.investor.name} — notable sourced positions | GoldSignal`;
   const description = `Notable sourced gold and silver positions for ${model.investor.name}, from SEC filings and public statements.`;
   return {
     title,
     description,
-    alternates: { canonical: `https://goldsignal.ai/investors/${slug}` },
+    alternates: { canonical: `https://goldsignal.ai/portfolios/${slug}` },
     openGraph: {
       title,
       description,
       type: "website",
-      url: `https://goldsignal.ai/investors/${slug}`,
+      url: `https://goldsignal.ai/portfolios/${slug}`,
     },
     twitter: {
       card: "summary",
@@ -35,14 +34,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export const revalidate = 3600;
 
-export default async function InvestorDetailPage({ params }: Props) {
+export default async function PortfolioDetailPage({ params }: Props) {
   const { slug } = await params;
   const model = await getInvestorDetail(slug);
   if (!model) notFound();
-  return (
-    <>
-      <InvestorDetailView model={model} />
-      <PageCompliance />
-    </>
-  );
+  return <InvestorDetailView model={model} />;
 }

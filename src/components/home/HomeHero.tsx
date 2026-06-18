@@ -20,10 +20,10 @@ function HeroCopy({ className }: { className?: string }) {
         Top Gold and Silver Stock Investors.
       </p>
       <Link
-        href="/investors"
+        href="/portfolios"
         className="home-cta mt-7 inline-flex items-center gap-2 rounded-lg bg-[var(--gold)] px-8 py-4 text-base font-bold text-[var(--bg-primary)] no-underline transition-colors hover:bg-[var(--gold-light)] lg:mt-9"
       >
-        View Investors
+        View Portfolios
         <ArrowRight className="size-5" strokeWidth={2.5} aria-hidden />
       </Link>
     </div>

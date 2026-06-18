@@ -2,12 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { SiteNav } from "@/components/goldsignal/SiteNav";
 import { SiteFooter } from "@/components/goldsignal/SiteFooter";
-import { COMPLIANCE_LINE, SITE_TAGLINE } from "@/lib/site";
+import { SITE_TAGLINE } from "@/lib/site";
 import "./site-cohesion.css";
 
 export const metadata: Metadata = {
   title: "Page not found — GoldSignal.ai",
-  description: `${SITE_TAGLINE}. Browse investors and SEC filing activity.`,
+  description: `${SITE_TAGLINE}. Browse portfolios and SEC filing activity.`,
 };
 
 export default function NotFound() {
@@ -19,19 +19,16 @@ export default function NotFound() {
           Page not found
         </h1>
         <p style={{ color: "var(--text-secondary)", maxWidth: "28rem", margin: "0 auto 1.5rem" }}>
-          That URL isn&apos;t in our tracked universe. Try the homepage or investors directory.
+          That URL isn&apos;t in our tracked universe. Try the homepage or portfolios directory.
         </p>
         <div style={{ display: "flex", flexWrap: "wrap", gap: "0.65rem", justifyContent: "center" }}>
           <Link href="/" className="btn btn--cta">
             Home
           </Link>
-          <Link href="/investors" className="btn btn--secondary">
-            Investors
+          <Link href="/portfolios" className="btn btn--secondary">
+            Portfolios
           </Link>
         </div>
-        <p className="page-compliance" style={{ marginTop: "2.5rem" }}>
-          {COMPLIANCE_LINE}
-        </p>
       </main>
       <SiteFooter />
     </>

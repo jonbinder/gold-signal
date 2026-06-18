@@ -16,8 +16,8 @@ export function InvestorProfileView({ investor }: InvestorProfileViewProps) {
 
   return (
     <section className="investor-profile">
-      <Link href="/investors" className="investor-profile__breadcrumb mono">
-        ← All investors
+      <Link href="/portfolios" className="investor-profile__breadcrumb mono">
+        ← All portfolios
       </Link>
 
       <div className="investor-profile__hero">

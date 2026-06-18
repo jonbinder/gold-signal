@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServiceClient } from "@/lib/supabase";
+import { revalidateInvestorPages } from "@/lib/investor-cache-revalidation";
+import { syncInvestorPositionsFromGoogleSheet } from "@/lib/investor-sheet-sync";
 import {
   getDeploymentOrigin,
   invokeProcessOne,
   invokeRefreshMetals,
   invokeRefreshStocks,
-  invokeSyncInvestorSheet,
 } from "@/lib/trigger-process-one";
 
 export const maxDuration = 60;
@@ -33,6 +34,18 @@ export async function GET(req: Request) {
   if (!supabase) {
     return NextResponse.json({ error: "Supabase not configured" }, { status: 503 });
   }
+
+  const sheetResult = await syncInvestorPositionsFromGoogleSheet(supabase);
+  if (sheetResult.ok) {
+    revalidateInvestorPages(sheetResult.touchedSlugs);
+  }
+  console.info("[cron/cleanup] Investor sheet sync", {
+    ok: sheetResult.ok,
+    upserted: sheetResult.upserted,
+    deleted: sheetResult.deleted,
+    skipped: sheetResult.skipped.length,
+    error: sheetResult.error,
+  });
 
   const cutoff = new Date(Date.now() - STUCK_MS).toISOString();
   const origin = getDeploymentOrigin(req);
@@ -81,15 +94,20 @@ export async function GET(req: Request) {
   await invokeRefreshStocks(0, origin);
   console.info("[cron/cleanup] Invoked stock universe refresh batch 0");
 
-  await invokeSyncInvestorSheet(origin);
-  console.info("[cron/cleanup] Invoked investor sheet sync");
-
   return NextResponse.json({
     ok: true,
     triggered: ids.size,
     submissionIds: [...ids],
     metalsRefreshStarted: true,
     stockRefreshStarted: true,
-    investorSheetSyncStarted: true,
+    investorSheetSync: {
+      ok: sheetResult.ok,
+      upserted: sheetResult.upserted,
+      deleted: sheetResult.deleted,
+      investorsCreated: sheetResult.investorsCreated,
+      skipped: sheetResult.skipped.length,
+      touchedSlugs: sheetResult.touchedSlugs,
+      error: sheetResult.error,
+    },
   });
 }

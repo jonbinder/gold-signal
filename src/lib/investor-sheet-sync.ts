@@ -32,6 +32,8 @@ const POSITION_TYPE_MAP: Record<string, PositionType> = {
   form4: "insider_form4",
   fund_holding: "fund_holding",
   fund: "fund_holding",
+  company_holding: "fund_holding",
+  company: "fund_holding",
   public_statement: "public_statement",
   statement: "public_statement",
   other: "other_disclosure",
@@ -86,6 +88,18 @@ function parsePublished(raw: string): boolean {
   return true;
 }
 
+/** Google Sheets / Excel serial date → ISO date (days since 1899-12-30). */
+function serialDateToIso(serial: number): string | null {
+  if (!Number.isFinite(serial) || serial < 1) return null;
+  const ms = Math.round((serial - 25569) * 86400 * 1000);
+  const d = new Date(ms);
+  if (Number.isNaN(d.getTime())) return null;
+  const y = d.getUTCFullYear();
+  const m = String(d.getUTCMonth() + 1).padStart(2, "0");
+  const day = String(d.getUTCDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
 function parseAsOfDate(raw: string): string | null {
   const t = raw.trim();
   const iso = t.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
@@ -94,6 +108,9 @@ function parseAsOfDate(raw: string): string | null {
   }
   const ym = t.match(/^(\d{4})-(\d{1,2})$/);
   if (ym) return `${ym[1]}-${ym[2].padStart(2, "0")}-01`;
+
+  const yearOnly = t.match(/^(\d{4})$/);
+  if (yearOnly) return `${yearOnly[1]}-01-01`;
 
   // Google Sheets mobile often formats dates as M/D/YYYY (e.g. 5/8/2026).
   const slash = t.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})$/);
@@ -104,6 +121,12 @@ function parseAsOfDate(raw: string): string | null {
     if (year < 100) year += year >= 70 ? 1900 : 2000;
     if (month < 1 || month > 12 || day < 1 || day > 31) return null;
     return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+  }
+
+  // Google API may return unformatted serial dates as numbers (e.g. 45658 or "45658.0").
+  if (/^\d+(\.\d+)?$/.test(t)) {
+    const n = Number(t);
+    if (n >= 10000) return serialDateToIso(n);
   }
 
   return null;
@@ -130,7 +153,7 @@ function headerIndexMap(headerRow: string[]): { col: Map<string, number> } | { m
 function cell(row: string[], col: Map<string, number>, name: string): string {
   const idx = col.get(name);
   if (idx == null) return "";
-  return (row[idx] ?? "").trim();
+  return String(row[idx] ?? "").trim();
 }
 
 async function loadInvestorsByName(supabase: SupabaseClient): Promise<Map<string, InvestorRow>> {
@@ -325,6 +348,7 @@ export async function syncInvestorPositionsFromGoogleSheet(
     );
 
     const syncedKeys = new Set<string>();
+    const investorsPresentInSheet = new Set<string>();
     const touchedInvestorIds = new Set<string>();
     const touchedSlugs = new Set<string>();
     let upserted = 0;
@@ -355,6 +379,21 @@ export async function syncInvestorPositionsFromGoogleSheet(
         skipped.push({ row: rowNum, reason: "missing investor" });
         continue;
       }
+
+      let investor: InvestorRow;
+      try {
+        const resolved = await resolveOrCreateInvestor(supabase, investorName, byName);
+        investor = resolved.investor;
+        if (resolved.created) investorsCreated += 1;
+      } catch (err) {
+        skipped.push({
+          row: rowNum,
+          reason: err instanceof Error ? err.message : "investor create failed",
+        });
+        continue;
+      }
+      investorsPresentInSheet.add(investor.id);
+
       if (!tickerRaw) {
         skipped.push({ row: rowNum, reason: "missing ticker" });
         continue;
@@ -393,18 +432,6 @@ export async function syncInvestorPositionsFromGoogleSheet(
       }
 
       const ticker = tickerRaw.toUpperCase().replace(/^US:/, "");
-      let investor: InvestorRow;
-      try {
-        const resolved = await resolveOrCreateInvestor(supabase, investorName, byName);
-        investor = resolved.investor;
-        if (resolved.created) investorsCreated += 1;
-      } catch (err) {
-        skipped.push({
-          row: rowNum,
-          reason: err instanceof Error ? err.message : "investor create failed",
-        });
-        continue;
-      }
 
       touchedInvestorIds.add(investor.id);
       touchedSlugs.add(investor.slug);
@@ -448,12 +475,12 @@ export async function syncInvestorPositionsFromGoogleSheet(
       upserted += 1;
     }
 
-    if (sheetRowTracking && touchedInvestorIds.size > 0) {
+    const deletedInvestorIds = new Set<string>();
+    if (sheetRowTracking) {
       const { data: managed } = await supabase
         .from("investor_positions")
         .select("id, investor_id, ticker, source_type, source_detail, as_of_date")
-        .eq("google_sheet_synced", true)
-        .in("investor_id", [...touchedInvestorIds]);
+        .eq("google_sheet_synced", true);
 
       for (const pos of managed ?? []) {
         const key = positionKey(
@@ -465,13 +492,17 @@ export async function syncInvestorPositionsFromGoogleSheet(
         );
         if (!syncedKeys.has(key)) {
           const { error } = await supabase.from("investor_positions").delete().eq("id", pos.id);
-          if (!error) deleted += 1;
+          if (!error) {
+            deleted += 1;
+            deletedInvestorIds.add(pos.investor_id as string);
+          }
         }
       }
     }
 
-    if (touchedInvestorIds.size > 0) {
-      await bumpInvestorPortfolioUpdatedAt(supabase, [...touchedInvestorIds]);
+    const bumpIds = new Set([...touchedInvestorIds, ...deletedInvestorIds]);
+    if (bumpIds.size > 0) {
+      await bumpInvestorPortfolioUpdatedAt(supabase, [...bumpIds]);
     }
 
     const dataRows = values.length - 1;
@@ -481,6 +512,7 @@ export async function syncInvestorPositionsFromGoogleSheet(
       upserted,
       deleted,
       investorsCreated,
+      investorsInSheet: investorsPresentInSheet.size,
       skipped: skipped.length,
       sheetRowTracking,
     });

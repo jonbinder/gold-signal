@@ -32,23 +32,28 @@ export async function readInvestorPositionsSheet(config: SheetEnvConfig): Promis
     throw new Error(`Google Sheets read failed (${res.status}): ${text.slice(0, 300)}`);
   }
 
-  const json = (await res.json()) as { values?: string[][] };
+  const json = (await res.json()) as { values?: Array<Array<string | number | boolean | null>> };
   return normalizeSheetGrid(json.values ?? []);
 }
 
 /**
  * Google Sheets sometimes returns one TSV blob per row (single column) when pasted from mobile.
- * Split tab-separated cells into proper columns.
+ * Split tab-separated cells into proper columns. Coerce all cell values to strings.
  */
-export function normalizeSheetGrid(values: string[][]): string[][] {
-  if (values.length === 0) return values;
+export function normalizeSheetGrid(values: Array<Array<string | number | boolean | null | undefined>>): string[][] {
+  const coerceRow = (row: Array<string | number | boolean | null | undefined>): string[] =>
+    row.map((c) => (c == null ? "" : String(c).trim()));
+
+  if (values.length === 0) return [];
+
+  const coerced = values.map(coerceRow);
 
   const looksTabSeparated =
-    values[0]?.length === 1 && (values[0][0]?.includes("\t") ?? false);
+    coerced[0]?.length === 1 && (coerced[0][0]?.includes("\t") ?? false);
 
-  if (!looksTabSeparated) return values;
+  if (!looksTabSeparated) return coerced;
 
-  return values
+  return coerced
     .map((row) => {
       if (row.length === 1) {
         return row[0]!.split("\t").map((c) => c.trim());
@@ -56,7 +61,7 @@ export function normalizeSheetGrid(values: string[][]): string[][] {
       if (row.some((c) => c.includes("\t"))) {
         return row.flatMap((c) => c.split("\t")).map((c) => c.trim());
       }
-      return row.map((c) => c.trim());
+      return row;
     })
     .filter((row) => row.some((c) => c.length > 0));
 }

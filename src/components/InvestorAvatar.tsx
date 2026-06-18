@@ -13,7 +13,7 @@ interface InvestorAvatarProps {
 }
 
 export function InvestorAvatar({ slug, name, size = 48, className = "" }: InvestorAvatarProps) {
-  const mappedSrc = investorImages[slug];
+  const mappedSrc = investorImages[slug] ?? `/investor-photos/${slug}.webp`;
   const [failed, setFailed] = useState(false);
   const src = mappedSrc && !failed ? mappedSrc : null;
   const initials = investorInitials(name);

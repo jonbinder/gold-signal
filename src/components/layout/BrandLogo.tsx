@@ -17,7 +17,7 @@ export function BrandLogo({ className, imageClassName, priority = false, sizes =
       className={cn("inline-flex items-center no-underline focus-visible:outline-none", className)}
     >
       <Image
-        src="/images/goldsignal-logo.png"
+        src="/brand/goldsignal-logo.png"
         alt="GoldSignal logo with Holdings Intelligence tagline"
         width={802}
         height={217}

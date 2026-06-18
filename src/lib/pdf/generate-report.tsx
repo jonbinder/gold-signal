@@ -10,7 +10,7 @@ import { SignalScoreReport } from "@/lib/pdf/SignalScoreReport";
 export async function loadReportLogoDataUri(): Promise<string | undefined> {
   const candidates = [
     path.join(process.cwd(), "src/app/icon.png"),
-    path.join(process.cwd(), "public/images/gs-phone.png"),
+    path.join(process.cwd(), "public/brand/gs-phone.png"),
   ];
   for (const filePath of candidates) {
     try {

@@ -102,7 +102,6 @@ export function resolveInvestorPhotoPath(slug: string): string {
   const dirs = [
     { base: path.join(process.cwd(), "public", "investor-photos"), urlPrefix: "/investor-photos" },
     { base: path.join(process.cwd(), "public", "investors"), urlPrefix: "/investors" },
-    { base: path.join(process.cwd(), "public", "images", "investors"), urlPrefix: "/images/investors" },
   ];
   const extensions = [".webp", ".jpg", ".jpeg", ".png"];
 

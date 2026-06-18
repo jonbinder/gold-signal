@@ -7,7 +7,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const OUT_DIR = path.join(__dirname, "..", "public", "images", "investors");
+const OUT_DIR = path.join(__dirname, "..", "public", "investor-photos");
 const UA = "GoldSignalBot/1.0 (https://goldsignal.ai; investor-images)";
 
 /** @type {{ file: string; wikidata?: string; commonsSearch: string; fallbacks?: string[] }[]} */

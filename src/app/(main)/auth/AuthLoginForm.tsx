@@ -66,7 +66,12 @@ export function AuthLoginForm() {
         </button>
       </form>
 
-      <p className="auth-waitlist">Don&apos;t have an account? Join the waitlist</p>
+      <p className="auth-waitlist">
+        Don&apos;t have an account?{" "}
+        <Link href="/waitlist" className="auth-waitlist__link">
+          Join the waitlist
+        </Link>
+      </p>
 
       <div className="auth-back">
         <Link href="/" className="auth-back__link">

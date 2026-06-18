@@ -136,6 +136,16 @@
   color: var(--text-muted);
 }
 
+.auth-waitlist__link {
+  color: #b8860b;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.auth-waitlist__link:hover {
+  color: #d4a84b;
+}
+
 .auth-back {
   margin-top: 2rem;
   text-align: center;

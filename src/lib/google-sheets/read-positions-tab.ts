@@ -10,7 +10,9 @@ export type SheetEnvConfig = {
 export function readSheetEnvConfig(): SheetEnvConfig | null {
   const spreadsheetId = process.env.GOOGLE_SHEETS_ID?.trim();
   const clientEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL?.trim();
-  const privateKey = parseGooglePrivateKey(process.env.GOOGLE_SERVICE_ACCOUNT_KEY);
+  const privateKey =
+    parseGooglePrivateKey(process.env.GOOGLE_SERVICE_ACCOUNT_KEY) ??
+    parseGooglePrivateKey(process.env.GOOGLE_SERVICE_ACCOUNT_JSON);
   const tabName = process.env.GOOGLE_SHEETS_TAB_NAME?.trim() || "Sheet1";
   if (!spreadsheetId || !clientEmail || !privateKey) return null;
   return { spreadsheetId, tabName, clientEmail, privateKey };

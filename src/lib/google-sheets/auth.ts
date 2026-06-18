@@ -5,11 +5,59 @@ function base64Url(input: string | Buffer): string {
   return buf.toString("base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
 }
 
-/** Service account private key from env (supports literal \\n in Vercel). */
+function unwrapQuotes(value: string): string {
+  const t = value.trim();
+  if (
+    (t.startsWith('"') && t.endsWith('"')) ||
+    (t.startsWith("'") && t.endsWith("'"))
+  ) {
+    return t.slice(1, -1).trim();
+  }
+  return t;
+}
+
+function normalizePemNewlines(value: string): string {
+  let s = value;
+  for (let i = 0; i < 3 && s.includes("\\n"); i += 1) {
+    s = s.replace(/\\n/g, "\n");
+  }
+  return s;
+}
+
+/** Re-wrap a single-line PEM into standard multiline form. */
+function reflowSingleLinePem(value: string): string {
+  if (!value.includes("BEGIN") || value.includes("\n")) return value;
+  const match = value.match(/(-----BEGIN [^-]+-----)\s*([A-Za-z0-9+/=\s]+)\s*(-----END [^-]+-----)/);
+  if (!match) return value;
+  const body = match[2]!.replace(/\s+/g, "");
+  const lines = body.match(/.{1,64}/g) ?? [body];
+  return `${match[1]}\n${lines.join("\n")}\n${match[3]}\n`;
+}
+
+/**
+ * Service account private key from env.
+ * Supports literal \\n (Vercel), quoted values, single-line PEM, or full JSON.
+ */
 export function parseGooglePrivateKey(raw: string | undefined): string | null {
-  const trimmed = raw?.trim();
+  const trimmed = unwrapQuotes(raw ?? "");
   if (!trimmed) return null;
-  return trimmed.replace(/\\n/g, "\n");
+
+  if (trimmed.startsWith("{")) {
+    try {
+      const parsed = JSON.parse(trimmed) as { private_key?: string };
+      if (typeof parsed.private_key === "string") {
+        return parseGooglePrivateKey(parsed.private_key);
+      }
+    } catch {
+      /* not JSON */
+    }
+  }
+
+  let key = normalizePemNewlines(trimmed);
+  key = reflowSingleLinePem(key);
+  if (!key.includes("BEGIN")) return null;
+  if (!key.endsWith("\n")) key += "\n";
+  return key;
 }
 
 export async function getGoogleSheetsAccessToken(
@@ -31,7 +79,17 @@ export async function getGoogleSheetsAccessToken(
   const signer = createSign("RSA-SHA256");
   signer.update(unsigned);
   signer.end();
-  const signature = signer.sign(privateKeyPem);
+
+  let signature: Buffer;
+  try {
+    signature = signer.sign(privateKeyPem);
+  } catch (err) {
+    const hint =
+      "Check GOOGLE_SERVICE_ACCOUNT_KEY on Vercel: paste the private_key from your JSON file with \\n for line breaks, or set GOOGLE_SERVICE_ACCOUNT_JSON to the full JSON.";
+    const message = err instanceof Error ? err.message : String(err);
+    throw new Error(`${message}. ${hint}`);
+  }
+
   const assertion = `${unsigned}.${base64Url(signature)}`;
 
   const res = await fetch("https://oauth2.googleapis.com/token", {

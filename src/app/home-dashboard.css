@@ -565,6 +565,10 @@
   overflow: hidden;
 }
 
+.home-portfolio-card__bio {
+  -webkit-line-clamp: 3;
+}
+
 .home-portfolio-card__stocks {
   display: inline-block;
   margin-top: 0.35rem;

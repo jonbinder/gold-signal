@@ -9,6 +9,7 @@ const NAVY = "#11151F";
 export type InvestorPhotoInvestor = {
   name: string;
   slug: string;
+  photoUrl?: string | null;
 };
 
 type InvestorPhotoProps = {
@@ -67,7 +68,7 @@ function InitialFallback({
 export function InvestorPhoto({ investor, size, className = "", priority = false }: InvestorPhotoProps) {
   const pixelSize = PIXEL_SIZE[size];
   const borderPx = BORDER_PX[size];
-  const src = `/investor-photos/${investor.slug}.webp`;
+  const src = investor.photoUrl?.trim() || `/investor-photos/${investor.slug}.webp`;
   const [failed, setFailed] = useState(false);
 
   if (failed) {

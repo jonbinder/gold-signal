@@ -30,12 +30,18 @@ export function InvestorsList({ investors }: Props) {
           <li key={inv.id}>
             <article className="home-portfolio-card home-portfolio-card--compact investors-portfolio-card">
               <Link href={investorPath(inv.slug)} className="home-portfolio-card__photo-link" tabIndex={-1}>
-                <HomePortfolioCardPhoto name={inv.name} slug={inv.slug} priority={index < 6} />
+                <HomePortfolioCardPhoto
+                  name={inv.name}
+                  slug={inv.slug}
+                  photoUrl={inv.photoUrl}
+                  priority={index < 6}
+                />
               </Link>
               <div className="home-portfolio-card__body">
                 <Link href={investorPath(inv.slug)} className="home-portfolio-card__name">
                   {inv.name}
                 </Link>
+                <p className="home-portfolio-card__firm home-portfolio-card__bio">{inv.bioShort}</p>
                 {role ? <p className="home-portfolio-card__firm">{role}</p> : null}
                 <p className="investors-portfolio-card__meta tabular-nums">
                   <span className={`investor-type-badge investor-type-badge--${inv.type}`}>

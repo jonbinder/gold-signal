@@ -14,12 +14,18 @@ export function HomePortfolioCard({ row, priorityPhoto = false }: HomePortfolioC
   return (
     <article className="home-portfolio-card home-portfolio-card--compact">
       <Link href={investorPath(row.slug)} className="home-portfolio-card__photo-link" tabIndex={-1}>
-        <HomePortfolioCardPhoto name={row.name} slug={row.slug} priority={priorityPhoto} />
+        <HomePortfolioCardPhoto
+          name={row.name}
+          slug={row.slug}
+          photoUrl={row.photoUrl}
+          priority={priorityPhoto}
+        />
       </Link>
       <div className="home-portfolio-card__body">
         <Link href={investorPath(row.slug)} className="home-portfolio-card__name">
           {row.name}
         </Link>
+        <p className="home-portfolio-card__firm home-portfolio-card__bio">{row.bioShort}</p>
         {row.firm ? <p className="home-portfolio-card__firm">{row.firm}</p> : null}
         <Link href={investorPath(row.slug)} className="home-portfolio-card__stocks">
           {stockLabel}

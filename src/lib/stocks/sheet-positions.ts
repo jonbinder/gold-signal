@@ -1,5 +1,5 @@
 import { unstable_cache } from "next/cache";
-import { getInvestors } from "@/lib/investors/csv-data";
+import { getInvestorPositions } from "@/lib/investors/csv-data";
 import { isTrackedInvestorSlug, normalizeTrackedInvestorSlug } from "@/lib/investors/tracked-roster";
 import { normalizeTicker } from "@/lib/polygon";
 
@@ -17,7 +17,7 @@ function isPlaceholderPositionText(...parts: Array<string | null | undefined>): 
 async function loadCsvStocks(): Promise<SheetStockRow[]> {
   const byTicker = new Map<string, { companyName: string; holders: Map<string, string> }>();
 
-  for (const row of getInvestors()) {
+  for (const row of getInvestorPositions()) {
     const slug = normalizeTrackedInvestorSlug(row.investorSlug);
     if (!isTrackedInvestorSlug(slug)) continue;
     if (isPlaceholderPositionText(row.detail, row.sourceDetail)) continue;

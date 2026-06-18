@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
  */
 export async function GET() {
   const rows = getInvestors();
-  const slugs = [...new Set(rows.map((r) => r.investorSlug))];
+  const slugs = rows.map((r) => r.slug);
   revalidateInvestorPages(slugs);
 
   return NextResponse.json(

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { InvestorPhoto } from "@/components/InvestorPhoto";
 import { StockLogo } from "@/components/stocks/StockLogo";
+import { isInvestorNeedsData } from "@/lib/investors/csv-data";
 import { stockPath } from "@/lib/paths";
 import type { InvestorDetailModel } from "@/lib/investors/types";
 import { loadTrackedStocksSync } from "@/lib/tracked-stocks-load";
@@ -23,9 +24,21 @@ function formatAsOf(date: string): string {
   return d.toLocaleDateString("en-US", { month: "short", year: "numeric", day: "numeric", timeZone: "UTC" });
 }
 
+function websiteHref(raw: string): string {
+  if (raw.startsWith("http://") || raw.startsWith("https://")) return raw;
+  return `https://${raw}`;
+}
+
+function xProfileHref(handle: string): string {
+  const normalized = handle.trim().replace(/^@+/, "");
+  return `https://x.com/${encodeURIComponent(normalized)}`;
+}
+
 export function InvestorDetailView({ model }: { model: InvestorDetailModel }) {
   const { investor, positions } = model;
   const tracked = new Set(loadTrackedStocksSync().map((s) => s.ticker.toUpperCase()));
+  const showWebsite = !isInvestorNeedsData(investor.website ?? "");
+  const showX = !isInvestorNeedsData(investor.xHandle);
 
   return (
     <main className="funds-page">
@@ -36,7 +49,7 @@ export function InvestorDetailView({ model }: { model: InvestorDetailModel }) {
           </Link>
           <div className="funds-hero__profile">
             <InvestorPhoto
-              investor={{ name: investor.name, slug: investor.slug }}
+              investor={{ name: investor.name, slug: investor.slug, photoUrl: investor.photoUrl }}
               size="hero"
               priority
               className="funds-hero__photo"
@@ -47,20 +60,40 @@ export function InvestorDetailView({ model }: { model: InvestorDetailModel }) {
               </p>
               <h1 className="funds-hero__title">{investor.name}</h1>
               {investor.titleRole ? <p className="funds-hero__sub">{investor.titleRole}</p> : null}
-              {investor.bio ? <p className="funds-hero__sub">{investor.bio}</p> : null}
-              {investor.website ? (
-                <p className="funds-hero__sub" style={{ marginTop: "0.5rem" }}>
-                  <a href={investor.website} target="_blank" rel="noopener noreferrer">
-                    {investor.website.replace(/^https?:\/\//, "")}
-                  </a>
-                </p>
-              ) : null}
             </div>
           </div>
         </div>
       </header>
 
       <div className="funds-main">
+        <section className="investor-bio-section" aria-label="Investor bio">
+          <p className="investor-bio-section__text">{investor.bioLong}</p>
+          {showWebsite || showX ? (
+            <div className="investor-bio-section__links">
+              {showWebsite ? (
+                <a
+                  href={websiteHref(investor.website!)}
+                  className="investor-bio-section__link"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Website
+                </a>
+              ) : null}
+              {showX ? (
+                <a
+                  href={xProfileHref(investor.xHandle)}
+                  className="investor-bio-section__link"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  X
+                </a>
+              ) : null}
+            </div>
+          ) : null}
+        </section>
+
         <p className="funds-filter-note">
           Notable gold &amp; silver positions held by leading investors and funds — sourced from SEC filings and
           public statements. Not complete portfolios.

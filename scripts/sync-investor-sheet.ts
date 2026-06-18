@@ -7,8 +7,8 @@ import { getInvestors } from "../src/lib/investors/csv-data";
 function main() {
   const rows = getInvestors();
   const bySlug = new Map<string, number>();
-  for (const row of rows) {
-    bySlug.set(row.investorSlug, (bySlug.get(row.investorSlug) ?? 0) + 1);
+  for (const inv of rows) {
+    bySlug.set(inv.slug, inv.holdings.length);
   }
 
   console.log(

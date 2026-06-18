@@ -1,84 +1,84 @@
-investor,ticker,company_name,position_type,detail,source_type,source_detail,date
-Adrian Day,FNV,Franco-Nevada Corp,stake,~9% (named top position),interview,Podcast: Triangle Investor,2026-03
-Adrian Day,AEM,Agnico Eagle Mines Ltd,stake,~11% (named top position),interview,Podcast: Triangle Investor,2026-03
-Adrian Day,WPM,Wheaton Precious Metals Corp,stake,named holding,interview,Podcast: Triangle Investor,2026-03
-Adrian Day,FSM,Fortuna Mining Corp,stake,named holding,interview,Podcast: Triangle Investor,2026-03
-Adrian Day,PAAS,Pan American Silver Corp,stake,named holding,interview,Podcast: Lobo Tigre,2026-06-04
-Peter Schiff,AEM,Agnico Eagle Mines Ltd,fund_holding,6.60% of fund,Fund fact sheet,EuroPac EPGFX top-10 holdings,2026-06-15
-Peter Schiff,PAAS,Pan American Silver Corp,fund_holding,5.95% of fund,Fund fact sheet,EuroPac EPGFX top-10 holdings,2026-06-15
-Peter Schiff,FSM,Fortuna Mining Corp,fund_holding,5.40% of fund,Fund fact sheet,EuroPac EPGFX top-10 holdings,2026-06-15
-Peter Schiff,B,Barrick Mining Corp,fund_holding,5.40% of fund,Fund fact sheet,EuroPac EPGFX top-10 holdings,2026-06-15
-Peter Schiff,OR,OR Royalties Inc,fund_holding,5.22% of fund,Fund fact sheet,EuroPac EPGFX top-10 holdings,2026-06-15
-Peter Schiff,MTA,Metalla Royalty & Streaming Ltd,fund_holding,5.18% of fund,Fund fact sheet,EuroPac EPGFX top-10 holdings,2026-06-15
-Peter Schiff,HSTXF,Heliostar Metals Ltd,fund_holding,5.02% of fund,Fund fact sheet,EuroPac EPGFX top-10 holdings,2026-06-15
-Peter Schiff,RGLD,Royal Gold Inc,fund_holding,4.97% of fund,Fund fact sheet,EuroPac EPGFX top-10 holdings,2026-06-15
-Peter Schiff,FNV,Franco-Nevada Corp,fund_holding,4.38% of fund,Fund fact sheet,EuroPac EPGFX top-10 holdings,2026-06-15
-Eric Sprott,DSVSF,Discovery Silver Corp,stake,"43,221,500 sh, ~22.07% weighting",SEC Form 4 / GuruFocus,"Reporting owner holdings, as of 2025-10-09",2025-10-09
-Eric Sprott,JAGGF,Jaguar Mining Inc,stake,"33,293,204 sh, ~13.05% weighting",SEC Form 4 / GuruFocus,"Reporting owner holdings, as of 2025-04-25",2025-04-25
-Eric Sprott,ANPMF,Andean Precious Metals Corp,stake,"23,109,638 sh, ~9.64% weighting",SEC Form 4 / GuruFocus,"Reporting owner holdings, as of 2024-10-08",2024-10-08
-Eric Sprott,HYMC,Hycroft Mining Holding Corp,stake,"Filed as 10% owner; added 300,000 sh in April (950,000 sh YTD 2026)",SEC Form 4,"Form 4 transactions Apr 9 & Apr 24, 2026",2026-04-24
-Eric Sprott,TDRRF,Tudor Gold Corp,stake,Named holding among 36 reporting-owner positions,SEC Form 4 / GuruFocus,Reporting owner holdings,2026-02
-Eric Sprott,SPOFF,EarthLabs Inc,stake,Named holding among 36 reporting-owner positions,SEC Form 4 / GuruFocus,Reporting owner holdings,2026-02
-Lawrence Lepard,RYES,Rise Gold Corp,stake,"Director / 10% owner; ~4,576,061 sh",SEC Form 4 / GuruFocus,Reporting owner holdings,2026-02-06
-Rob McEwen,MUX,McEwen Inc,stake,Chief Owner; >US$200M invested personally,SEC filing / company 8-K,Company disclosure of insider ownership,2026-03-31
-Rob McEwen,GOTRF,Goliath Resources Ltd,company_holding,"MUX acquired 5,181,347 units",SEC Form 10-Q,"McEwen Inc 10-Q, Mar 10, 2025 purchase",2025-03-10
-Rob McEwen,PAVLF,Paragon Advanced Labs Inc,company_holding,"27.3% interest, cost basis $13.7M",SEC Form 8-K,"McEwen Inc 8-K, acquired Dec 9, 2025",2025-12-09
-Lawrence Lepard,OMGGF,Omai Gold Mines Corp,stake,Big fund position; sees 5-10x potential,interview,Mining Stock Education / Bill Powers,2026-06
-Lawrence Lepard,LGCXF,Lahontan Gold Corp,stake,Big fund position; sees 5-10x potential,interview,Mining Stock Education / Bill Powers,2026-06
-Lawrence Lepard,ASM,Avino Silver & Gold Mines Ltd,stake,Named holding ('I love Avino'),interview,Mining Stock Education / Bill Powers,2026-06
-Lawrence Lepard,CDE,Coeur Mining Inc,stake,Named holding ('I love Coeur'),interview,Mining Stock Education / Bill Powers,2026-06
-Lawrence Lepard,AGMRF,Silver Mountain Resources Inc,stake,Named holding; favored as pure-silver development story,interview,Mining Stock Education / Bill Powers,2026-06
-Lawrence Lepard,PAAS,Pan American Silver Corp,stake,Named holding (large-cap),interview,Mining Stock Education / Bill Powers,2026-06
-Lawrence Lepard,EXK,Endeavour Silver Corp,stake,Named holding; growing production,interview,Mining Stock Education / Bill Powers,2026-06
-Lawrence Lepard,BTG,B2Gold Corp,stake,"Named deep-value holding; 'silly cheap', possible Africa spinoff",interview,Mining Stock Education / Bill Powers,2026-06
-Lawrence Lepard,ZAUIF,Zodiac Gold Inc,stake,"Large recent position; ON BOARD (director). <$100M cap, early-stage West Africa",interview,Mining Stock Education / Bill Powers / company PR Dec 29 2025,2026-06
-Lawrence Lepard,BYAGF,Banyan Gold Corp,stake,"Named holding; cheap per-ounce, Yukon (Tara)",interview,Mining Stock Education / Bill Powers,2026-06
-Lawrence Lepard,LGCFF,Lavras Gold Corp,stake,"~10% of fund; ON BOARD (director), Brazil drill story, PEA pending",interview,Mining Stock Education / Bill Powers,2026-06
-Lawrence Lepard,CBGZF,Cabral Gold Inc,stake,"Named holding; ON BOARD (director), Brazil, near-term heap-leach producer",interview,Mining Stock Education / Bill Powers,2026-06
-Rick Rule,RGLD,Royal Gold Inc,public_statement,named holding / loves royalty model,interview,VRIC 2026 / Triangle Investor,2026-01
-Rick Rule,GLDG,GoldMining Inc,public_statement,named long-term hold,interview,Triangle Investor portfolio breakdown,2025-12
-Rick Rule,MUX,McEwen Inc,public_statement,owns; copper upside,interview,Triangle Investor portfolio breakdown,2025-12
-Rick Rule,ODV,Osisko Development Corp,public_statement,owns,interview,Triangle Investor portfolio breakdown,2025-12
-Rick Rule,SCTSF,Scottie Resources Corp,public_statement,small position,interview,Triangle Investor portfolio breakdown,2025-12
-Rick Rule,HHLKF,Hot Chili Ltd,public_statement,owns; large deposit,interview,Triangle Investor portfolio breakdown,2025-12
-Rick Rule,VZLA,Vizsla Silver Corp,public_statement,named silver reinvestment holding,interview,"INN, after VRIC 2026",2026-02-16
-Garrett Goggin,NEM,Newmont Corp,public_statement,Named pick; called the rebound,public commentary,Golden Portfolio / interviews,2025
-Garrett Goggin,ELE,Elemental Royalty,public_statement,Named pick; called the rebound,public commentary,Golden Portfolio / interviews,2026
-Don Durrett,AUMBF,1911 Gold Corp,stake,named holding,X Social Media,25 Must Own List,5/8/2026
-Don Durrett,USAS,Americas Gold & Silver Corp,stake,named holding,X Social Media,25 Must Own List,5/8/2026
-Don Durrett,ADSLF,Andean Silver Ltd,stake,named holding,X Social Media,25 Must Own List,5/8/2026
-Don Durrett,ASM,Avino Silver & Gold Mines Ltd,stake,named holding,X Social Media,25 Must Own List,5/8/2026
-Don Durrett,AYA,Aya Gold & Silver Inc,stake,named holding,X Social Media,25 Must Own List,5/8/2026
-Don Durrett,ASX: BMC,BMC Minerals Ltd,stake,named holding,X Social Media,25 Must Own List,5/8/2026
-Don Durrett,ASX: CMM,Capricorn Metals Ltd,stake,named holding,X Social Media,25 Must Own List,5/8/2026
-Don Durrett,CDE,Coeur Mining Inc,stake,named holding,X Social Media,25 Must Own List,5/8/2026
-Don Durrett,DSVSF,Discovery Silver Corp,stake,named holding,X Social Media,25 Must Own List,5/8/2026
-Don Durrett,EXK,Endeavour Silver Corp,stake,named holding,X Social Media,25 Must Own List,5/8/2026
-Don Durrett,AG,First Majestic Silver Corp,stake,named holding,X Social Media,25 Must Own List,5/8/2026
-Don Durrett,FNLPF,Fresnillo Plc,stake,named holding,X Social Media,25 Must Own List,5/8/2026
-Don Durrett,GLGDF,Gogold Resources,stake,named holding,X Social Media,25 Must Own List,5/8/2026
-Don Durrett,ASX: GGP,Greatland Resources Ltd,stake,named holding,X Social Media,25 Must Own List,5/8/2026
-Don Durrett,GSVRF,Guanajuato Silver,stake,named holding,X Social Media,25 Must Own List,5/8/2026
-Don Durrett,HL,Hecla Mining Company,stake,named holding,X Social Media,25 Must Own List,5/8/2026
-Don Durrett,HBEIF,Honey Badger Silver,stake,named holding,X Social Media,25 Must Own List,5/8/2026
-Don Durrett,NXGCF,NexGold Mining Corp,stake,named holding,X Social Media,25 Must Own List,5/8/2026
-Don Durrett,PAAS,Pan American Silver Corp,stake,named holding,X Social Media,25 Must Own List,5/8/2026
-Don Durrett,RMLRF,Ramelius Resources Ltd,stake,named holding,X Social Media,25 Must Own List,5/8/2026
-Don Durrett,RGRNF,Regis Resources Ltd,stake,named holding,X Social Media,25 Must Own List,5/8/2026
-Don Durrett,SCZM,Santacruz Silver Mining Ltd,stake,named holding,X Social Media,25 Must Own List,5/8/2026
-Don Durrett,TSKFF,Talisker Resources Ltd,stake,named holding,X Social Media,25 Must Own List,5/8/2026
-Don Durrett,VZLA,Vizsla Silver Corp,stake,named holding,X Social Media,25 Must Own List,5/8/2026
-Don Durrett,WGXRF,Westgold Resources Ltd,stake,named holding,X Social Media,25 Must Own List,5/8/2026
-Ross Beaty,EQX,Equinox Gold Corp,stake,~3.5% / ~27.1M sh,exchange filings / press,"Early-2026 filings, Chair Emeritus",2026-01
-Ross Beaty,PAAS,Pan American Silver Corp,stake,"2,828,680 sh (founder, long-term holder)",SEC / GuruFocus,Reporting holdings,2026-05
-Ross Beaty,NEWP,New Pacific Metals Corp,stake,"14,724,068 sh",SEC / GuruFocus,Reporting holdings,2026-05
-Ross Beaty,ARREF,Amerigo Resources Ltd,stake,"17,747,792 sh",SEC / GuruFocus,Reporting holdings,2026-05
-Pierre Lassonde,ORLA,Orla Mining Ltd,stake,"10% security holder; ~25,859,363 sh",SEC Form 4 / GuruFocus,Reporting owner holdings,2026-05-11
-Pierre Lassonde,PRYMF,Prime Mining Corp,stake,"10% security holder; ~13,920,978 sh",SEC Form 4 / GuruFocus,Reporting owner holdings,2026-05-11
-Pierre Lassonde,AGXMF,Argentex Mining Corp,stake,"10% security holder; ~13,030,000 sh",SEC Form 4 / GuruFocus,Reporting owner holdings,2026-05-11
-Frank Giustra,ARIS,Aris Mining Corp,stake,"~24.18% (direct + Radcliffe), co-founder",SEC filing / InvestorsHub,Post debt-restructuring conversion disclosure,2025
-Frank Giustra,LBCMF,Libero Copper & Gold Corp,stake,11.2% stake; Fiore Group,press / Globe and Mail,"Acquired Mar 11, 2024",2024-03-11
-Frank Giustra,NRYCF,Nations Royalty Corp,stake,Founder (2024),company / MarketScreener,Founder disclosure,2024
-Frank Giustra,ONVEF,Oronova Energy (to become Seva Mining),company_holding,First Mining/Fiore-backed deal; largest shareholder,press release,"First Mining PR, Nov 20, 2025",2025-11-20
-Jon Binder,AUMBF,1911 Gold Corp,stake,named holding,X Social Media,named holding,2026-06-18
-Jon Binder,HSTXF,Heliostar Metals Ltd,stake,named holding,X Social Media,named holding,2026-06-18
+investor,ticker,company_name,position_type,detail,source_type,source_detail,date,bio_short,bio_long,website,x_handle 
+Adrian Day,FNV,Franco-Nevada Corp,stake,~9% (named top position),interview,Podcast: Triangle Investor,2026-03,"With over 35 years of experience, CEO of Adrian Day Asset Management, publishes Global Analyst. ","Adrian Day is Chairman and CEO of Adrian Day Asset Management, a registered Investment Advisory firm. He is also editor-in-chief of Global Analyst, an e-mail newsletter. With over 35 years of experience, Adrian Day curates specific buy and sell recommendations with a track record boasting an average 87.5% return for all closed positions. ",https://adrianday.com/,None
+Adrian Day,AEM,Agnico Eagle Mines Ltd,stake,~11% (named top position),interview,Podcast: Triangle Investor,2026-03,,,,
+Adrian Day,WPM,Wheaton Precious Metals Corp,stake,named holding,interview,Podcast: Triangle Investor,2026-03,,,,
+Adrian Day,FSM,Fortuna Mining Corp,stake,named holding,interview,Podcast: Triangle Investor,2026-03,,,,
+Adrian Day,PAAS,Pan American Silver Corp,stake,named holding,interview,Podcast: Lobo Tigre,2026-06-04,,,,
+Peter Schiff,AEM,Agnico Eagle Mines Ltd,fund_holding,6.60% of fund,Fund fact sheet,EuroPac EPGFX top-10 holdings,2026-06-15,,,,
+Peter Schiff,PAAS,Pan American Silver Corp,fund_holding,5.95% of fund,Fund fact sheet,EuroPac EPGFX top-10 holdings,2026-06-15,,,,
+Peter Schiff,FSM,Fortuna Mining Corp,fund_holding,5.40% of fund,Fund fact sheet,EuroPac EPGFX top-10 holdings,2026-06-15,,,,
+Peter Schiff,B,Barrick Mining Corp,fund_holding,5.40% of fund,Fund fact sheet,EuroPac EPGFX top-10 holdings,2026-06-15,,,,
+Peter Schiff,OR,OR Royalties Inc,fund_holding,5.22% of fund,Fund fact sheet,EuroPac EPGFX top-10 holdings,2026-06-15,,,,
+Peter Schiff,MTA,Metalla Royalty & Streaming Ltd,fund_holding,5.18% of fund,Fund fact sheet,EuroPac EPGFX top-10 holdings,2026-06-15,,,,
+Peter Schiff,HSTXF,Heliostar Metals Ltd,fund_holding,5.02% of fund,Fund fact sheet,EuroPac EPGFX top-10 holdings,2026-06-15,,,,
+Peter Schiff,RGLD,Royal Gold Inc,fund_holding,4.97% of fund,Fund fact sheet,EuroPac EPGFX top-10 holdings,2026-06-15,,,,
+Peter Schiff,FNV,Franco-Nevada Corp,fund_holding,4.38% of fund,Fund fact sheet,EuroPac EPGFX top-10 holdings,2026-06-15,,,,
+Eric Sprott,DSVSF,Discovery Silver Corp,stake,"43,221,500 sh, ~22.07% weighting",SEC Form 4 / GuruFocus,"Reporting owner holdings, as of 2025-10-09",2025-10-09,,,,
+Eric Sprott,JAGGF,Jaguar Mining Inc,stake,"33,293,204 sh, ~13.05% weighting",SEC Form 4 / GuruFocus,"Reporting owner holdings, as of 2025-04-25",2025-04-25,,,,
+Eric Sprott,ANPMF,Andean Precious Metals Corp,stake,"23,109,638 sh, ~9.64% weighting",SEC Form 4 / GuruFocus,"Reporting owner holdings, as of 2024-10-08",2024-10-08,,,,
+Eric Sprott,HYMC,Hycroft Mining Holding Corp,stake,"Filed as 10% owner; added 300,000 sh in April (950,000 sh YTD 2026)",SEC Form 4,"Form 4 transactions Apr 9 & Apr 24, 2026",2026-04-24,,,,
+Eric Sprott,TDRRF,Tudor Gold Corp,stake,Named holding among 36 reporting-owner positions,SEC Form 4 / GuruFocus,Reporting owner holdings,2026-02,,,,
+Eric Sprott,SPOFF,EarthLabs Inc,stake,Named holding among 36 reporting-owner positions,SEC Form 4 / GuruFocus,Reporting owner holdings,2026-02,,,,
+Lawrence Lepard,RYES,Rise Gold Corp,stake,"Director / 10% owner; ~4,576,061 sh",SEC Form 4 / GuruFocus,Reporting owner holdings,2026-02-06,,,,
+Rob McEwen,MUX,McEwen Inc,stake,Chief Owner; >US$200M invested personally,SEC filing / company 8-K,Company disclosure of insider ownership,2026-03-31,,,,
+Rob McEwen,GOTRF,Goliath Resources Ltd,company_holding,"MUX acquired 5,181,347 units",SEC Form 10-Q,"McEwen Inc 10-Q, Mar 10, 2025 purchase",2025-03-10,,,,
+Rob McEwen,PAVLF,Paragon Advanced Labs Inc,company_holding,"27.3% interest, cost basis $13.7M",SEC Form 8-K,"McEwen Inc 8-K, acquired Dec 9, 2025",2025-12-09,,,,
+Lawrence Lepard,OMGGF,Omai Gold Mines Corp,stake,Big fund position; sees 5-10x potential,interview,Mining Stock Education / Bill Powers,2026-06,,,,
+Lawrence Lepard,LGCXF,Lahontan Gold Corp,stake,Big fund position; sees 5-10x potential,interview,Mining Stock Education / Bill Powers,2026-06,,,,
+Lawrence Lepard,ASM,Avino Silver & Gold Mines Ltd,stake,Named holding ('I love Avino'),interview,Mining Stock Education / Bill Powers,2026-06,,,,
+Lawrence Lepard,CDE,Coeur Mining Inc,stake,Named holding ('I love Coeur'),interview,Mining Stock Education / Bill Powers,2026-06,,,,
+Lawrence Lepard,AGMRF,Silver Mountain Resources Inc,stake,Named holding; favored as pure-silver development story,interview,Mining Stock Education / Bill Powers,2026-06,,,,
+Lawrence Lepard,PAAS,Pan American Silver Corp,stake,Named holding (large-cap),interview,Mining Stock Education / Bill Powers,2026-06,,,,
+Lawrence Lepard,EXK,Endeavour Silver Corp,stake,Named holding; growing production,interview,Mining Stock Education / Bill Powers,2026-06,,,,
+Lawrence Lepard,BTG,B2Gold Corp,stake,"Named deep-value holding; 'silly cheap', possible Africa spinoff",interview,Mining Stock Education / Bill Powers,2026-06,,,,
+Lawrence Lepard,ZAUIF,Zodiac Gold Inc,stake,"Large recent position; ON BOARD (director). <$100M cap, early-stage West Africa",interview,Mining Stock Education / Bill Powers / company PR Dec 29 2025,2026-06,,,,
+Lawrence Lepard,BYAGF,Banyan Gold Corp,stake,"Named holding; cheap per-ounce, Yukon (Tara)",interview,Mining Stock Education / Bill Powers,2026-06,,,,
+Lawrence Lepard,LGCFF,Lavras Gold Corp,stake,"~10% of fund; ON BOARD (director), Brazil drill story, PEA pending",interview,Mining Stock Education / Bill Powers,2026-06,,,,
+Lawrence Lepard,CBGZF,Cabral Gold Inc,stake,"Named holding; ON BOARD (director), Brazil, near-term heap-leach producer",interview,Mining Stock Education / Bill Powers,2026-06,,,,
+Rick Rule,RGLD,Royal Gold Inc,public_statement,named holding / loves royalty model,interview,VRIC 2026 / Triangle Investor,2026-01,,,,
+Rick Rule,GLDG,GoldMining Inc,public_statement,named long-term hold,interview,Triangle Investor portfolio breakdown,2025-12,,,,
+Rick Rule,MUX,McEwen Inc,public_statement,owns; copper upside,interview,Triangle Investor portfolio breakdown,2025-12,,,,
+Rick Rule,ODV,Osisko Development Corp,public_statement,owns,interview,Triangle Investor portfolio breakdown,2025-12,,,,
+Rick Rule,SCTSF,Scottie Resources Corp,public_statement,small position,interview,Triangle Investor portfolio breakdown,2025-12,,,,
+Rick Rule,HHLKF,Hot Chili Ltd,public_statement,owns; large deposit,interview,Triangle Investor portfolio breakdown,2025-12,,,,
+Rick Rule,VZLA,Vizsla Silver Corp,public_statement,named silver reinvestment holding,interview,"INN, after VRIC 2026",2026-02-16,,,,
+Garrett Goggin,NEM,Newmont Corp,public_statement,Named pick; called the rebound,public commentary,Golden Portfolio / interviews,2025,,,,
+Garrett Goggin,ELE,Elemental Royalty,public_statement,Named pick; called the rebound,public commentary,Golden Portfolio / interviews,2026,,,,
+Don Durrett,AUMBF,1911 Gold Corp,stake,named holding,X Social Media,25 Must Own List,5/8/2026,,,,
+Don Durrett,USAS,Americas Gold & Silver Corp,stake,named holding,X Social Media,25 Must Own List,5/8/2026,,,,
+Don Durrett,ADSLF,Andean Silver Ltd,stake,named holding,X Social Media,25 Must Own List,5/8/2026,,,,
+Don Durrett,ASM,Avino Silver & Gold Mines Ltd,stake,named holding,X Social Media,25 Must Own List,5/8/2026,,,,
+Don Durrett,AYA,Aya Gold & Silver Inc,stake,named holding,X Social Media,25 Must Own List,5/8/2026,,,,
+Don Durrett,ASX: BMC,BMC Minerals Ltd,stake,named holding,X Social Media,25 Must Own List,5/8/2026,,,,
+Don Durrett,ASX: CMM,Capricorn Metals Ltd,stake,named holding,X Social Media,25 Must Own List,5/8/2026,,,,
+Don Durrett,CDE,Coeur Mining Inc,stake,named holding,X Social Media,25 Must Own List,5/8/2026,,,,
+Don Durrett,DSVSF,Discovery Silver Corp,stake,named holding,X Social Media,25 Must Own List,5/8/2026,,,,
+Don Durrett,EXK,Endeavour Silver Corp,stake,named holding,X Social Media,25 Must Own List,5/8/2026,,,,
+Don Durrett,AG,First Majestic Silver Corp,stake,named holding,X Social Media,25 Must Own List,5/8/2026,,,,
+Don Durrett,FNLPF,Fresnillo Plc,stake,named holding,X Social Media,25 Must Own List,5/8/2026,,,,
+Don Durrett,GLGDF,Gogold Resources,stake,named holding,X Social Media,25 Must Own List,5/8/2026,,,,
+Don Durrett,ASX: GGP,Greatland Resources Ltd,stake,named holding,X Social Media,25 Must Own List,5/8/2026,,,,
+Don Durrett,GSVRF,Guanajuato Silver,stake,named holding,X Social Media,25 Must Own List,5/8/2026,,,,
+Don Durrett,HL,Hecla Mining Company,stake,named holding,X Social Media,25 Must Own List,5/8/2026,,,,
+Don Durrett,HBEIF,Honey Badger Silver,stake,named holding,X Social Media,25 Must Own List,5/8/2026,,,,
+Don Durrett,NXGCF,NexGold Mining Corp,stake,named holding,X Social Media,25 Must Own List,5/8/2026,,,,
+Don Durrett,PAAS,Pan American Silver Corp,stake,named holding,X Social Media,25 Must Own List,5/8/2026,,,,
+Don Durrett,RMLRF,Ramelius Resources Ltd,stake,named holding,X Social Media,25 Must Own List,5/8/2026,,,,
+Don Durrett,RGRNF,Regis Resources Ltd,stake,named holding,X Social Media,25 Must Own List,5/8/2026,,,,
+Don Durrett,SCZM,Santacruz Silver Mining Ltd,stake,named holding,X Social Media,25 Must Own List,5/8/2026,,,,
+Don Durrett,TSKFF,Talisker Resources Ltd,stake,named holding,X Social Media,25 Must Own List,5/8/2026,,,,
+Don Durrett,VZLA,Vizsla Silver Corp,stake,named holding,X Social Media,25 Must Own List,5/8/2026,,,,
+Don Durrett,WGXRF,Westgold Resources Ltd,stake,named holding,X Social Media,25 Must Own List,5/8/2026,,,,
+Ross Beaty,EQX,Equinox Gold Corp,stake,~3.5% / ~27.1M sh,exchange filings / press,"Early-2026 filings, Chair Emeritus",2026-01,,,,
+Ross Beaty,PAAS,Pan American Silver Corp,stake,"2,828,680 sh (founder, long-term holder)",SEC / GuruFocus,Reporting holdings,2026-05,,,,
+Ross Beaty,NEWP,New Pacific Metals Corp,stake,"14,724,068 sh",SEC / GuruFocus,Reporting holdings,2026-05,,,,
+Ross Beaty,ARREF,Amerigo Resources Ltd,stake,"17,747,792 sh",SEC / GuruFocus,Reporting holdings,2026-05,,,,
+Pierre Lassonde,ORLA,Orla Mining Ltd,stake,"10% security holder; ~25,859,363 sh",SEC Form 4 / GuruFocus,Reporting owner holdings,2026-05-11,,,,
+Pierre Lassonde,PRYMF,Prime Mining Corp,stake,"10% security holder; ~13,920,978 sh",SEC Form 4 / GuruFocus,Reporting owner holdings,2026-05-11,,,,
+Pierre Lassonde,AGXMF,Argentex Mining Corp,stake,"10% security holder; ~13,030,000 sh",SEC Form 4 / GuruFocus,Reporting owner holdings,2026-05-11,,,,
+Frank Giustra,ARIS,Aris Mining Corp,stake,"~24.18% (direct + Radcliffe), co-founder",SEC filing / InvestorsHub,Post debt-restructuring conversion disclosure,2025,,,,
+Frank Giustra,LBCMF,Libero Copper & Gold Corp,stake,11.2% stake; Fiore Group,press / Globe and Mail,"Acquired Mar 11, 2024",2024-03-11,,,,
+Frank Giustra,NRYCF,Nations Royalty Corp,stake,Founder (2024),company / MarketScreener,Founder disclosure,2024,,,,
+Frank Giustra,ONVEF,Oronova Energy (to become Seva Mining),company_holding,First Mining/Fiore-backed deal; largest shareholder,press release,"First Mining PR, Nov 20, 2025",2025-11-20,,,,
+Jon Binder,AUMBF,1911 Gold Corp,stake,named holding,X Social Media,named holding,2026-06-18,,,,
+Jon Binder,HSTXF,Heliostar Metals Ltd,stake,named holding,X Social Media,named holding,2026-06-18,,,,

@@ -1,6 +1,6 @@
 import { cache } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { getInvestors } from "@/lib/investors/csv-data";
+import { getInvestorPositions } from "@/lib/investors/csv-data";
 import { getPublishedInvestorsList } from "@/lib/investors/queries";
 import { isTrackedInvestorSlug, normalizeTrackedInvestorSlug } from "@/lib/investors/tracked-roster";
 import { normalizeClientLogoUrl } from "@/lib/stock-branding";
@@ -18,7 +18,7 @@ function getServerClient(): SupabaseClient | null {
 async function loadMostHeld(supabase: SupabaseClient): Promise<HomeMostHeldRow[]> {
   const byTicker = new Map<string, { companyName: string; investors: Set<string> }>();
 
-  for (const row of getInvestors()) {
+  for (const row of getInvestorPositions()) {
     const slug = normalizeTrackedInvestorSlug(row.investorSlug);
     if (!isTrackedInvestorSlug(slug)) continue;
     const ticker = normalizeTicker(row.ticker);
@@ -78,6 +78,8 @@ async function loadRecentlyUpdatedPortfolios(): Promise<HomePopularInvestorRow[]
       firm:
         inv.titleRole?.trim() ||
         (inv.type === "fund" ? "Fund" : "Independent investor"),
+      bioShort: inv.bioShort,
+      photoUrl: inv.photoUrl,
       stockCount: inv.positionCount,
       lastUpdatedAt: inv.updatedAt,
     }));

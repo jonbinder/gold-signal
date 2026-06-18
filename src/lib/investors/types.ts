@@ -15,6 +15,9 @@ export type InvestorProfile = {
   type: InvestorType;
   titleRole: string | null;
   bio: string | null;
+  bioShort: string;
+  bioLong: string;
+  xHandle: string;
   photoUrl: string | null;
   website: string | null;
   cik: string | null;

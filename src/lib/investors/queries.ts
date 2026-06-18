@@ -3,7 +3,14 @@ import { cache } from "react";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { normalizeTicker } from "@/lib/polygon";
 import { readServiceRoleKey, readSupabaseAnonKey, readSupabaseUrl } from "@/lib/submission-supabase";
-import { getInvestors, slugFromInvestorName, type CsvInvestorPosition } from "@/lib/investors/csv-data";
+import {
+  getCsvInvestorBySlug,
+  getInvestorPositions,
+  getInvestors,
+  INVESTOR_NEEDS_DATA,
+  slugFromInvestorName,
+  type CsvInvestorPosition,
+} from "@/lib/investors/csv-data";
 import type {
   InvestorDetailModel,
   InvestorListItem,
@@ -85,16 +92,19 @@ function getAnonClient() {
   return getInvestorsClient().client;
 }
 
-function mapInvestor(row: InvestorRow): InvestorProfile {
+function mapInvestor(row: InvestorRow, csvProfile?: ReturnType<typeof getCsvInvestorBySlug>): InvestorProfile {
   return {
     id: row.id,
     slug: row.slug,
     name: row.name,
     type: row.investor_type ?? "fund",
     titleRole: row.title_role,
-    bio: row.bio,
-    photoUrl: row.photo_url,
-    website: row.website ?? row.website_url,
+    bio: csvProfile?.bioLong ?? row.bio,
+    bioShort: csvProfile?.bioShort ?? INVESTOR_NEEDS_DATA,
+    bioLong: csvProfile?.bioLong ?? INVESTOR_NEEDS_DATA,
+    xHandle: csvProfile?.xHandle ?? INVESTOR_NEEDS_DATA,
+    photoUrl: csvProfile?.photoPath ?? row.photo_url,
+    website: csvProfile ? csvProfile.website : row.website ?? row.website_url ?? INVESTOR_NEEDS_DATA,
     cik: row.cik,
     focusNote: row.focus_note,
     contextNote: row.context_note,
@@ -103,7 +113,7 @@ function mapInvestor(row: InvestorRow): InvestorProfile {
   };
 }
 
-function mapListInvestor(row: InvestorListRow): InvestorProfile {
+function mapListInvestor(row: InvestorListRow, csvProfile?: ReturnType<typeof getCsvInvestorBySlug>): InvestorProfile {
   return {
     id: row.id,
     slug: row.slug,
@@ -111,7 +121,10 @@ function mapListInvestor(row: InvestorListRow): InvestorProfile {
     type: row.investor_type ?? "fund",
     titleRole: row.title_role,
     bio: null,
-    photoUrl: row.photo_url,
+    bioShort: csvProfile?.bioShort ?? INVESTOR_NEEDS_DATA,
+    bioLong: csvProfile?.bioLong ?? INVESTOR_NEEDS_DATA,
+    xHandle: csvProfile?.xHandle ?? INVESTOR_NEEDS_DATA,
+    photoUrl: csvProfile?.photoPath ?? row.photo_url,
     website: null,
     cik: null,
     focusNote: row.focus_note,
@@ -167,7 +180,7 @@ function mapCsvPosition(row: CsvInvestorPosition, investorId: string): InvestorP
 
 function loadCsvPositionsBySlug(): Map<string, CsvInvestorPosition[]> {
   const bySlug = new Map<string, CsvInvestorPosition[]>();
-  for (const row of getInvestors()) {
+  for (const row of getInvestorPositions()) {
     const slug = normalizeTrackedInvestorSlug(row.investorSlug);
     if (!isTrackedInvestorSlug(slug)) continue;
     const list = bySlug.get(slug) ?? [];
@@ -220,7 +233,10 @@ async function loadPublishedInvestorsListRows(): Promise<InvestorListItem[]> {
   const rows = (data ?? []) as InvestorListRow[];
 
   return rows
-    .map((row) => mapListInvestor(row))
+    .map((row) => {
+      const csvProfile = getCsvInvestorBySlug(row.slug);
+      return mapListInvestor(row, csvProfile);
+    })
     .filter((investor) => isTrackedInvestorSlug(investor.slug))
     .map((investor) => {
       const csvRows = csvBySlug.get(investor.slug) ?? [];
@@ -228,6 +244,7 @@ async function loadPublishedInvestorsListRows(): Promise<InvestorListItem[]> {
       const csvUpdated = latestAsOfDate(csvRows);
       return {
         ...investor,
+        bioShort: investor.bioShort,
         manualPositionCount: sheetPositionCount,
         auto13fPositionCount: 0,
         positionCount: sheetPositionCount,
@@ -239,7 +256,7 @@ async function loadPublishedInvestorsListRows(): Promise<InvestorListItem[]> {
 
 const loadPublishedInvestorsListCached = unstable_cache(
   loadPublishedInvestorsListSorted,
-  ["investors-list-published-v7-csv"],
+  ["investors-list-published-v8-csv-bio"],
   { revalidate: 3600, tags: [INVESTORS_LIST_CACHE_TAG] },
 );
 
@@ -267,7 +284,8 @@ async function loadInvestorDetail(slug: string): Promise<InvestorDetailModel | n
     .maybeSingle();
 
   if (error || !data) return null;
-  const investor = mapInvestor(data as InvestorRow);
+  const csvProfile = getCsvInvestorBySlug(normalized);
+  const investor = mapInvestor(data as InvestorRow, csvProfile);
 
   const csvRows = loadCsvPositionsBySlug().get(normalized) ?? [];
   const manualPositions = dedupePositionsByTicker(
@@ -291,7 +309,7 @@ export async function getInvestorDetail(slug: string): Promise<InvestorDetailMod
   const normalized = slug.trim().toLowerCase();
   return unstable_cache(
     () => loadInvestorDetail(normalized),
-    ["investor-detail-csv-v1", normalized],
+    ["investor-detail-csv-v2-bio", normalized],
     { revalidate: 3600, tags: [INVESTORS_LIST_CACHE_TAG, `investor-${normalized}`] },
   )();
 }
@@ -301,7 +319,7 @@ export const getPublishedInvestorsForTicker = cache(
     const sym = normalizeTicker(ticker);
     const out = new Map<string, { slug: string; name: string; type: InvestorType }>();
 
-    for (const row of getInvestors()) {
+    for (const row of getInvestorPositions()) {
       if (row.ticker !== sym) continue;
       const slug = normalizeTrackedInvestorSlug(row.investorSlug);
       if (!isTrackedInvestorSlug(slug)) continue;

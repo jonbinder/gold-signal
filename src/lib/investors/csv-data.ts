@@ -1,9 +1,27 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { normalizeTicker } from "@/lib/polygon";
 import type { PositionType } from "@/lib/investors/types";
 
 const CSV_PATH = path.join(process.cwd(), "data", "GS-Investors.csv");
+const PLACEHOLDER_PHOTO = "/investors/placeholder-investor.svg";
+
+export const INVESTOR_NEEDS_DATA = "[ NEEDS DATA ]";
+
+const REQUIRED_CSV_COLUMNS = [
+  "investor",
+  "ticker",
+  "company_name",
+  "position_type",
+  "detail",
+  "source_type",
+  "source_detail",
+  "date",
+  "bio_short",
+  "bio_long",
+  "website",
+  "x_handle",
+] as const;
 
 const POSITION_TYPE_MAP: Record<string, PositionType> = {
   stake: "stake_filing",
@@ -33,8 +51,20 @@ export type CsvInvestorPosition = {
   asOfDate: string;
 };
 
-let cachedRows: CsvInvestorPosition[] | null = null;
+export type CsvInvestor = {
+  name: string;
+  slug: string;
+  bioShort: string;
+  bioLong: string;
+  website: string;
+  xHandle: string;
+  photoPath: string;
+  holdings: CsvInvestorPosition[];
+};
+
+let cachedInvestors: CsvInvestor[] | null = null;
 let loggedPreview = false;
+let loggedInvestors = false;
 
 export function slugFromInvestorName(name: string): string {
   const base = name
@@ -45,6 +75,45 @@ export function slugFromInvestorName(name: string): string {
     .replace(/^-+|-+$/g, "")
     .slice(0, 72);
   return base || "investor";
+}
+
+export function isInvestorNeedsData(value: string): boolean {
+  return value.trim() === INVESTOR_NEEDS_DATA;
+}
+
+function isEmptyCsvValue(value: string): boolean {
+  const t = value.trim();
+  if (!t) return true;
+  const lower = t.toLowerCase();
+  return lower === "none" || lower === "n/a" || lower === "null";
+}
+
+function normalizeInvestorField(value: string): string {
+  return isEmptyCsvValue(value) ? INVESTOR_NEEDS_DATA : value.trim();
+}
+
+function pickFirstNonEmpty(current: string, next: string): string {
+  if (!isEmptyCsvValue(current)) return current.trim();
+  if (!isEmptyCsvValue(next)) return next.trim();
+  return "";
+}
+
+export function resolveInvestorPhotoPath(slug: string): string {
+  const dirs = [
+    { base: path.join(process.cwd(), "public", "investor-photos"), urlPrefix: "/investor-photos" },
+    { base: path.join(process.cwd(), "public", "investors"), urlPrefix: "/investors" },
+    { base: path.join(process.cwd(), "public", "images", "investors"), urlPrefix: "/images/investors" },
+  ];
+  const extensions = [".webp", ".jpg", ".jpeg", ".png"];
+
+  for (const { base, urlPrefix } of dirs) {
+    for (const ext of extensions) {
+      const filePath = path.join(base, `${slug}${ext}`);
+      if (existsSync(filePath)) return `${urlPrefix}/${slug}${ext}`;
+    }
+  }
+
+  return PLACEHOLDER_PHOTO;
 }
 
 function parseAsOfDate(raw: string): string | null {
@@ -133,48 +202,24 @@ function logCsvPreview(grid: string[][]): void {
   if (grid[2]) console.info("[gs-investors-csv] row 2:", grid[2]);
 }
 
+function logInvestorSummary(investors: CsvInvestor[]): void {
+  if (loggedInvestors) return;
+  loggedInvestors = true;
+  console.info(
+    "[gs-investors-csv] parsed investors:",
+    investors.map((inv) => ({
+      name: inv.name,
+      bio_short: inv.bioShort,
+      photo: inv.photoPath,
+    })),
+  );
+}
+
 function loadCsvGrid(): string[][] {
   const raw = readFileSync(CSV_PATH, "utf8");
   const grid = parseCsvText(raw.replace(/^\uFEFF/, ""));
   logCsvPreview(grid);
   return grid;
-}
-
-function rowToPosition(cells: string[], col: Map<string, number>): CsvInvestorPosition | null {
-  const get = (name: string) => {
-    const idx = col.get(name);
-    if (idx == null) return "";
-    return (cells[idx] ?? "").trim();
-  };
-
-  const investor = get("investor");
-  const tickerRaw = get("ticker");
-  const companyName = get("company_name");
-  const positionTypeRaw = get("position_type");
-  const detail = get("detail");
-  const sourceType = get("source_type");
-  const sourceDetail = get("source_detail");
-  const asOfRaw = get("date") || get("as_of_date");
-
-  if (!investor || !tickerRaw || !detail || !sourceType || !sourceDetail || !asOfRaw) return null;
-
-  const positionType = mapPositionType(positionTypeRaw);
-  if (!positionType) return null;
-
-  const asOfDate = parseAsOfDate(asOfRaw);
-  if (!asOfDate) return null;
-
-  return {
-    investor,
-    investorSlug: slugFromInvestorName(investor),
-    ticker: normalizeTicker(tickerRaw.replace(/^US:/, "")),
-    companyName: companyName || tickerRaw,
-    positionType,
-    detail,
-    sourceType,
-    sourceDetail,
-    asOfDate,
-  };
 }
 
 function buildColumnMap(header: string[]): Map<string, number> {
@@ -188,27 +233,125 @@ function buildColumnMap(header: string[]): Map<string, number> {
   return col;
 }
 
-/**
- * Read GS-Investors.csv at build/request time (server only).
- * Column mapping: investor, ticker, company_name, position_type, detail, source_type, source_detail, date.
- */
-export function getInvestors(): CsvInvestorPosition[] {
-  if (cachedRows) return cachedRows;
-
-  const grid = loadCsvGrid();
-  if (grid.length < 2) {
-    cachedRows = [];
-    return cachedRows;
+function assertRequiredColumns(col: Map<string, number>): void {
+  const missing = REQUIRED_CSV_COLUMNS.filter((name) => !col.has(name));
+  if (missing.length > 0) {
+    throw new Error(`GS-Investors.csv missing required columns: ${missing.join(", ")}`);
   }
+}
+
+function rowGet(cells: string[], col: Map<string, number>, name: string): string {
+  const idx = col.get(name);
+  if (idx == null) return "";
+  return (cells[idx] ?? "").trim();
+}
+
+function rowToPosition(cells: string[], col: Map<string, number>, investor: string, investorSlug: string): CsvInvestorPosition | null {
+  const tickerRaw = rowGet(cells, col, "ticker");
+  const companyName = rowGet(cells, col, "company_name");
+  const positionTypeRaw = rowGet(cells, col, "position_type");
+  const detail = rowGet(cells, col, "detail");
+  const sourceType = rowGet(cells, col, "source_type");
+  const sourceDetail = rowGet(cells, col, "source_detail");
+  const asOfRaw = rowGet(cells, col, "date");
+
+  if (!tickerRaw || !detail || !sourceType || !sourceDetail || !asOfRaw) return null;
+
+  const positionType = mapPositionType(positionTypeRaw);
+  if (!positionType) return null;
+
+  const asOfDate = parseAsOfDate(asOfRaw);
+  if (!asOfDate) return null;
+
+  return {
+    investor,
+    investorSlug,
+    ticker: normalizeTicker(tickerRaw.replace(/^US:/, "")),
+    companyName: companyName || tickerRaw,
+    positionType,
+    detail,
+    sourceType,
+    sourceDetail,
+    asOfDate,
+  };
+}
+
+type InvestorAccumulator = {
+  name: string;
+  slug: string;
+  bioShort: string;
+  bioLong: string;
+  website: string;
+  xHandle: string;
+  holdings: CsvInvestorPosition[];
+};
+
+function buildInvestorsFromGrid(grid: string[][]): CsvInvestor[] {
+  if (grid.length < 2) return [];
 
   const col = buildColumnMap(grid[0] ?? []);
-  const rows: CsvInvestorPosition[] = [];
+  assertRequiredColumns(col);
+
+  const byName = new Map<string, InvestorAccumulator>();
 
   for (let i = 1; i < grid.length; i += 1) {
-    const parsed = rowToPosition(grid[i] ?? [], col);
-    if (parsed) rows.push(parsed);
+    const cells = grid[i] ?? [];
+    const investorName = rowGet(cells, col, "investor");
+    if (!investorName) continue;
+
+    const slug = slugFromInvestorName(investorName);
+    const existing = byName.get(investorName) ?? {
+      name: investorName,
+      slug,
+      bioShort: "",
+      bioLong: "",
+      website: "",
+      xHandle: "",
+      holdings: [],
+    };
+
+    existing.bioShort = pickFirstNonEmpty(existing.bioShort, rowGet(cells, col, "bio_short"));
+    existing.bioLong = pickFirstNonEmpty(existing.bioLong, rowGet(cells, col, "bio_long"));
+    existing.website = pickFirstNonEmpty(existing.website, rowGet(cells, col, "website"));
+    existing.xHandle = pickFirstNonEmpty(existing.xHandle, rowGet(cells, col, "x_handle"));
+
+    const position = rowToPosition(cells, col, investorName, slug);
+    if (position) existing.holdings.push(position);
+
+    byName.set(investorName, existing);
   }
 
-  cachedRows = rows;
-  return cachedRows;
+  return [...byName.values()].map((acc) => ({
+    name: acc.name,
+    slug: acc.slug,
+    bioShort: normalizeInvestorField(acc.bioShort),
+    bioLong: normalizeInvestorField(acc.bioLong),
+    website: normalizeInvestorField(acc.website),
+    xHandle: normalizeInvestorField(acc.xHandle),
+    photoPath: resolveInvestorPhotoPath(acc.slug),
+    holdings: acc.holdings,
+  }));
+}
+
+/**
+ * Grouped investors from GS-Investors.csv (server only).
+ * Each investor includes holdings and profile fields from the sheet.
+ */
+export function getInvestors(): CsvInvestor[] {
+  if (cachedInvestors) return cachedInvestors;
+  cachedInvestors = buildInvestorsFromGrid(loadCsvGrid());
+  logInvestorSummary(cachedInvestors);
+  return cachedInvestors;
+}
+
+/** Flat position rows derived from grouped CSV investors. */
+export function getInvestorPositions(): CsvInvestorPosition[] {
+  return getInvestors().flatMap((inv) =>
+    inv.holdings.map((row) => ({ ...row, investorSlug: inv.slug })),
+  );
+}
+
+export function getCsvInvestorBySlug(slug: string): CsvInvestor | undefined {
+  const normalized = slug.trim().toLowerCase();
+  return getInvestors().find((inv) => inv.slug === normalized);
 }

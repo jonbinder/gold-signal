@@ -2,6 +2,8 @@ export type HomePopularInvestorRow = {
   slug: string;
   name: string;
   firm: string;
+  bioShort: string;
+  photoUrl: string | null;
   stockCount: number;
   lastUpdatedAt: string;
 };

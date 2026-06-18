@@ -9,6 +9,7 @@ const PHOTO_PX = 112;
 type HomePortfolioCardPhotoProps = {
   name: string;
   slug: string;
+  photoUrl?: string | null;
   priority?: boolean;
 };
 
@@ -19,8 +20,13 @@ function investorInitials(name: string): string {
   return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
 }
 
-export function HomePortfolioCardPhoto({ name, slug, priority = false }: HomePortfolioCardPhotoProps) {
-  const src = `/investor-photos/${slug}.webp`;
+export function HomePortfolioCardPhoto({
+  name,
+  slug,
+  photoUrl,
+  priority = false,
+}: HomePortfolioCardPhotoProps) {
+  const src = photoUrl?.trim() || `/investor-photos/${slug}.webp`;
   const [failed, setFailed] = useState(false);
 
   if (failed) {

@@ -17,9 +17,6 @@
     },
     "src/app/api/cron/refresh-metals/route.ts": {
       "maxDuration": 60
-    },
-    "src/app/api/sync-investor-sheet/route.ts": {
-      "maxDuration": 60
     }
   }
 }

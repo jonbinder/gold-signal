@@ -1,8 +1,10 @@
 import { cache } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { getInvestors } from "@/lib/investors/csv-data";
+import { getPublishedInvestorsList } from "@/lib/investors/queries";
+import { isTrackedInvestorSlug, normalizeTrackedInvestorSlug } from "@/lib/investors/tracked-roster";
 import { normalizeClientLogoUrl } from "@/lib/stock-branding";
 import { normalizeTicker } from "@/lib/polygon";
-import { getPublishedInvestorsList } from "@/lib/investors/queries";
 import { createSupabasePublicClient, createSupabaseServiceClient } from "@/lib/supabase";
 import type { HomeDashboardModel, HomeMostHeldRow, HomePopularInvestorRow } from "@/lib/home/types";
 
@@ -13,32 +15,17 @@ function getServerClient(): SupabaseClient | null {
   return createSupabaseServiceClient() ?? createSupabasePublicClient();
 }
 
-async function loadPublishedInvestorIds(supabase: SupabaseClient): Promise<Set<string>> {
-  const { data } = await supabase.from("investors").select("id").eq("is_published", true);
-  return new Set((data ?? []).map((r) => (r as { id: string }).id));
-}
-
 async function loadMostHeld(supabase: SupabaseClient): Promise<HomeMostHeldRow[]> {
-  const publishedIds = await loadPublishedInvestorIds(supabase);
-  if (publishedIds.size === 0) return [];
-
   const byTicker = new Map<string, { companyName: string; investors: Set<string> }>();
 
-  const { data: positions } = await supabase
-    .from("investor_positions")
-    .select("ticker, company_name, investor_id")
-    .eq("is_published", true)
-    .eq("google_sheet_synced", true);
-
-  for (const row of positions ?? []) {
-    const investorId = (row as { investor_id: string }).investor_id;
-    if (!publishedIds.has(investorId)) continue;
-    const ticker = normalizeTicker((row as { ticker: string }).ticker);
+  for (const row of getInvestors()) {
+    const slug = normalizeTrackedInvestorSlug(row.investorSlug);
+    if (!isTrackedInvestorSlug(slug)) continue;
+    const ticker = normalizeTicker(row.ticker);
     if (!ticker) continue;
-    const companyName =
-      (row as { company_name?: string }).company_name?.trim() || ticker;
+    const companyName = row.companyName.trim() || ticker;
     const entry = byTicker.get(ticker) ?? { companyName, investors: new Set<string>() };
-    entry.investors.add(investorId);
+    entry.investors.add(slug);
     if (!entry.companyName || entry.companyName === ticker) entry.companyName = companyName;
     byTicker.set(ticker, entry);
   }

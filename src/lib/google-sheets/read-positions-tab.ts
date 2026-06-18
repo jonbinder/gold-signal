@@ -1,3 +1,4 @@
+// TODO: Google Sheets API disabled — portfolio positions read from data/GS-Investors.csv.
 import { getGoogleSheetsAccessToken, parseGooglePrivateKey } from "@/lib/google-sheets/auth";
 
 export type SheetEnvConfig = {

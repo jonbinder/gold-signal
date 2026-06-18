@@ -28,9 +28,9 @@ export function WaitlistSignup() {
 
         <h1 className="waitlist-page__title">Get Early Access to GoldSignal</h1>
         <p className="waitlist-page__sub">
-          GoldSignal tracks what elite precious metals investors — Sprott, Rule, Schiff, and others —
-          actually own, sourced directly from SEC filings and fund disclosures. No opinions. No scores.
-          Just data. Join the waitlist and we&apos;ll notify you the moment accounts open.
+          GoldSignal tracks elite precious metals investors, sourced directly from SEC filings, company
+          disclosures, and announced holdings. Join the waitlist to be notified when login is available to
+          non members.
         </p>
 
         {submitted ? (
@@ -55,7 +55,7 @@ export function WaitlistSignup() {
                 </button>
               </div>
             </form>
-            <p className="waitlist-page__note">No spam. No forecasts. Just signal.</p>
+            <p className="waitlist-page__note">No spam. Just signal.</p>
           </>
         )}
       </div>

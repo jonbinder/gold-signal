@@ -1,36 +1,29 @@
 /**
- * Manual trigger: sync investor positions from Google Sheet → Supabase.
+ * Validate local GS-Investors CSV (replaces Google Sheets sync).
  * Run: npm run sync:investor-sheet
  */
-import * as dotenv from "dotenv";
-dotenv.config({ path: ".env.local" });
+import { getInvestors } from "../src/lib/investors/csv-data";
 
-import { syncInvestorPositionsFromGoogleSheet } from "../src/lib/investor-sheet-sync";
-import { createSupabaseServiceClient } from "../src/lib/supabase";
-import { revalidateInvestorsRemote } from "./revalidate-investors-remote";
-
-async function main() {
-  const supabase = createSupabaseServiceClient();
-  if (!supabase) {
-    console.error("SUPABASE_SERVICE_ROLE_KEY and NEXT_PUBLIC_SUPABASE_URL required");
-    process.exit(1);
+function main() {
+  const rows = getInvestors();
+  const bySlug = new Map<string, number>();
+  for (const row of rows) {
+    bySlug.set(row.investorSlug, (bySlug.get(row.investorSlug) ?? 0) + 1);
   }
 
-  const result = await syncInvestorPositionsFromGoogleSheet(supabase);
-  console.log(JSON.stringify(result, null, 2));
-  if (!result.ok) process.exit(1);
-
-  if (result.touchedSlugs?.length) {
-    const revalidated = await revalidateInvestorsRemote(result.touchedSlugs);
-    if (!revalidated) {
-      console.warn(
-        "Cache not busted remotely. Start dev server and re-run, or hit GET /api/sync-investor-sheet on production.",
-      );
-    }
-  }
+  console.log(
+    JSON.stringify(
+      {
+        ok: true,
+        source: "data/GS-Investors.csv",
+        rows: rows.length,
+        investors: bySlug.size,
+        byInvestor: Object.fromEntries(bySlug),
+      },
+      null,
+      2,
+    ),
+  );
 }
 
-main().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+main();

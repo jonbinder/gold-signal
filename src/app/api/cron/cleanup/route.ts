@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServiceClient } from "@/lib/supabase";
-import { revalidateInvestorPages } from "@/lib/investor-cache-revalidation";
-import { syncInvestorPositionsFromGoogleSheet } from "@/lib/investor-sheet-sync";
 import {
   getDeploymentOrigin,
   invokeProcessOne,
@@ -35,17 +33,8 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "Supabase not configured" }, { status: 503 });
   }
 
-  const sheetResult = await syncInvestorPositionsFromGoogleSheet(supabase);
-  if (sheetResult.ok) {
-    revalidateInvestorPages(sheetResult.touchedSlugs);
-  }
-  console.info("[cron/cleanup] Investor sheet sync", {
-    ok: sheetResult.ok,
-    upserted: sheetResult.upserted,
-    deleted: sheetResult.deleted,
-    skipped: sheetResult.skipped.length,
-    error: sheetResult.error,
-  });
+  // TODO: Restore Google Sheets → Supabase sync here if sheet pipeline is re-enabled.
+  // Portfolio positions now load from data/GS-Investors.csv at build time.
 
   const cutoff = new Date(Date.now() - STUCK_MS).toISOString();
   const origin = getDeploymentOrigin(req);
@@ -100,14 +89,6 @@ export async function GET(req: Request) {
     submissionIds: [...ids],
     metalsRefreshStarted: true,
     stockRefreshStarted: true,
-    investorSheetSync: {
-      ok: sheetResult.ok,
-      upserted: sheetResult.upserted,
-      deleted: sheetResult.deleted,
-      investorsCreated: sheetResult.investorsCreated,
-      skipped: sheetResult.skipped.length,
-      touchedSlugs: sheetResult.touchedSlugs,
-      error: sheetResult.error,
-    },
+    investorPositionsSource: "data/GS-Investors.csv",
   });
 }

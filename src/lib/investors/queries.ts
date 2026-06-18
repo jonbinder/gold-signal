@@ -3,6 +3,7 @@ import { cache } from "react";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { normalizeTicker } from "@/lib/polygon";
 import { readServiceRoleKey, readSupabaseAnonKey, readSupabaseUrl } from "@/lib/submission-supabase";
+import { getInvestors, slugFromInvestorName, type CsvInvestorPosition } from "@/lib/investors/csv-data";
 import type {
   InvestorDetailModel,
   InvestorListItem,
@@ -10,7 +11,7 @@ import type {
   InvestorProfile,
   InvestorType,
 } from "@/lib/investors/types";
-import { isTrackedInvestorSlug } from "@/lib/investors/tracked-roster";
+import { isTrackedInvestorSlug, normalizeTrackedInvestorSlug } from "@/lib/investors/tracked-roster";
 
 export const INVESTORS_LIST_CACHE_TAG = "investors-list";
 
@@ -42,24 +43,6 @@ type InvestorListRow = Pick<
   | "focus_note"
   | "sort_order"
 > & { updated_at: string | null };
-
-type PositionRow = {
-  id: string;
-  investor_id: string;
-  ticker: string;
-  company_name: string;
-  position_type: InvestorPosition["positionType"];
-  detail: string;
-  approx_size: string | null;
-  source_type: string;
-  source_detail: string;
-  as_of_date: string;
-  why_interesting: string | null;
-  is_published: boolean;
-  google_sheet_synced?: boolean;
-  created_at: string;
-  updated_at: string;
-};
 
 type InvestorsClientMode = "service_role" | "anon" | "none";
 
@@ -138,7 +121,6 @@ function mapListInvestor(row: InvestorListRow): InvestorProfile {
   };
 }
 
-
 function isPlaceholderPositionText(...parts: Array<string | null | undefined>): boolean {
   const hay = parts.filter(Boolean).join(" ").toUpperCase();
   return hay.includes("PLACEHOLDER");
@@ -156,36 +138,56 @@ function dedupePositionsByTicker(positions: InvestorPosition[]): InvestorPositio
   return out;
 }
 
-function mapManualPosition(row: PositionRow): InvestorPosition | null {
-  if (row.google_sheet_synced === false) return null;
-  if (isPlaceholderPositionText(row.detail, row.source_detail, row.why_interesting)) return null;
+function positionId(row: CsvInvestorPosition): string {
+  return `csv-${row.investorSlug}-${row.ticker}-${row.sourceType}-${row.sourceDetail}-${row.asOfDate}`;
+}
 
-  const clean = (value: string | null): string | null => {
-    if (!value) return value;
-    return value
-      .replace(/\s*\(research draft\)\s*/gi, " ")
-      .replace(/\s*[-\u2014]\s*verify[^.]*before publish\.?/gi, "")
-      .replace(/\s+/g, " ")
-      .trim();
-  };
+function mapCsvPosition(row: CsvInvestorPosition, investorId: string): InvestorPosition | null {
+  if (isPlaceholderPositionText(row.detail, row.sourceDetail)) return null;
 
+  const now = "1970-01-01T00:00:00.000Z";
   return {
-    id: row.id,
-    investorId: row.investor_id,
-    ticker: normalizeTicker(row.ticker),
-    companyName: row.company_name,
-    positionType: row.position_type,
-    detail: clean(row.detail) ?? "",
-    approxSize: row.approx_size,
-    sourceType: row.source_type,
-    sourceDetail: clean(row.source_detail) ?? "",
-    asOfDate: row.as_of_date,
-    whyInteresting: clean(row.why_interesting),
-    isPublished: row.is_published,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
+    id: positionId(row),
+    investorId,
+    ticker: row.ticker,
+    companyName: row.companyName,
+    positionType: row.positionType,
+    detail: row.detail,
+    approxSize: null,
+    sourceType: row.sourceType,
+    sourceDetail: row.sourceDetail,
+    asOfDate: row.asOfDate,
+    whyInteresting: null,
+    isPublished: true,
+    createdAt: now,
+    updatedAt: now,
     isAuto13f: false,
   };
+}
+
+function loadCsvPositionsBySlug(): Map<string, CsvInvestorPosition[]> {
+  const bySlug = new Map<string, CsvInvestorPosition[]>();
+  for (const row of getInvestors()) {
+    const slug = normalizeTrackedInvestorSlug(row.investorSlug);
+    if (!isTrackedInvestorSlug(slug)) continue;
+    const list = bySlug.get(slug) ?? [];
+    list.push({ ...row, investorSlug: slug });
+    bySlug.set(slug, list);
+  }
+  return bySlug;
+}
+
+function latestAsOfDate(rows: CsvInvestorPosition[]): string {
+  return rows.reduce((max, row) => (row.asOfDate > max ? row.asOfDate : max), "");
+}
+
+function countDistinctTickers(rows: CsvInvestorPosition[]): number {
+  const seen = new Set<string>();
+  for (const row of rows) {
+    if (isPlaceholderPositionText(row.detail, row.sourceDetail)) continue;
+    seen.add(row.ticker.toUpperCase());
+  }
+  return seen.size;
 }
 
 async function loadPublishedInvestorsListSorted(): Promise<InvestorListItem[]> {
@@ -214,63 +216,30 @@ async function loadPublishedInvestorsListRows(): Promise<InvestorListItem[]> {
     return [];
   }
 
+  const csvBySlug = loadCsvPositionsBySlug();
   const rows = (data ?? []) as InvestorListRow[];
-  const investors = rows.map((row) => ({
-    ...mapListInvestor(row),
-    updatedAt: row.updated_at ?? "",
-  }));
-  if (investors.length === 0) return [];
 
-  const ids = investors.map((i) => i.id);
-
-  const { data: sheetRows, error: sheetError } = await supabase
-    .from("investor_positions")
-    .select("investor_id, ticker, detail, source_detail, why_interesting")
-    .in("investor_id", ids)
-    .eq("is_published", true)
-    .eq("google_sheet_synced", true);
-
-  if (sheetError) {
-    console.error("[investors] sheet position counts query failed", sheetError);
-  }
-
-  const sheetCountById = new Map<string, number>();
-  const seenTickerByInvestor = new Map<string, Set<string>>();
-  for (const row of sheetRows ?? []) {
-    const investorId = (row as { investor_id: string }).investor_id;
-    const ticker = normalizeTicker((row as { ticker: string }).ticker);
-    if (
-      isPlaceholderPositionText(
-        (row as { detail?: string }).detail,
-        (row as { source_detail?: string }).source_detail,
-        (row as { why_interesting?: string | null }).why_interesting,
-      )
-    ) {
-      continue;
-    }
-    const seen = seenTickerByInvestor.get(investorId) ?? new Set<string>();
-    if (seen.has(ticker)) continue;
-    seen.add(ticker);
-    seenTickerByInvestor.set(investorId, seen);
-    sheetCountById.set(investorId, (sheetCountById.get(investorId) ?? 0) + 1);
-  }
-
-  return investors
+  return rows
+    .map((row) => mapListInvestor(row))
     .filter((investor) => isTrackedInvestorSlug(investor.slug))
     .map((investor) => {
-    const sheetPositionCount = sheetCountById.get(investor.id) ?? 0;
-    return {
-      ...investor,
-      manualPositionCount: sheetPositionCount,
-      auto13fPositionCount: 0,
-      positionCount: sheetPositionCount,
-    };
-  });
+      const csvRows = csvBySlug.get(investor.slug) ?? [];
+      const sheetPositionCount = countDistinctTickers(csvRows);
+      const csvUpdated = latestAsOfDate(csvRows);
+      return {
+        ...investor,
+        manualPositionCount: sheetPositionCount,
+        auto13fPositionCount: 0,
+        positionCount: sheetPositionCount,
+        updatedAt: csvUpdated || investor.id,
+      };
+    })
+    .filter((investor) => investor.positionCount > 0);
 }
 
 const loadPublishedInvestorsListCached = unstable_cache(
   loadPublishedInvestorsListSorted,
-  ["investors-list-published-v6-sheet-only"],
+  ["investors-list-published-v7-csv"],
   { revalidate: 3600, tags: [INVESTORS_LIST_CACHE_TAG] },
 );
 
@@ -284,7 +253,8 @@ export async function getPublishedInvestors(): Promise<InvestorListItem[]> {
 }
 
 async function loadInvestorDetail(slug: string): Promise<InvestorDetailModel | null> {
-  if (!isTrackedInvestorSlug(slug)) return null;
+  const normalized = normalizeTrackedInvestorSlug(slug);
+  if (!isTrackedInvestorSlug(normalized)) return null;
 
   const supabase = getAnonClient();
   if (!supabase) return null;
@@ -292,27 +262,22 @@ async function loadInvestorDetail(slug: string): Promise<InvestorDetailModel | n
   const { data, error } = await supabase
     .from("investors")
     .select(INVESTOR_SELECT)
-    .eq("slug", slug)
+    .eq("slug", normalized)
     .eq("is_published", true)
     .maybeSingle();
 
   if (error || !data) return null;
   const investor = mapInvestor(data as InvestorRow);
 
-  const { data: manualRaw } = await supabase
-    .from("investor_positions")
-    .select(
-      "id, investor_id, ticker, company_name, position_type, detail, approx_size, source_type, source_detail, as_of_date, why_interesting, is_published, google_sheet_synced, created_at, updated_at",
-    )
-    .eq("investor_id", investor.id)
-    .eq("is_published", true)
-    .eq("google_sheet_synced", true)
-    .order("as_of_date", { ascending: false });
+  const csvRows = loadCsvPositionsBySlug().get(normalized) ?? [];
   const manualPositions = dedupePositionsByTicker(
-    ((manualRaw ?? []) as PositionRow[])
-      .map(mapManualPosition)
-      .filter((row): row is InvestorPosition => row != null),
+    csvRows
+      .map((row) => mapCsvPosition(row, investor.id))
+      .filter((row): row is InvestorPosition => row != null)
+      .sort((a, b) => b.asOfDate.localeCompare(a.asOfDate)),
   );
+
+  if (manualPositions.length === 0) return null;
 
   return {
     investor,
@@ -326,32 +291,29 @@ export async function getInvestorDetail(slug: string): Promise<InvestorDetailMod
   const normalized = slug.trim().toLowerCase();
   return unstable_cache(
     () => loadInvestorDetail(normalized),
-    ["investor-detail-sheet-only", normalized],
+    ["investor-detail-csv-v1", normalized],
     { revalidate: 3600, tags: [INVESTORS_LIST_CACHE_TAG, `investor-${normalized}`] },
   )();
 }
 
 export const getPublishedInvestorsForTicker = cache(
   async (ticker: string): Promise<Array<{ slug: string; name: string; type: InvestorType }>> => {
-    const supabase = getAnonClient();
-    if (!supabase) return [];
     const sym = normalizeTicker(ticker);
-
-    const { data: manual } = await supabase
-      .from("investor_positions")
-      .select("investor_id, investor:investors(slug, name, investor_type, is_published)")
-      .eq("ticker", sym)
-      .eq("is_published", true)
-      .eq("google_sheet_synced", true);
-
     const out = new Map<string, { slug: string; name: string; type: InvestorType }>();
-    for (const row of manual ?? []) {
-      const inv = (row as { investor?: { slug?: string; name?: string; investor_type?: InvestorType; is_published?: boolean } })
-        .investor;
-      if (!inv?.slug || !inv?.name || inv.is_published !== true) continue;
-      out.set(inv.slug, { slug: inv.slug, name: inv.name, type: inv.investor_type ?? "fund" });
+
+    for (const row of getInvestors()) {
+      if (row.ticker !== sym) continue;
+      const slug = normalizeTrackedInvestorSlug(row.investorSlug);
+      if (!isTrackedInvestorSlug(slug)) continue;
+      if (isPlaceholderPositionText(row.detail, row.sourceDetail)) continue;
+      out.set(slug, { slug, name: row.investor, type: "individual" });
     }
 
     return [...out.values()].sort((a, b) => a.name.localeCompare(b.name));
   },
 );
+
+/** Resolve CSV investor name to tracked slug (for diagnostics). */
+export function investorNameToSlug(name: string): string {
+  return slugFromInvestorName(name);
+}

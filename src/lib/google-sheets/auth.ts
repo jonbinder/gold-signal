@@ -1,3 +1,4 @@
+// TODO: Google Sheets JWT auth disabled — portfolio positions read from data/GS-Investors.csv.
 import { createSign } from "crypto";
 
 function base64Url(input: string | Buffer): string {

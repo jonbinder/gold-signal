@@ -6,11 +6,37 @@ import Link from "next/link";
 export function WaitlistSignup() {
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  function handleSubmit(e: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    // TODO: POST email to waitlist API or Resend audience integration.
-    setSubmitted(true);
+    setError(null);
+    setSubmitting(true);
+
+    try {
+      const res = await fetch("/api/waitlist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+
+      if (!res.ok) {
+        setError("Something went wrong. Please try again.");
+        return;
+      }
+
+      const data = (await res.json()) as { success?: boolean };
+      if (data.success) {
+        setSubmitted(true);
+      } else {
+        setError("Something went wrong. Please try again.");
+      }
+    } catch {
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -50,10 +76,11 @@ export function WaitlistSignup() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
-                <button type="submit" className="waitlist-form__submit">
+                <button type="submit" className="waitlist-form__submit" disabled={submitting}>
                   Join the Waitlist
                 </button>
               </div>
+              {error ? <p className="waitlist-form__error">{error}</p> : null}
             </form>
             <p className="waitlist-page__note">No spam. Just signal.</p>
           </>

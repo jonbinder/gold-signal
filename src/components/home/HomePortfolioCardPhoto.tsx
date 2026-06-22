@@ -11,6 +11,7 @@ type HomePortfolioCardPhotoProps = {
   slug: string;
   photoUrl?: string | null;
   priority?: boolean;
+  className?: string;
 };
 
 function investorInitials(name: string): string {
@@ -25,27 +26,37 @@ export function HomePortfolioCardPhoto({
   slug,
   photoUrl,
   priority = false,
+  className = "",
 }: HomePortfolioCardPhotoProps) {
   const src = photoUrl?.trim() || `/investor-photos/${slug}.webp`;
   const [failed, setFailed] = useState(false);
+  const isTile = className.includes("home-portfolio-tile__photo");
+  const pixelSize = isTile ? 320 : PHOTO_PX;
 
   if (failed) {
     return (
-      <div className="home-portfolio-card__photo home-portfolio-card__photo--fallback" aria-hidden="true">
+      <div
+        className={`home-portfolio-card__photo home-portfolio-card__photo--fallback ${className}`.trim()}
+        aria-hidden="true"
+      >
         <span className="home-portfolio-card__initials">{investorInitials(name)}</span>
       </div>
     );
   }
 
   return (
-    <div className="home-portfolio-card__photo">
+    <div className={`home-portfolio-card__photo ${className}`.trim()}>
       <Image
         src={src}
         alt=""
-        width={PHOTO_PX}
-        height={PHOTO_PX}
+        width={pixelSize}
+        height={pixelSize}
         priority={priority}
-        sizes="(max-width: 640px) 128px, (max-width: 1024px) 160px, 200px"
+        sizes={
+          isTile
+            ? "(max-width: 720px) 45vw, 320px"
+            : "(max-width: 640px) 128px, (max-width: 1024px) 160px, 200px"
+        }
         onError={() => setFailed(true)}
         className="home-portfolio-card__image"
       />

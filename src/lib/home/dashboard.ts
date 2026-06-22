@@ -9,7 +9,7 @@ import { createSupabasePublicClient, createSupabaseServiceClient } from "@/lib/s
 import type { HomeDashboardModel, HomeMostHeldRow, HomePopularInvestorRow } from "@/lib/home/types";
 
 const MOST_HELD_CAP = 10;
-const RECENT_PORTFOLIOS_CAP = 6;
+const RECENT_PORTFOLIOS_CAP = 4;
 
 function getServerClient(): SupabaseClient | null {
   return createSupabaseServiceClient() ?? createSupabasePublicClient();
@@ -69,7 +69,8 @@ async function loadMostHeld(supabase: SupabaseClient): Promise<HomeMostHeldRow[]
 
 async function loadRecentlyUpdatedPortfolios(): Promise<HomePopularInvestorRow[]> {
   const investors = await getPublishedInvestorsList();
-  return investors
+  return [...investors]
+    .sort((a, b) => b.positionCount - a.positionCount || a.name.localeCompare(b.name))
     .slice(0, RECENT_PORTFOLIOS_CAP)
     .map((inv) => ({
       slug: inv.slug,

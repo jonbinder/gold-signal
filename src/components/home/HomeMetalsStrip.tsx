@@ -21,11 +21,6 @@ function fmtChg(pct: number | null): { text: string; tone: "up" | "down" | "flat
   return { text, tone: "flat" };
 }
 
-function fmtRatio(value: number | null): string {
-  if (value == null || !Number.isFinite(value)) return "—";
-  return value.toFixed(2);
-}
-
 type StatProps = {
   label: string;
   value: string;
@@ -48,7 +43,6 @@ function Stat({ label, value, change, labelClass = "" }: StatProps) {
 export function HomeMetalsStrip({ spot }: { spot: SpotSnapshot | null }) {
   const goldChg = fmtChg(spot?.goldChangePct ?? null);
   const silverChg = fmtChg(spot?.silverChangePct ?? null);
-  const ratioChg = fmtChg(spot?.ratioChangePct ?? null);
   const freshness = spot
     ? formatSpotFreshnessLabel(spot.asOf, spot.marketState, spot.delayed)
     : null;
@@ -68,15 +62,9 @@ export function HomeMetalsStrip({ spot }: { spot: SpotSnapshot | null }) {
           change={silverChg}
           labelClass="home-metals-strip__label--silver"
         />
-        <Stat
-          label="Gold / Silver ratio"
-          value={fmtRatio(spot?.ratio ?? null)}
-          change={ratioChg}
-          labelClass="home-metals-strip__label--ratio"
-        />
       </div>
       <p className="home-metals-strip__note tabular-nums">
-        Physical gold &amp; silver spot · ratio = gold ÷ silver
+        Physical gold &amp; silver spot
         {freshness ? (
           <span className={spot?.delayed ? "home-metals-strip__freshness--delayed" : ""}>
             {" "}

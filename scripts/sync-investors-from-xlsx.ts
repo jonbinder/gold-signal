@@ -12,7 +12,6 @@ import {
   type CsvInvestorPosition,
 } from "../src/lib/investors/csv-data";
 import {
-  isTrackedInvestorSlug,
   normalizeTrackedInvestorSlug,
 } from "../src/lib/investors/tracked-roster";
 import { getSupabaseServiceRole } from "../src/lib/supabase/service-role";
@@ -99,17 +98,14 @@ function sheetInvestorToRecord(inv: CsvInvestor): InvestorRecord {
 export function readInvestorsFromXlsx(): InvestorRecord[] {
   return getSheetInvestors()
     .map(sheetInvestorToRecord)
-    .filter((inv) => isTrackedInvestorSlug(inv.slug))
     .sort((a, b) => a.name.localeCompare(b.name));
 }
 
 export function writeInvestorsJson(investors: InvestorRecord[], filePath = JSON_PATH): void {
-  const roster = investors
-    .map((inv) => ({
-      ...inv,
-      slug: normalizeTrackedInvestorSlug(inv.slug),
-    }))
-    .filter((inv) => isTrackedInvestorSlug(inv.slug));
+  const roster = investors.map((inv) => ({
+    ...inv,
+    slug: normalizeTrackedInvestorSlug(inv.slug),
+  }));
 
   const payload: InvestorsFile = {
     updatedAt: new Date().toISOString(),
@@ -160,9 +156,7 @@ async function syncSupabasePositionsFromSheet(sheetInvestors: CsvInvestor[]): Pr
     sheetInvestors.map((inv) => [normalizeTrackedInvestorSlug(inv.slug), inv] as const),
   );
 
-  const trackedIds = (investorRows ?? [])
-    .filter((row) => isTrackedInvestorSlug(row.slug))
-    .map((row) => row.id);
+  const trackedIds = (investorRows ?? []).map((row) => row.id);
 
   if (trackedIds.length > 0) {
     const { error: deleteError } = await supabase
@@ -177,7 +171,6 @@ async function syncSupabasePositionsFromSheet(sheetInvestors: CsvInvestor[]): Pr
   let inserted = 0;
   for (const row of investorRows ?? []) {
     const slug = normalizeTrackedInvestorSlug(row.slug);
-    if (!isTrackedInvestorSlug(slug)) continue;
 
     const sheetInvestor = sheetBySlug.get(slug);
     if (!sheetInvestor?.holdings.length) continue;
@@ -206,7 +199,6 @@ async function main(): Promise<void> {
   const sheetInvestors = getSheetInvestors();
   const investors = sheetInvestors
     .map(sheetInvestorToRecord)
-    .filter((inv) => isTrackedInvestorSlug(inv.slug))
     .sort((a, b) => a.name.localeCompare(b.name));
 
   writeInvestorsJson(investors);

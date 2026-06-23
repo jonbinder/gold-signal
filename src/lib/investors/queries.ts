@@ -182,7 +182,6 @@ function loadCsvPositionsBySlug(): Map<string, CsvInvestorPosition[]> {
   const bySlug = new Map<string, CsvInvestorPosition[]>();
   for (const row of getInvestorPositions()) {
     const slug = normalizeTrackedInvestorSlug(row.investorSlug);
-    if (!isTrackedInvestorSlug(slug)) continue;
     const list = bySlug.get(slug) ?? [];
     list.push({ ...row, investorSlug: slug });
     bySlug.set(slug, list);
@@ -237,7 +236,6 @@ async function loadPublishedInvestorsListRows(): Promise<InvestorListItem[]> {
       const csvProfile = getCsvInvestorBySlug(row.slug);
       return mapListInvestor(row, csvProfile);
     })
-    .filter((investor) => isTrackedInvestorSlug(investor.slug))
     .map((investor) => {
       const csvRows = csvBySlug.get(investor.slug) ?? [];
       const sheetPositionCount = countDistinctTickers(csvRows);
@@ -263,6 +261,12 @@ export async function getPublishedInvestorsList(): Promise<InvestorListItem[]> {
   return loadPublishedInvestorsListCached();
 }
 
+/** Published investors with at least one tracked position (distinct tickers from GS-Investors workbook). */
+export async function getPublishedInvestorsWithPositions(): Promise<InvestorListItem[]> {
+  const investors = await getPublishedInvestorsList();
+  return investors.filter((investor) => investor.positionCount > 0);
+}
+
 /** @deprecated List is pre-sorted by most recent portfolio update. */
 export async function getPublishedInvestors(): Promise<InvestorListItem[]> {
   return getPublishedInvestorsList();
@@ -270,7 +274,6 @@ export async function getPublishedInvestors(): Promise<InvestorListItem[]> {
 
 async function loadInvestorDetail(slug: string): Promise<InvestorDetailModel | null> {
   const normalized = normalizeTrackedInvestorSlug(slug);
-  if (!isTrackedInvestorSlug(normalized)) return null;
 
   const supabase = getAnonClient();
   if (!supabase) return null;

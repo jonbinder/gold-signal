@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { InvestorsList } from "@/components/investors/InvestorsList";
-import { getPublishedInvestorsList } from "@/lib/investors/queries";
+import { getPublishedInvestorsWithPositions } from "@/lib/investors/queries";
 import "@/app/funds.css";
 import "@/app/home-dashboard.css";
 
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
 export const revalidate = 3600;
 
 export default async function PortfoliosPage() {
-  const investors = await getPublishedInvestorsList();
+  const investors = await getPublishedInvestorsWithPositions();
 
   return (
     <main className="funds-page">

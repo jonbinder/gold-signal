@@ -1,14 +1,16 @@
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
+import * as XLSX from "xlsx";
 import { normalizeTicker } from "@/lib/polygon";
 import type { PositionType } from "@/lib/investors/types";
 
-const CSV_PATH = path.join(process.cwd(), "data", "GS-Investors.csv");
+const INVESTOR_SHEET_PATH = path.join(process.cwd(), "data", "GS-Investors.xlsx");
+const PREFERRED_SHEET_NAMES = ["GS-Investors", "Investors", "investors"];
 const PLACEHOLDER_PHOTO = "/investors/placeholder-investor.svg";
 
 export const INVESTOR_NEEDS_DATA = "[ NEEDS DATA ]";
 
-const REQUIRED_CSV_COLUMNS = [
+const REQUIRED_SHEET_COLUMNS = [
   "investor",
   "ticker",
   "company_name",
@@ -145,67 +147,37 @@ function mapPositionType(raw: string): PositionType | null {
   return POSITION_TYPE_MAP[key] ?? null;
 }
 
-/** RFC 4180-style CSV row parser (handles quoted commas). */
-export function parseCsvText(content: string): string[][] {
-  const rows: string[][] = [];
-  let row: string[] = [];
-  let field = "";
-  let inQuotes = false;
-
-  for (let i = 0; i < content.length; i += 1) {
-    const ch = content[i]!;
-    const next = content[i + 1];
-
-    if (inQuotes) {
-      if (ch === '"' && next === '"') {
-        field += '"';
-        i += 1;
-      } else if (ch === '"') {
-        inQuotes = false;
-      } else {
-        field += ch;
-      }
-      continue;
-    }
-
-    if (ch === '"') {
-      inQuotes = true;
-    } else if (ch === ",") {
-      row.push(field);
-      field = "";
-    } else if (ch === "\n") {
-      row.push(field);
-      field = "";
-      if (row.some((c) => c.length > 0)) rows.push(row);
-      row = [];
-    } else if (ch === "\r") {
-      /* skip */
-    } else {
-      field += ch;
-    }
+function cellToString(value: unknown): string {
+  if (value == null) return "";
+  if (value instanceof Date) {
+    const y = value.getUTCFullYear();
+    const m = String(value.getUTCMonth() + 1).padStart(2, "0");
+    const d = String(value.getUTCDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
   }
-
-  if (field.length > 0 || row.length > 0) {
-    row.push(field);
-    if (row.some((c) => c.length > 0)) rows.push(row);
-  }
-
-  return rows;
+  return String(value).trim();
 }
 
-function logCsvPreview(grid: string[][]): void {
+function pickInvestorWorksheetName(sheetNames: string[]): string {
+  for (const name of PREFERRED_SHEET_NAMES) {
+    if (sheetNames.includes(name)) return name;
+  }
+  return sheetNames[0] ?? "";
+}
+
+function logSheetPreview(grid: string[][]): void {
   if (loggedPreview || grid.length === 0) return;
   loggedPreview = true;
-  console.info("[gs-investors-csv] headers:", grid[0]);
-  if (grid[1]) console.info("[gs-investors-csv] row 1:", grid[1]);
-  if (grid[2]) console.info("[gs-investors-csv] row 2:", grid[2]);
+  console.info("[gs-investors-xlsx] headers:", grid[0]);
+  if (grid[1]) console.info("[gs-investors-xlsx] row 1:", grid[1]);
+  if (grid[2]) console.info("[gs-investors-xlsx] row 2:", grid[2]);
 }
 
 function logInvestorSummary(investors: CsvInvestor[]): void {
   if (loggedInvestors) return;
   loggedInvestors = true;
   console.info(
-    "[gs-investors-csv] parsed investors:",
+    "[gs-investors-xlsx] parsed investors:",
     investors.map((inv) => ({
       name: inv.name,
       bio_short: inv.bioShort,
@@ -214,10 +186,34 @@ function logInvestorSummary(investors: CsvInvestor[]): void {
   );
 }
 
-function loadCsvGrid(): string[][] {
-  const raw = readFileSync(CSV_PATH, "utf8");
-  const grid = parseCsvText(raw.replace(/^\uFEFF/, ""));
-  logCsvPreview(grid);
+function loadInvestorSheetGrid(): string[][] {
+  if (!existsSync(INVESTOR_SHEET_PATH)) {
+    throw new Error(`Missing data/GS-Investors.xlsx (expected at ${INVESTOR_SHEET_PATH})`);
+  }
+
+  const buffer = readFileSync(INVESTOR_SHEET_PATH);
+  const workbook = XLSX.read(buffer, { type: "buffer", cellDates: true });
+  const sheetName = pickInvestorWorksheetName(workbook.SheetNames);
+  if (!sheetName) {
+    throw new Error("GS-Investors.xlsx has no worksheets");
+  }
+
+  const worksheet = workbook.Sheets[sheetName];
+  if (!worksheet) {
+    throw new Error(`Worksheet "${sheetName}" not found in GS-Investors.xlsx`);
+  }
+
+  const rawRows = XLSX.utils.sheet_to_json<unknown[]>(worksheet, {
+    header: 1,
+    defval: "",
+    raw: false,
+  });
+
+  const grid = rawRows
+    .map((row) => (Array.isArray(row) ? row : []).map(cellToString))
+    .filter((row) => row.some((cell) => cell.length > 0));
+
+  logSheetPreview(grid);
   return grid;
 }
 
@@ -233,9 +229,9 @@ function buildColumnMap(header: string[]): Map<string, number> {
 }
 
 function assertRequiredColumns(col: Map<string, number>): void {
-  const missing = REQUIRED_CSV_COLUMNS.filter((name) => !col.has(name));
+  const missing = REQUIRED_SHEET_COLUMNS.filter((name) => !col.has(name));
   if (missing.length > 0) {
-    throw new Error(`GS-Investors.csv missing required columns: ${missing.join(", ")}`);
+    throw new Error(`GS-Investors.xlsx missing required columns: ${missing.join(", ")}`);
   }
 }
 
@@ -333,17 +329,17 @@ function buildInvestorsFromGrid(grid: string[][]): CsvInvestor[] {
 }
 
 /**
- * Grouped investors from GS-Investors.csv (server only).
+ * Grouped investors from data/GS-Investors.xlsx (server only).
  * Each investor includes holdings and profile fields from the sheet.
  */
 export function getInvestors(): CsvInvestor[] {
   if (cachedInvestors) return cachedInvestors;
-  cachedInvestors = buildInvestorsFromGrid(loadCsvGrid());
+  cachedInvestors = buildInvestorsFromGrid(loadInvestorSheetGrid());
   logInvestorSummary(cachedInvestors);
   return cachedInvestors;
 }
 
-/** Flat position rows derived from grouped CSV investors. */
+/** Flat position rows derived from grouped investor sheet rows. */
 export function getInvestorPositions(): CsvInvestorPosition[] {
   return getInvestors().flatMap((inv) =>
     inv.holdings.map((row) => ({ ...row, investorSlug: inv.slug })),

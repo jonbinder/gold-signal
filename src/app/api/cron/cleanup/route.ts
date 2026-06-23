@@ -34,7 +34,7 @@ export async function GET(req: Request) {
   }
 
   // TODO: Restore Google Sheets → Supabase sync here if sheet pipeline is re-enabled.
-  // Portfolio positions now load from data/GS-Investors.csv at build time.
+  // Portfolio positions now load from data/GS-Investors.xlsx at build time.
 
   const cutoff = new Date(Date.now() - STUCK_MS).toISOString();
   const origin = getDeploymentOrigin(req);
@@ -89,6 +89,6 @@ export async function GET(req: Request) {
     submissionIds: [...ids],
     metalsRefreshStarted: true,
     stockRefreshStarted: true,
-    investorPositionsSource: "data/GS-Investors.csv",
+    investorPositionsSource: "data/GS-Investors.xlsx",
   });
 }

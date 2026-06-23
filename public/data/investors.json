@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-18T14:33:59.014Z",
+  "updatedAt": "2026-06-23T08:43:23.600Z",
   "investors": [
     {
       "slug": "adrian-day",
@@ -723,44 +723,6 @@
           "ticker": "VZLA",
           "weight": null,
           "notes": "named silver reinvestment holding · interview · INN, after VRIC 2026"
-        }
-      ]
-    },
-    {
-      "slug": "rob-mcewen",
-      "name": "Rob McEwen",
-      "sheetName": "Rob McEwen",
-      "role": "",
-      "aum": "",
-      "positionCount": 3,
-      "thesis": "",
-      "bio": "",
-      "tickers": [
-        "MUX",
-        "GOTRF",
-        "PAVLF"
-      ],
-      "holdings": [
-        {
-          "rank": 1,
-          "company": "McEwen Inc",
-          "ticker": "MUX",
-          "weight": null,
-          "notes": "Chief Owner; >US$200M invested personally · SEC filing / company 8-K · Company disclosure of insider ownership"
-        },
-        {
-          "rank": 2,
-          "company": "Goliath Resources Ltd",
-          "ticker": "GOTRF",
-          "weight": null,
-          "notes": "MUX acquired 5,181,347 units · SEC Form 10-Q · McEwen Inc 10-Q, Mar 10, 2025 purchase"
-        },
-        {
-          "rank": 3,
-          "company": "Paragon Advanced Labs Inc",
-          "ticker": "PAVLF",
-          "weight": 27.3,
-          "notes": "27.3% interest, cost basis $13.7M · SEC Form 8-K · McEwen Inc 8-K, acquired Dec 9, 2025"
         }
       ]
     },

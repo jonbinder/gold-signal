@@ -7,7 +7,7 @@ export const maxDuration = 60;
 export const dynamic = "force-dynamic";
 
 /**
- * GET /api/sync-investor-sheet — disabled (positions now read from data/GS-Investors.csv).
+ * GET /api/sync-investor-sheet — disabled (positions now read from data/GS-Investors.xlsx).
  * TODO: Restore Google Sheets → Supabase sync if the remote sheet pipeline is re-enabled.
  */
 export async function GET() {
@@ -19,8 +19,8 @@ export async function GET() {
     {
       ok: true,
       disabled: true,
-      message: "Google Sheets sync disabled. Positions load from data/GS-Investors.csv.",
-      csvRows: rows.length,
+      message: "Google Sheets sync disabled. Positions load from data/GS-Investors.xlsx.",
+      sheetRows: rows.length,
       touchedSlugs: slugs,
     },
     { status: 200 },

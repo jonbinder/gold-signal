@@ -28,6 +28,6 @@ export async function syncInvestorPositionsFromGoogleSheet(
     investorsCreated: 0,
     skipped: [],
     touchedSlugs: [],
-    error: "Google Sheets sync disabled. Use data/GS-Investors.csv (see @/lib/investors/csv-data).",
+    error: "Google Sheets sync disabled. Use data/GS-Investors.xlsx (see @/lib/investors/csv-data).",
   };
 }

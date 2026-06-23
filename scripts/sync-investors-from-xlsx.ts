@@ -1,12 +1,12 @@
 /**
- * Reads data/GS-Investors.csv and writes public/data/investors.json.
- * When Supabase service role is configured, replaces investor_positions from CSV only.
+ * Reads data/GS-Investors.xlsx and writes public/data/investors.json.
+ * When Supabase service role is configured, replaces investor_positions from the workbook only.
  */
 import dotenv from "dotenv";
 import fs from "fs";
 import path from "path";
 import {
-  getInvestors as getCsvInvestors,
+  getInvestors as getSheetInvestors,
   INVESTOR_NEEDS_DATA,
   type CsvInvestor,
   type CsvInvestorPosition,
@@ -20,7 +20,7 @@ import { getSupabaseServiceRole } from "../src/lib/supabase/service-role";
 dotenv.config({ path: path.join(process.cwd(), ".env.local") });
 
 const ROOT = process.cwd();
-const CSV_PATH = path.join(ROOT, "data", "GS-Investors.csv");
+const XLSX_PATH = path.join(ROOT, "data", "GS-Investors.xlsx");
 const JSON_PATH = path.join(ROOT, "public", "data", "investors.json");
 
 export type InvestorHolding = {
@@ -66,7 +66,7 @@ function isPlaceholderPositionText(...parts: Array<string | null | undefined>): 
   return hay.includes("PLACEHOLDER");
 }
 
-function csvInvestorToRecord(inv: CsvInvestor): InvestorRecord {
+function sheetInvestorToRecord(inv: CsvInvestor): InvestorRecord {
   const holdings: InvestorHolding[] = inv.holdings.map((h, index) => ({
     rank: index + 1,
     company: h.companyName,
@@ -96,9 +96,9 @@ function csvInvestorToRecord(inv: CsvInvestor): InvestorRecord {
   };
 }
 
-export function readInvestorsFromCsv(): InvestorRecord[] {
-  return getCsvInvestors()
-    .map(csvInvestorToRecord)
+export function readInvestorsFromXlsx(): InvestorRecord[] {
+  return getSheetInvestors()
+    .map(sheetInvestorToRecord)
     .filter((inv) => isTrackedInvestorSlug(inv.slug))
     .sort((a, b) => a.name.localeCompare(b.name));
 }
@@ -119,7 +119,7 @@ export function writeInvestorsJson(investors: InvestorRecord[], filePath = JSON_
   fs.writeFileSync(filePath, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
 }
 
-function csvPositionRows(investorId: string, holdings: CsvInvestorPosition[]) {
+function sheetPositionRows(investorId: string, holdings: CsvInvestorPosition[]) {
   const now = new Date().toISOString();
   return holdings
     .filter((row) => !isPlaceholderPositionText(row.detail, row.sourceDetail))
@@ -141,7 +141,7 @@ function csvPositionRows(investorId: string, holdings: CsvInvestorPosition[]) {
     }));
 }
 
-async function syncSupabasePositionsFromCsv(csvInvestors: CsvInvestor[]): Promise<number> {
+async function syncSupabasePositionsFromSheet(sheetInvestors: CsvInvestor[]): Promise<number> {
   const supabase = getSupabaseServiceRole();
   if (!supabase) {
     console.warn("[investors:sync] Skipping Supabase position sync (missing service role env).");
@@ -156,8 +156,8 @@ async function syncSupabasePositionsFromCsv(csvInvestors: CsvInvestor[]): Promis
     throw new Error(`Failed to load investors for position sync: ${investorError.message}`);
   }
 
-  const csvBySlug = new Map(
-    csvInvestors.map((inv) => [normalizeTrackedInvestorSlug(inv.slug), inv] as const),
+  const sheetBySlug = new Map(
+    sheetInvestors.map((inv) => [normalizeTrackedInvestorSlug(inv.slug), inv] as const),
   );
 
   const trackedIds = (investorRows ?? [])
@@ -179,10 +179,10 @@ async function syncSupabasePositionsFromCsv(csvInvestors: CsvInvestor[]): Promis
     const slug = normalizeTrackedInvestorSlug(row.slug);
     if (!isTrackedInvestorSlug(slug)) continue;
 
-    const csvInvestor = csvBySlug.get(slug);
-    if (!csvInvestor?.holdings.length) continue;
+    const sheetInvestor = sheetBySlug.get(slug);
+    if (!sheetInvestor?.holdings.length) continue;
 
-    const payload = csvPositionRows(row.id, csvInvestor.holdings);
+    const payload = sheetPositionRows(row.id, sheetInvestor.holdings);
     if (payload.length === 0) continue;
 
     const { error: insertError } = await supabase.from("investor_positions").insert(payload);
@@ -198,32 +198,27 @@ async function syncSupabasePositionsFromCsv(csvInvestors: CsvInvestor[]): Promis
 }
 
 async function main(): Promise<void> {
-  if (!fs.existsSync(CSV_PATH)) {
-    console.error(`Missing ${path.relative(ROOT, CSV_PATH)}. Add GS-Investors.csv under data/.`);
+  if (!fs.existsSync(XLSX_PATH)) {
+    console.error(`Missing ${path.relative(ROOT, XLSX_PATH)}. Add GS-Investors.xlsx under data/.`);
     process.exit(1);
   }
 
-  const csvInvestors = getCsvInvestors();
-  const investors = csvInvestors
-    .map(csvInvestorToRecord)
+  const sheetInvestors = getSheetInvestors();
+  const investors = sheetInvestors
+    .map(sheetInvestorToRecord)
     .filter((inv) => isTrackedInvestorSlug(inv.slug))
     .sort((a, b) => a.name.localeCompare(b.name));
 
   writeInvestorsJson(investors);
 
-  const positionRows = await syncSupabasePositionsFromCsv(csvInvestors);
-  const investorsWithPositions = investors.filter((inv) => inv.positionCount > 0).length;
+  const rowsRead = sheetInvestors.reduce((sum, inv) => sum + inv.holdings.length, 0);
+  const rowsInserted = await syncSupabasePositionsFromSheet(sheetInvestors);
 
   console.log(`Synced ${investors.length} investors → public/data/investors.json`);
-  console.log(
-    `CSV positions: ${investorsWithPositions} investors with holdings, ${investors.reduce((sum, inv) => sum + inv.positionCount, 0)} total rows`,
-  );
-  if (positionRows > 0) {
-    console.log(`Supabase investor_positions: inserted ${positionRows} rows from CSV`);
-  }
+  console.log(`[investors:sync] xlsx rows read: ${rowsRead}, supabase rows inserted: ${rowsInserted}`);
 }
 
-const isDirectRun = process.argv[1]?.includes("sync-investors-from-csv");
+const isDirectRun = process.argv[1]?.includes("sync-investors-from-xlsx");
 if (isDirectRun) {
   main().catch((err) => {
     console.error(err instanceof Error ? err.message : err);

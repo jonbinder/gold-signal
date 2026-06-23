@@ -1,5 +1,5 @@
 /**
- * Validate local GS-Investors CSV (replaces Google Sheets sync).
+ * Validate local GS-Investors workbook (replaces Google Sheets sync).
  * Run: npm run sync:investor-sheet
  */
 import { getInvestors } from "../src/lib/investors/csv-data";
@@ -15,7 +15,7 @@ function main() {
     JSON.stringify(
       {
         ok: true,
-        source: "data/GS-Investors.csv",
+        source: "data/GS-Investors.xlsx",
         rows: rows.length,
         investors: bySlug.size,
         byInvestor: Object.fromEntries(bySlug),

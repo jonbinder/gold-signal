@@ -50,8 +50,10 @@ npm run investors:sync
 This:
 
 1. Writes `public/data/investors.json`
-2. **Upserts** every workbook investor into Supabase `investors` (`is_published = true` for new rows)
+2. **Mirrors** workbook investors into Supabase `investors` (upsert present rows, **delete** rows whose slug is no longer in the workbook; aborts if the workbook parses zero investors)
 3. Destructively replaces `investor_positions` from workbook holdings (unchanged behavior)
+
+Removing an investor from the workbook and re-running sync removes them from the site. Their positions are removed via `ON DELETE CASCADE`.
 
 Redeploy or revalidate cache so pages pick up changes. `prebuild` runs sync automatically.
 

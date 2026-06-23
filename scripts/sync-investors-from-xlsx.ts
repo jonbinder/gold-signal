@@ -1,6 +1,6 @@
 /**
  * Reads data/GS-Investors.xlsx and writes public/data/investors.json.
- * When Supabase service role is configured, upserts investors and replaces investor_positions from the workbook.
+ * When Supabase service role is configured, mirrors investors (upsert + delete stale) and replaces investor_positions from the workbook.
  */
 import dotenv from "dotenv";
 import fs from "fs";
@@ -148,12 +148,24 @@ function inferInvestorType(name: string): "individual" | "fund" {
     : "individual";
 }
 
-async function upsertInvestorsFromSheet(sheetInvestors: CsvInvestor[]): Promise<number> {
+async function mirrorInvestorsFromSheet(
+  sheetInvestors: CsvInvestor[],
+): Promise<{ upserted: number; deleted: number; deletedSlugs: string[] }> {
+  if (sheetInvestors.length === 0) {
+    throw new Error(
+      "[investors:sync] ABORT: workbook parsed zero investors — refusing to delete or write anything.",
+    );
+  }
+
   const supabase = getSupabaseServiceRole();
   if (!supabase) {
-    console.warn("[investors:sync] Skipping Supabase investor upsert (missing service role env).");
-    return 0;
+    console.warn("[investors:sync] Skipping Supabase investor mirror (missing service role env).");
+    return { upserted: 0, deleted: 0, deletedSlugs: [] };
   }
+
+  const authoritativeSlugs = new Set(
+    sheetInvestors.map((inv) => normalizeTrackedInvestorSlug(inv.slug)),
+  );
 
   let upserted = 0;
   for (const inv of sheetInvestors) {
@@ -210,7 +222,25 @@ async function upsertInvestorsFromSheet(sheetInvestors: CsvInvestor[]): Promise<
     upserted += 1;
   }
 
-  return upserted;
+  const { data: existingRows, error: listError } = await supabase.from("investors").select("id, slug");
+  if (listError) {
+    throw new Error(`Failed to list investors for mirror delete: ${listError.message}`);
+  }
+
+  const stale = (existingRows ?? []).filter(
+    (row) => !authoritativeSlugs.has(normalizeTrackedInvestorSlug(row.slug)),
+  );
+
+  const deletedSlugs = stale.map((row) => normalizeTrackedInvestorSlug(row.slug));
+  if (stale.length > 0) {
+    const staleIds = stale.map((row) => row.id);
+    const { error: deleteError } = await supabase.from("investors").delete().in("id", staleIds);
+    if (deleteError) {
+      throw new Error(`Failed to delete stale investors: ${deleteError.message}`);
+    }
+  }
+
+  return { upserted, deleted: stale.length, deletedSlugs };
 }
 
 async function syncSupabasePositionsFromSheet(sheetInvestors: CsvInvestor[]): Promise<number> {
@@ -273,17 +303,26 @@ async function main(): Promise<void> {
   }
 
   const sheetInvestors = getSheetInvestors();
+  if (sheetInvestors.length === 0) {
+    console.error("[investors:sync] ABORT: workbook parsed zero investors — no files written.");
+    process.exit(1);
+  }
+
   const investors = sheetInvestors
     .map(sheetInvestorToRecord)
     .sort((a, b) => a.name.localeCompare(b.name));
 
   writeInvestorsJson(investors);
 
-  const investorsUpserted = await upsertInvestorsFromSheet(sheetInvestors);
+  const { upserted: investorsUpserted, deleted: investorsDeleted, deletedSlugs } =
+    await mirrorInvestorsFromSheet(sheetInvestors);
   const rowsRead = sheetInvestors.reduce((sum, inv) => sum + inv.holdings.length, 0);
   const rowsInserted = await syncSupabasePositionsFromSheet(sheetInvestors);
 
   console.log(`Synced ${investors.length} investors → public/data/investors.json`);
+  if (investorsDeleted > 0) {
+    console.log(`[investors:sync] removed stale investors (${investorsDeleted}): ${deletedSlugs.sort().join(", ")}`);
+  }
   console.log(
     `[investors:sync] investors upserted: ${investorsUpserted}, xlsx rows read: ${rowsRead}, supabase position rows inserted: ${rowsInserted}`,
   );

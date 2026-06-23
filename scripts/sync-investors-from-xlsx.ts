@@ -1,6 +1,6 @@
 /**
  * Reads data/GS-Investors.xlsx and writes public/data/investors.json.
- * When Supabase service role is configured, replaces investor_positions from the workbook only.
+ * When Supabase service role is configured, upserts investors and replaces investor_positions from the workbook.
  */
 import dotenv from "dotenv";
 import fs from "fs";
@@ -137,6 +137,82 @@ function sheetPositionRows(investorId: string, holdings: CsvInvestorPosition[]) 
     }));
 }
 
+function sheetField(value: string): string | null {
+  const trimmed = value.trim();
+  return trimmed && trimmed !== INVESTOR_NEEDS_DATA ? trimmed : null;
+}
+
+function inferInvestorType(name: string): "individual" | "fund" {
+  return /\b(inc|llc|corp|ltd|fund|family|partners|capital|asset management)\b/i.test(name)
+    ? "fund"
+    : "individual";
+}
+
+async function upsertInvestorsFromSheet(sheetInvestors: CsvInvestor[]): Promise<number> {
+  const supabase = getSupabaseServiceRole();
+  if (!supabase) {
+    console.warn("[investors:sync] Skipping Supabase investor upsert (missing service role env).");
+    return 0;
+  }
+
+  let upserted = 0;
+  for (const inv of sheetInvestors) {
+    const slug = normalizeTrackedInvestorSlug(inv.slug);
+    const { data: existing, error: lookupError } = await supabase
+      .from("investors")
+      .select("id, is_published, needs_review, sort_order, title_role")
+      .eq("slug", slug)
+      .maybeSingle();
+
+    if (lookupError) {
+      throw new Error(`Failed to load investor ${slug}: ${lookupError.message}`);
+    }
+
+    const bio = sheetField(inv.bioLong);
+    const website = sheetField(inv.website);
+    const focusNote = sheetField(inv.bioShort);
+    const now = new Date().toISOString();
+
+    const shared = {
+      slug,
+      name: inv.name,
+      investor_type: inferInvestorType(inv.name),
+      bio,
+      photo_url: inv.photoPath,
+      website,
+      website_url: website,
+      focus_note: focusNote,
+      is_active: true,
+      updated_at: now,
+    };
+
+    if (existing?.id) {
+      const { error } = await supabase
+        .from("investors")
+        .update({
+          ...shared,
+          is_published: existing.is_published ?? true,
+          needs_review: existing.needs_review ?? false,
+        })
+        .eq("id", existing.id);
+      if (error) throw new Error(`Failed to update investor ${slug}: ${error.message}`);
+    } else {
+      const { error } = await supabase.from("investors").insert({
+        ...shared,
+        title_role: null,
+        sort_order: 100,
+        is_published: true,
+        needs_review: false,
+      });
+      if (error) throw new Error(`Failed to insert investor ${slug}: ${error.message}`);
+    }
+
+    upserted += 1;
+  }
+
+  return upserted;
+}
+
 async function syncSupabasePositionsFromSheet(sheetInvestors: CsvInvestor[]): Promise<number> {
   const supabase = getSupabaseServiceRole();
   if (!supabase) {
@@ -203,11 +279,14 @@ async function main(): Promise<void> {
 
   writeInvestorsJson(investors);
 
+  const investorsUpserted = await upsertInvestorsFromSheet(sheetInvestors);
   const rowsRead = sheetInvestors.reduce((sum, inv) => sum + inv.holdings.length, 0);
   const rowsInserted = await syncSupabasePositionsFromSheet(sheetInvestors);
 
   console.log(`Synced ${investors.length} investors → public/data/investors.json`);
-  console.log(`[investors:sync] xlsx rows read: ${rowsRead}, supabase rows inserted: ${rowsInserted}`);
+  console.log(
+    `[investors:sync] investors upserted: ${investorsUpserted}, xlsx rows read: ${rowsRead}, supabase position rows inserted: ${rowsInserted}`,
+  );
 }
 
 const isDirectRun = process.argv[1]?.includes("sync-investors-from-xlsx");

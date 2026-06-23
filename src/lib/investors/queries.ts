@@ -234,9 +234,7 @@ async function loadPublishedInvestorsListRows(): Promise<InvestorListItem[]> {
   return rows
     .map((row) => {
       const csvProfile = getCsvInvestorBySlug(row.slug);
-      return mapListInvestor(row, csvProfile);
-    })
-    .map((investor) => {
+      const investor = mapListInvestor(row, csvProfile);
       const csvRows = csvBySlug.get(investor.slug) ?? [];
       const sheetPositionCount = countDistinctTickers(csvRows);
       const csvUpdated = latestAsOfDate(csvRows);
@@ -246,25 +244,19 @@ async function loadPublishedInvestorsListRows(): Promise<InvestorListItem[]> {
         manualPositionCount: sheetPositionCount,
         auto13fPositionCount: 0,
         positionCount: sheetPositionCount,
-        updatedAt: csvUpdated || investor.id,
+        updatedAt: csvUpdated || row.updated_at || "",
       };
     });
 }
 
 const loadPublishedInvestorsListCached = unstable_cache(
   loadPublishedInvestorsListSorted,
-  ["investors-list-published-v9-csv-only"],
+  ["investors-list-published-v10-all-investors"],
   { revalidate: 3600, tags: [INVESTORS_LIST_CACHE_TAG] },
 );
 
 export async function getPublishedInvestorsList(): Promise<InvestorListItem[]> {
   return loadPublishedInvestorsListCached();
-}
-
-/** Published investors with at least one tracked position (distinct tickers from GS-Investors workbook). */
-export async function getPublishedInvestorsWithPositions(): Promise<InvestorListItem[]> {
-  const investors = await getPublishedInvestorsList();
-  return investors.filter((investor) => investor.positionCount > 0);
 }
 
 /** @deprecated List is pre-sorted by most recent portfolio update. */

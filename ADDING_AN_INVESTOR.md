@@ -1,37 +1,21 @@
 # Adding an investor
 
-No app code changes are required. After data is in place, run the sync and deploy.
+No app code changes are required. Add data, drop a photo, sync, deploy.
 
-## 1. Supabase profile row
+## 1. Workbook row (`data/GS-Investors.xlsx`)
 
-Add a row to the `investors` table (or extend `scripts/seed-investors.ts` and run it once):
+Add at least one row on the `GS-Investors` sheet with the `investor` column set. Position columns can be empty until you have holdings — the investor still appears on `/portfolios` with a `[ NEEDS DATA ]` position count.
 
-| Field | Required | Notes |
-|-------|----------|-------|
-| `slug` | yes | Must match the slug derived from the display name (see below) |
-| `name` | yes | Display name, e.g. `Adrian Day` |
-| `is_published` | yes | `true` |
-| `type` | yes | `individual` or `fund` |
-| `sort_order` | optional | Controls default ordering before position `updated_at` sort |
-
-**Slug rule** (single source: `slugFromInvestorName` in `src/lib/investors/csv-data.ts`):
-
-- Lowercase the name
-- Strip accents (NFKD)
-- Replace non-alphanumerics with hyphens
-- Example: `Pierre Lassonde` → `pierre-lassonde`
-
-The same slug is used for `/portfolios/[slug]`, photo filenames, and workbook rows.
-
-## 2. Workbook positions (`data/GS-Investors.xlsx`)
-
-Add one or more rows on the `GS-Investors` sheet. The investor appears on `/portfolios` only when they have **≥1 distinct ticker** (placeholder rows are excluded).
-
-**Required columns per position row:**
+**Required:**
 
 | Column | Example |
 |--------|---------|
-| `investor` | `Adrian Day` (must slug-match Supabase `slug`) |
+| `investor` | `Jane Doe` |
+
+**When adding positions** (one row per holding):
+
+| Column | Example |
+|--------|---------|
 | `ticker` | `FNV` |
 | `company_name` | `Franco-Nevada Corp` |
 | `position_type` | `stake`, `insider`, `fund`, `statement`, or `other` |
@@ -40,37 +24,43 @@ Add one or more rows on the `GS-Investors` sheet. The investor appears on `/port
 | `source_detail` | `Podcast: Triangle Investor` |
 | `date` | `2026-03` or `2026-03-15` |
 
-**Optional profile columns** (fill on the investor’s first row; `[ NEEDS DATA ]` shows if empty):
+**Optional profile columns** (on any row for that investor; `[ NEEDS DATA ]` if empty):
 
 `bio_short`, `bio_long`, `website`, `x_handle`
 
-## 3. Photo
+## 2. Photo
 
 1. Save as `public/investor-photos/{slug}.webp` (`.jpg` / `.png` also work).
-2. Recommended: **400×400 px**, cropped for a headshot (`object-fit: cover`).
+2. Recommended: **400×400 px**, headshot crop (`object-fit: cover` on photos).
 3. Missing files fall back to initials — no build failure.
 
-At build/runtime, `resolveInvestorPhotoPath(slug)` checks `public/investor-photos/` then `public/investors/`, then the placeholder SVG.
+**Slug rule** (`slugFromInvestorName` in `src/lib/investors/csv-data.ts`):
 
-## 4. Sync and deploy
+- Lowercase, strip accents, non-alphanumerics → hyphens
+- Example: `Jane Doe` → `jane-doe`
+
+Same slug drives `/portfolios/[slug]`, photo filename, and Supabase `investors.slug`.
+
+## 3. Sync and deploy
 
 ```bash
 npm run investors:sync
 ```
 
-This writes `public/data/investors.json` and, when Supabase service role is configured, replaces `investor_positions` from the workbook.
+This:
 
-Redeploy (or trigger cache revalidation) so `/portfolios` picks up the new data.
+1. Writes `public/data/investors.json`
+2. **Upserts** every workbook investor into Supabase `investors` (`is_published = true` for new rows)
+3. Destructively replaces `investor_positions` from workbook holdings (unchanged behavior)
+
+Redeploy or revalidate cache so pages pick up changes. `prebuild` runs sync automatically.
 
 ## Checklist
 
-- [ ] Supabase `investors` row with matching `slug` and `is_published = true`
-- [ ] ≥1 real position row in `GS-Investors.xlsx` for that investor name
-- [ ] Photo at `public/investor-photos/{slug}.webp` (optional but recommended)
-- [ ] `npm run investors:sync` run before deploy
+- [ ] Row in `GS-Investors.xlsx` with `investor` name
+- [ ] Photo at `public/investor-photos/{slug}.webp` (optional; initials fallback works)
+- [ ] `npm run investors:sync` (or deploy, which runs it via `prebuild`)
 
 ## Slug consistency
 
-Slug generation lives in **`slugFromInvestorName`** (`csv-data.ts`). Supabase `investors.slug` must equal that output for the workbook `investor` name. Legacy aliases (e.g. `sprott-asset-management` → `sprott-inc`) are handled only in `normalizeTrackedInvestorSlug` (`tracked-roster.ts`).
-
-Do not hand-edit slugs in one place without updating the others.
+Single slug source: **`slugFromInvestorName`**. Legacy aliases (e.g. `sprott-asset-management` → `sprott-inc`) are in `normalizeTrackedInvestorSlug` only.

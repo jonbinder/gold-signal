@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-23T08:43:23.600Z",
+  "updatedAt": "2026-06-23T09:29:13.557Z",
   "investors": [
     {
       "slug": "adrian-day",
@@ -52,6 +52,28 @@
           "ticker": "PAAS",
           "weight": null,
           "notes": "named holding · interview · Podcast: Lobo Tigre"
+        }
+      ]
+    },
+    {
+      "slug": "david-erfle",
+      "name": "David Erfle",
+      "sheetName": "David Erfle",
+      "role": "",
+      "aum": "",
+      "positionCount": 1,
+      "thesis": "Junior Mining Junky",
+      "bio": "",
+      "tickers": [
+        "HSTXF"
+      ],
+      "holdings": [
+        {
+          "rank": 1,
+          "company": "Heliostar Metals Ltd",
+          "ticker": "HSTXF",
+          "weight": null,
+          "notes": "named holding · X Social Media · named holding"
         }
       ]
     },
@@ -391,13 +413,35 @@
       ]
     },
     {
+      "slug": "jeff-clark",
+      "name": "Jeff Clark",
+      "sheetName": "Jeff Clark",
+      "role": "",
+      "aum": "",
+      "positionCount": 1,
+      "thesis": "TheGoldAdvisor.com",
+      "bio": "",
+      "tickers": [
+        "HSTXF"
+      ],
+      "holdings": [
+        {
+          "rank": 1,
+          "company": "Heliostar Metals Ltd",
+          "ticker": "HSTXF",
+          "weight": null,
+          "notes": "named holding · X Social Media · named holding"
+        }
+      ]
+    },
+    {
       "slug": "jon-binder",
       "name": "Jon Binder",
       "sheetName": "Jon Binder",
       "role": "",
       "aum": "",
       "positionCount": 2,
-      "thesis": "",
+      "thesis": "GS founder",
       "bio": "",
       "tickers": [
         "AUMBF",
@@ -413,6 +457,28 @@
         },
         {
           "rank": 2,
+          "company": "Heliostar Metals Ltd",
+          "ticker": "HSTXF",
+          "weight": null,
+          "notes": "named holding · X Social Media · named holding"
+        }
+      ]
+    },
+    {
+      "slug": "jordan-rusche",
+      "name": "Jordan Rusche",
+      "sheetName": "Jordan Rusche",
+      "role": "",
+      "aum": "",
+      "positionCount": 1,
+      "thesis": "The Mining Stock Monkey",
+      "bio": "",
+      "tickers": [
+        "HSTXF"
+      ],
+      "holdings": [
+        {
+          "rank": 1,
           "company": "Heliostar Metals Ltd",
           "ticker": "HSTXF",
           "weight": null,
@@ -530,6 +596,72 @@
           "ticker": "CBGZF",
           "weight": null,
           "notes": "Named holding; ON BOARD (director), Brazil, near-term heap-leach producer · interview · Mining Stock Education / Bill Powers"
+        }
+      ]
+    },
+    {
+      "slug": "lundin-family",
+      "name": "Lundin Family",
+      "sheetName": "Lundin Family",
+      "role": "",
+      "aum": "",
+      "positionCount": 1,
+      "thesis": "Jack and Adam Lundin",
+      "bio": "",
+      "tickers": [
+        "HSTXF"
+      ],
+      "holdings": [
+        {
+          "rank": 1,
+          "company": "Heliostar Metals Ltd",
+          "ticker": "HSTXF",
+          "weight": null,
+          "notes": "named holding · X Social Media · named holding"
+        }
+      ]
+    },
+    {
+      "slug": "michael-gentile",
+      "name": "Michael Gentile",
+      "sheetName": "Michael Gentile",
+      "role": "",
+      "aum": "",
+      "positionCount": 1,
+      "thesis": "investment fund",
+      "bio": "",
+      "tickers": [
+        "HSTXF"
+      ],
+      "holdings": [
+        {
+          "rank": 1,
+          "company": "Heliostar Metals Ltd",
+          "ticker": "HSTXF",
+          "weight": null,
+          "notes": "named holding · X Social Media · named holding"
+        }
+      ]
+    },
+    {
+      "slug": "peter-krauth",
+      "name": "Peter Krauth",
+      "sheetName": "Peter Krauth",
+      "role": "",
+      "aum": "",
+      "positionCount": 1,
+      "thesis": "silver bull",
+      "bio": "",
+      "tickers": [
+        "HSTXF"
+      ],
+      "holdings": [
+        {
+          "rank": 1,
+          "company": "Heliostar Metals Ltd",
+          "ticker": "HSTXF",
+          "weight": null,
+          "notes": "named holding · X Social Media · named holding"
         }
       ]
     },
@@ -769,6 +901,28 @@
           "ticker": "ARREF",
           "weight": null,
           "notes": "17,747,792 sh · SEC / GuruFocus · Reporting holdings"
+        }
+      ]
+    },
+    {
+      "slug": "tavi-costa",
+      "name": "Tavi Costa",
+      "sheetName": "Tavi Costa",
+      "role": "",
+      "aum": "",
+      "positionCount": 1,
+      "thesis": "Crescat",
+      "bio": "",
+      "tickers": [
+        "HSTXF"
+      ],
+      "holdings": [
+        {
+          "rank": 1,
+          "company": "Heliostar Metals Ltd",
+          "ticker": "HSTXF",
+          "weight": null,
+          "notes": "named holding · X Social Media · named holding"
         }
       ]
     }

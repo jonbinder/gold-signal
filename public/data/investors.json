@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-23T09:48:37.574Z",
+  "updatedAt": "2026-06-23T11:42:17.618Z",
   "investors": [
     {
       "slug": "adrian-day",
@@ -628,7 +628,29 @@
       "role": "",
       "aum": "",
       "positionCount": 1,
-      "thesis": "investment fund",
+      "thesis": "investment fund manager",
+      "bio": "",
+      "tickers": [
+        "HSTXF"
+      ],
+      "holdings": [
+        {
+          "rank": 1,
+          "company": "Heliostar Metals Ltd",
+          "ticker": "HSTXF",
+          "weight": null,
+          "notes": "named holding · X Social Media · named holding"
+        }
+      ]
+    },
+    {
+      "slug": "nomi-prins",
+      "name": "Nomi Prins",
+      "sheetName": "Nomi Prins",
+      "role": "",
+      "aum": "",
+      "positionCount": 1,
+      "thesis": "Nomi Prins is a geopolitical financial expert and financial historian who sheds light on the dark corners of the global economy",
       "bio": "",
       "tickers": [
         "HSTXF"
